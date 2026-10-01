@@ -73,29 +73,31 @@ Kontrast oranı = (L_açık + 0.05) / (L_koyu + 0.05)      aralık: 1:1 ile 21:1
 
 Oran yuvarlanmaz; 4.48:1 eşiği geçmez. Yarı saydam renkler önce zemin üzerine karıştırılarak (alpha compositing) opak renge çevrilir, sonra hesaplanır.
 
-### 2.5 Hesap betiği (Bash ile çalıştır)
+### 2.5 Hesap betiği (`scripts/contrast.py`)
+
+Kontrast hesabı `scripts/contrast.py` ile yapılır. Yalnız Python standart kütüphanesini kullanır; 2.4'teki formülü birebir uygular, oranı yuvarlamaz (4.48:1 eşiği geçmez) ve yarı saydam renkleri zemine karıştırır.
 
 ```bash
-python3 - <<'EOF'
-def lum(h):
-    h = h.lstrip('#')
-    r, g, b = [int(h[i:i+2], 16) / 255 for i in (0, 2, 4)]
-    f = lambda c: c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4
-    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b)
+# Tek çift; --min verilirse eşik altında çıkış kodu 1 olur
+python scripts/contrast.py "#1B2430" "#FFFFFF" --min 4.5
 
-def ratio(a, b):
-    hi, lo = sorted([lum(a), lum(b)], reverse=True)
-    return (hi + 0.05) / (lo + 0.05)
+# Tüm çiftler JSON'dan (ad, fg, bg, min); biri bile FAIL ise çıkış kodu 1
+python scripts/contrast.py --pairs pairs.json
 
-pairs = [  # (ad, ön plan, zemin, eşik)
-    ("text/bg", "#1B2430", "#FFFFFF", 4.5),
-    ("border-strong/surface", "#79808C", "#F4F6F8", 3.0),
-]
-for name, fg, bg, need in pairs:
-    r = ratio(fg, bg)
-    print(f"{name:28s} {r:5.2f}:1  {'OK' if r >= need else 'FAIL'} (>= {need})")
-EOF
+# Değerler token ise CSS'ten çöz (açık + koyu tema); --theme light|dark|both
+python scripts/contrast.py --css styles/tokens.css --pairs pairs.json --theme both
 ```
+
+`pairs.json` biçimi:
+
+```json
+[
+  {"name": "text/bg", "fg": "var(--color-text)", "bg": "--color-bg", "min": 4.5},
+  {"name": "border-strong/surface", "fg": "#79808C", "bg": "#F4F6F8", "min": 3.0}
+]
+```
+
+`--css` verilmezse `fg`/`bg` doğrudan renk değeri olmalıdır. `--json` bayrağı sonucu JSON olarak yazdırır (verify-ui ve diğer araçlar okur). Geçersiz renk ya da çözülemeyen token çıkış kodu 2 verir.
 
 `python3` yoksa `python` dene; Python yoksa formülü elle uygula ve hesap adımlarını rationale ekine yaz.
 
