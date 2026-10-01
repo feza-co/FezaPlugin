@@ -1,0 +1,23 @@
+{
+  "name": "feza-requirements",
+  "version": "2.0.0",
+  "description": "Requirements engineering skills: ISO/IEC/IEEE 29148 aligned SRS generation and review, elicitation kits, requirement classification, conflict analysis and user stories.",
+  "author": {
+    "name": "Feza"
+  },
+  "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-requirements",
+  "repository": "https://github.com/feza-co/FezaPlugin",
+  "license": "MIT",
+  "keywords": [
+    "requirements",
+    "srs",
+    "iso-29148",
+    "ieee-830",
+    "user-stories",
+    "elicitation",
+    "software-engineering",
+    "documentation",
+    "agent-skills"
+  ],
+  "skills": "./skills/"
+}
