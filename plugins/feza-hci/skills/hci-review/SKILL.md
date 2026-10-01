@@ -49,6 +49,7 @@ EN FAZLA 3 SORU:
 ## Adım 2 — Bilgi Tabanı
 
 - `references/hci-principles.md` — ISO 9241-210 + Dix et al. prensipleri + sezgisel kontrol listesi.
+- `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -79,6 +80,7 @@ EN FAZLA 3 SORU:
 - Her bulguda **somut aksiyon önerisi** (genel "iyileştir" demek yok).
 - En az **3 olumlu nokta** (denge için).
 - "kullanıcı dostu / modern / temiz" gibi sözcükler YOK; ölçülebilir tespit.
+- Mikro-metin bulgularında `references/ux-writing.md` ilkesine (§2) atıf verilir ve somut önerilen metin yazılır (TR, gerekiyorsa EN).
 
 ## Adım 4 — Self-Check
 

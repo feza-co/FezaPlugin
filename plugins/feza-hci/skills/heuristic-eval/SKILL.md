@@ -35,6 +35,7 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 
 ## Adım 2 — Bilgi Tabanı
 - `references/heuristics.md` — Nielsen 10 + Dix et al. mapping + severity rubric.
+- `references/ux-writing.md` — H2 (gerçek dünya ile eşleşme) ve H9 (hata kurtarma) bulgularında mikro-metin ölçütü olarak kullanılır.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -56,6 +57,8 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 | H1 | H1: Visibility of system status | Form kaydedilirken yükleme göstergesi yok | `pages/profile.tsx` | 3 | Spinner + "Kaydediliyor..." metni ekle | Nielsen H1 |
 | H2 | H2: Match real world | "Cancel" yerine "Abort" kullanılmış | `components/Modal.tsx` | 2 | "Vazgeç" / "Cancel" yap | Nielsen H2 |
 | ... |
+
+H2 ve H9 mikro-metin bulguları yazılırken `references/ux-writing.md` §5 tablosundaki kötü→iyi örneğe benzer somut **"önerilen metin"** verilir (TR, gerekiyorsa EN karşılığıyla); "daha net yaz" gibi soyut öneri kabul edilmez. Örnek: butondaki "Tamam" → "Değişiklikleri kaydet" (H2); "Yanlış şifre girdiniz." → "Şifre eşleşmedi. Yeniden deneyin ya da şifrenizi sıfırlayın." (H9).
 
 ### Heuristic'lerin Tümü Taranır
 

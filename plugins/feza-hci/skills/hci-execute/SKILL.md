@@ -75,6 +75,7 @@ Gerisini akıllıca varsay; her varsayımı `Varsayım:` etiketiyle kaydet ve te
 - `references/design-system-rules.md` — token yapısı, kontrast formülü ve `scripts/contrast.py` kullanımı, renk, tipografi, boşluk, hareket kuralları.
 - `references/implementation-checklist.md` — erişilebilirlik ve heuristik uygulama kontrol listesi, bileşen durum matrisi, doğrulama prosedürü.
 - `references/screen-patterns.md` — ekran tarifleri indeksi; her ekran için ilgili `references/recipe-<ad>.md` (8 bölümlü tarif: yerleşim, zorunlu durumlar, etkileşim, erişilebilirlik, sık hatalar, mikro-metin, kabul kontrolleri).
+- `references/ux-writing.md` — buton, form, hata, boş durum, onay, toast, yükleniyor ve izin metinleri; ton rehberi (TR 'siz', EN aktif çatı); mikro-metin kontrol listesi.
 - `references/output-conventions.md`, `references/delivery-format.md`, `references/quality-gate.md`.
 
 ## Adım 2 — Kullanıcı ve Görev Modeli (ISO 9241-210)
@@ -178,6 +179,10 @@ Projede zaten `index.html` ya da çakışan dosya varsa üzerine yazmadan önce 
 
 Her ekran için seçilen `references/recipe-<ad>.md` tarifini uygula: "3. Zorunlu durumlar" tablosundaki her durumu (varsayılan, yükleniyor, boş, hata, başarı, devre dışı) **gerçekten** kodla, "4. Etkileşim kuralları" ve "5. Erişilebilirlik notları"nı izle, "6. Sık yapılan hatalar"dan kaçın, "8. Kabul kontrolleri"ni Adım 6'da E1-E13'e ek olarak işaretle. Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
 
+### Mikro-metin
+
+Tüm arayüz metni (buton, form etiketi, hata, boş durum, onay, toast, yükleniyor, izin) `references/ux-writing.md` §2-§4'e göre yazılır. Kullanılan terimlerin **terim sözlüğü** `DESIGN_RATIONALE_<proje>.md` dosyasına eklenir ve tüm ekranlar bu sözlüğe uyar. Brief marka tonu verdiyse metin ona uyarlanır; ton uyarlaması netlik kurallarını (§2) gevşetmez.
+
 ## Adım 6 — Gizli Doğrulama Döngüsü
 
 Kullanıcıya puan, kontrol listesi sonucu ya da tur sayısı **gösterme**. `references/quality-gate.md` mantığıyla çalışır; prosedürün ayrıntısı `references/implementation-checklist.md` → "Doğrulama Prosedürü".
@@ -198,6 +203,7 @@ Uygulama v1 → verify-ui.mjs + görsel inceleme + statik kontroller
 6. **WCAG 2.1 AA kontrol listesi** — `references/implementation-checklist.md` A ve AA maddeleri.
 7. **Kontrast hesabı** — `scripts/contrast.py` ile `styles/tokens.css` içindeki her çift yeniden hesaplanır; açık ve koyu tema ayrı (`--theme light` / `--theme dark`); Python yoksa formül `references/design-system-rules.md` 2.4'e göre elle uygulanır.
 8. **Bilişsel yük** — `/feza-hci:cognitive-load` mantığı: ekran başına etkileşimli öğe sayısı, grup sayısı, karar noktası, geri bildirim gecikmesi.
+9. **Mikro-metin kontrolü** — `references/ux-writing.md` §6 listesi: belirsiz buton etiketi, suçlayıcı hata dili, terim tutarsızlığı, placeholder-etiket, eksik düzeltme yönergesi, yerel ayar biçimi. Her ihlal severity ≥ 2 sayılır.
 
 **Düzeltme turu:** `report.json` ihlalleri ve görsel bulgular düzeltilir; script yeniden çalıştırılır. En fazla 2 tur.
 
@@ -259,6 +265,7 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] `scripts/verify-ui.mjs` çalıştı ve çıkış 0 verdi (ya da çıkış 2 Bilinen Boşluklar'a yazıldı)?
 - [ ] Ekran görüntüleri görsel olarak incelendi?
 - [ ] Her ekran bir tarife bağlandı; tarif yoksa varsayım kaydedildi?
+- [ ] Mikro-metinler `references/ux-writing.md` §6 kontrol listesinden geçti?
 - [ ] Logo ve marka varlıkları placeholder olarak işaretli?
 
 ## Sınırlar
