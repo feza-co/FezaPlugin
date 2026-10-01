@@ -1,0 +1,111 @@
+{
+  "name": "feza",
+  "owner": {
+    "name": "Feza",
+    "url": "https://github.com/feza-co"
+  },
+  "metadata": {
+    "description": "FezaPlugin: 45 documentation and design skills for software teams across requirements, project management, ISO compliance, HCI/UX, software quality assurance and a cross-package toolkit."
+  },
+  "plugins": [
+    {
+      "name": "feza-requirements",
+      "source": "./plugins/feza-requirements",
+      "description": "Requirements engineering skills: ISO/IEC/IEEE 29148 aligned SRS generation and review, elicitation kits, requirement classification, conflict analysis and user stories.",
+      "category": "productivity",
+      "keywords": [
+        "requirements",
+        "srs",
+        "iso-29148",
+        "ieee-830",
+        "user-stories",
+        "elicitation"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-requirements",
+      "license": "MIT"
+    },
+    {
+      "name": "feza-pm",
+      "source": "./plugins/feza-pm",
+      "description": "Project management skills: scope statement, WBS, PERT estimation, budget, CPM scheduling, risk register, RACI, SWOT, stakeholder and communication planning.",
+      "category": "productivity",
+      "keywords": [
+        "project-management",
+        "wbs",
+        "pert",
+        "cpm",
+        "risk-register",
+        "raci",
+        "pmbok"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-pm",
+      "license": "MIT"
+    },
+    {
+      "name": "feza-iso",
+      "source": "./plugins/feza-iso",
+      "description": "ISO/IEC standards skills: 12207 process audit, 29110 VSE profile, 25010 product quality, 15939 measurement plan, 29148 layered requirements and complaint-to-process mapping.",
+      "category": "productivity",
+      "keywords": [
+        "iso",
+        "iso-12207",
+        "iso-25010",
+        "iso-29110",
+        "iso-15939",
+        "iso-29148",
+        "compliance"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-iso",
+      "license": "MIT"
+    },
+    {
+      "name": "feza-hci",
+      "source": "./plugins/feza-hci",
+      "description": "Human-computer interaction skills: holistic UX review, heuristic evaluation, usability test planning, cognitive load, color and contrast audit, design thinking, prototyping, personas, and HCI-compliant UI design and implementation.",
+      "category": "productivity",
+      "keywords": [
+        "hci",
+        "ux",
+        "usability",
+        "heuristic-evaluation",
+        "wcag",
+        "accessibility",
+        "persona"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-hci",
+      "license": "MIT"
+    },
+    {
+      "name": "feza-sqa",
+      "source": "./plugins/feza-sqa",
+      "description": "Software quality assurance skills: IEEE 730 SQA plan, test plan, metrics plan, IEEE 1028 inspection, traceability matrix, change control and defect reporting.",
+      "category": "productivity",
+      "keywords": [
+        "sqa",
+        "quality-assurance",
+        "test-plan",
+        "ieee-730",
+        "ieee-1028",
+        "traceability",
+        "defect-tracking"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-sqa",
+      "license": "MIT"
+    },
+    {
+      "name": "feza-toolkit",
+      "source": "./plugins/feza-toolkit",
+      "description": "Cross-package utilities: skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
+      "category": "productivity",
+      "keywords": [
+        "toolkit",
+        "orchestration",
+        "sdlc",
+        "glossary",
+        "demo"
+      ],
+      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-toolkit",
+      "license": "MIT"
+    }
+  ]
+}
