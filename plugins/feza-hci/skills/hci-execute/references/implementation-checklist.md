@@ -4,6 +4,8 @@ Kaynaklar: WCAG 2.1 (W3C, 2018), Nielsen (1994) 10 kullanılabilirlik heuristiğ
 
 Bu liste iki kez kullanılır: **uygularken** kural olarak, **doğrularken** (gizli döngü) denetim listesi olarak.
 
+Sayısal eşikler: `references/thresholds.md` (E1-E13). Bu listedeki maddeler eşiklerle çelişirse eşik dosyası geçerlidir.
+
 ## 1. WCAG 2.1 A + AA Kontrol Listesi (arayüz üretimi için seçilmiş)
 
 | # | Kriter | Seviye | Uygulamada nasıl karşılanır | Statik kontrol |
@@ -38,7 +40,7 @@ Bu liste iki kez kullanılır: **uygularken** kural olarak, **doğrularken** (gi
 | W28 | 3.3.4 Error Prevention (Legal, Financial, Data) | AA | Geri alınabilir, kontrol edilebilir ya da onaylı gönderim | Silme, ödeme, gönderim |
 | W29 | 4.1.2 Name, Role, Value | A | Özel bileşende doğru rol ve durum (`aria-expanded`, `aria-pressed`) | Özel bileşenler |
 | W30 | 4.1.3 Status Messages | AA | Toast ve durum mesajı `role="status"` / `aria-live="polite"`; acil hata `role="alert"` | Bildirim bileşeni |
-| W31 | 2.5.5 Target Size | AAA (hedef) | ≥ 44 × 44 CSS px | Düğme, bağlantı, ikon boyutları |
+| W31 | 2.5.5 Target Size | AAA (hedef) | Birincil eylem ≥ 44 × 44 CSS px; her etkileşimli hedef en az 24 × 24 CSS px (WCAG 2.2 SC 2.5.8) | Düğme, bağlantı, ikon boyutları |
 
 ## 2. Heuristik Uygulama Listesi (Nielsen 1994 ↔ Dix et al. ↔ ISO 9241-110)
 
@@ -89,15 +91,16 @@ Her etkileşimli bileşen için doldurulur. "—" uygulanamaz demektir; boş hü
 
 Sonuçlar kullanıcıya puan olarak gösterilmez; yalnız düzeltmeler uygulanır ve kapanmayanlar "Bilinen Boşluklar"a yazılır.
 
-| Adım | Ne yapılır | Araç |
+| Sıra | Ne yapılır | Araç |
 |------|-----------|------|
-| D1 | Kontrast: `tokens.css` içindeki tüm ön plan/zemin çiftleri, açık ve koyu tema | `references/design-system-rules.md` betiği (Bash) |
-| D2 | Statik tarama: `outline: none`, `tabindex` > 0, `onclick` olan `div`/`span`, `label`'sız `input`, `alt`'sız `img`, ham hex/px değerleri bileşen dosyalarında | Grep |
-| D3 | WCAG listesi W1-W31 tek tek | Kod okuma |
-| D4 | Heuristik listesi H1-H10; her heuristik için en az bir gözlem | Kod okuma + akış yürütme |
-| D5 | Durum matrisi tam mı (boş hücre yok) | Kod okuma |
-| D6 | Bilişsel yük C1-C10 | Ekran envanteri + wireframe |
-| D7 | Render (opsiyonel): 360 px ve 1280 px ekran görüntüsü; yalnız klavyeyle her birincil görev; konsol hatası; açık/koyu tema; `prefers-reduced-motion` emülasyonu | Mevcutsa Playwright / başsız tarayıcı |
+| 1 | Otomatik doğrulamayı çalıştır: `node scripts/verify-ui.mjs <giriş sayfası>` | `scripts/verify-ui.mjs` |
+| 2 | `report.json` sonuçlarını E1-E13'e göre oku (`results.E1..E13`); OK/FAIL ve ihlalleri not et | `report.json` |
+| 3 | Ekran görüntülerini Read ile aç; hizalama/taşma/hiyerarşi/boşluk tutarlılığını değerlendir | Read |
+| 4 | Statik kriterler E9-E11'i incele (birincil eylem, görev derinliği, durum kapsaması) | Kod okuma |
+| 5 | İhlalleri düzelt ve yeniden çalıştır (en fazla 2 tur) | `scripts/verify-ui.mjs` |
+| 6 | Çıkış kodu 2 ise statik kontrol; "Bilinen Boşluklar"a "otomatik render doğrulaması yapılamadı" yaz | Kod okuma |
+
+Statik yardımcılar (düzeltme ve ek kontrol için): `outline: none`, `tabindex` > 0, `onclick` olan `div`/`span`, `label`'sız `input`, `alt`'sız `img` ve ham hex/px değerleri Grep ile taranır; heuristik listesi H1-H10, durum matrisi ve bilişsel yük C1-C10 kod okuma ile kontrol edilir; kontrast çiftleri `scripts/contrast.py` ile (açık ve koyu tema) doğrulanır.
 
 ### Severity ölçeği (Nielsen)
 
@@ -113,4 +116,4 @@ Herhangi bir WCAG A/AA ihlali en az severity 2 sayılır. Klavye ile tamamlanama
 
 ### Tur kuralı
 
-En fazla 2 düzeltme turu. Turdan sonra kalan severity ≥ 2 bulgu varsa `DESIGN_RATIONALE_<proje>.md` → "Bilinen Boşluklar" tablosuna severity, konum ve önerilen çözümle yazılır.
+En fazla 2 düzeltme turu. Turdan sonra kalan severity ≥ 2 bulgu varsa `DESIGN_RATIONALE_<proje>.md` → "Bilinen Boşluklar" tablosuna severity, konum ve önerilen çözümle yazılır. E1-E13'ten biri FAIL ise severity'den bağımsız düzeltilir.
