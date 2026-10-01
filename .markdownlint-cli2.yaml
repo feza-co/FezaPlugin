@@ -1,0 +1,15 @@
+# Light markdownlint profile for repository documentation.
+# Skill bodies are not linted: they are agent instructions, not rendered documentation.
+config:
+  default: true
+  MD013: false   # line length
+  MD024:
+    siblings_only: true
+  MD033: false   # inline HTML
+  MD041: false   # first line heading
+  MD060: false   # table column style
+ignores:
+  - "skills/**"
+  - "plugins/*/skills/**"
+  - "shared/**"
+  - "node_modules/**"

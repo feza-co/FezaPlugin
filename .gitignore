@@ -1,0 +1,42 @@
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Build output and packaged plugins
+*.plugin
+dist/
+build/
+*.log
+
+# Local agent working copies and tool caches
+.claude/
+.code-review-graph/
+
+# Binary documents are not kept in the repository
+*.pdf
+*.pptx
+
+# Environment
+.env
+.env.*
