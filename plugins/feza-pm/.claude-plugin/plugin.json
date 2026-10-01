@@ -1,7 +1,7 @@
 {
   "name": "feza-pm",
   "displayName": "FezaPlugin Project Management",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Project management skills: scope statement, WBS, PERT estimation, budget, CPM scheduling, risk register, RACI, SWOT, stakeholder and communication planning.",
   "author": {
     "name": "Feza"

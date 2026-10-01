@@ -1,7 +1,7 @@
 {
   "name": "feza-sqa",
   "displayName": "FezaPlugin Software Quality Assurance",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Software quality assurance skills: IEEE 730 SQA plan, test plan, metrics plan, IEEE 1028 inspection, traceability matrix, change control and defect reporting.",
   "author": {
     "name": "Feza"

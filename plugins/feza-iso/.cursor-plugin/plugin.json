@@ -1,6 +1,6 @@
 {
   "name": "feza-iso",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "ISO/IEC standards skills: 12207 process audit, 29110 VSE profile, 25010 product quality, 15939 measurement plan, 29148 layered requirements and complaint-to-process mapping.",
   "author": {
     "name": "Feza"
