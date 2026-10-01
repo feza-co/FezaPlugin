@@ -24,8 +24,24 @@ jobs:
         with:
           python-version: "3.12"
 
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
       - name: Generated files are up to date
         run: python scripts/sync.py --check
+
+      - name: Syntax-check skill scripts (JavaScript)
+        run: |
+          set -euo pipefail
+          git ls-files -z 'plugins/**/scripts/*.mjs' | xargs -0 -r -n1 node --check
+          echo "All skill .mjs scripts parse."
+
+      - name: Syntax-check skill scripts (Python)
+        run: |
+          set -euo pipefail
+          git ls-files -z 'plugins/**/scripts/*.py' | xargs -0 -r -n1 python -m py_compile
+          echo "All skill .py scripts compile."
 
       - name: Static validation
         run: python scripts/validate.py

@@ -93,6 +93,28 @@ Eşleşme yoksa en yakın kriter seti seçilir; emin olunamıyorsa paket kriter 
 | Olumlu gözlem dengesi | %5 | Yok | 1-2 | En az 3 |
 | Teslim formatı | %10 | Eksik | Kısmen | Tam |
 
+#### feza-hci engelleyicileri (arayüz üreten çıktılar)
+
+`hci-execute` ve fix modu uygulanan değerlendirmelerde aşağıdaki eşiklerin hepsi sağlanmadan puan ne olursa olsun teslim yapılmaz; ağırlıklı puanlama korunur.
+
+| # | Kriter | Eşik | Ölçüm |
+|---|---|---|---|
+| E1 | axe-core ihlali (serious + critical) | 0 | verify-ui |
+| E2 | Metin kontrastı | ≥ 4.5:1 (büyük metin ≥ 3:1) | axe + contrast.py |
+| E3 | UI bileşeni / grafik kontrastı | ≥ 3:1 | contrast.py |
+| E4 | Dokunma hedefi | ≥ 44×44 CSS px (birincil eylemler); en az 24×24 her yerde (WCAG 2.2 SC 2.5.8) | verify-ui |
+| E5 | Yeniden akış | 320px'de yatay kaydırma yok (WCAG 1.4.10) | verify-ui |
+| E6 | Görünür odak | Tüm etkileşimli öğelerde | verify-ui klavye testi |
+| E7 | Odak sırası | Görsel sırayla uyumlu, tuzak yok | verify-ui klavye testi |
+| E8 | Form etiketleri | Her alanın erişilebilir adı var | axe |
+| E9 | Birincil eylem | Ekran başına en fazla 1 birincil (vurgulu) eylem | statik inceleme |
+| E10 | Görev derinliği | Birincil görevler en fazla 3 ekran/adım | görev akışı (Adım 2) |
+| E11 | Durum kapsaması | Her asenkron işlemde yükleniyor + hata + başarı; her listede boş durum | statik inceleme |
+| E12 | Hareket | `prefers-reduced-motion` altında animasyon kapalı/azaltılmış | verify-ui |
+| E13 | Metin büyütme | %200 yakınlaştırmada içerik kaybı yok (WCAG 1.4.4) | verify-ui |
+
+Sayısal araçlarla ölçülemeyen kriter statik incelemeyle kontrol edilir ve gerekçesi `DESIGN_RATIONALE` dokümanının erişilebilirlik bölümüne kısa bir satırla yazılır; tam tanım ve makine okunur eşikler için feza-hci skill'lerindeki eşik dosyası geçerlidir.
+
 ### feza-sqa — SQA (SQA planı, test, inceleme, metrik vb.)
 
 | Kriter | Ağırlık | 1 | 3 | 5 |
@@ -129,6 +151,7 @@ Bütünleşik paket raporu setinde her kriter yine 1-5 puanlanır (1 = yok, 3 = 
 - Varsayılan teslim formatında kapak, özet veya içindekilerden birinin eksik olması (kullanıcı sade format istemediyse).
 - Yinelenen veya yeniden kullanılmış ID (FR-001 iki kez vb.).
 - Etiketsiz maliyet/ücret rakamı ("Varsayım: ..." etiketi olmadan).
+- feza-hci arayüz çıktılarında E1-E13 eşiklerinden birinin sağlanmaması (bkz. feza-hci engelleyicileri).
 
 ## 5. Görünürlük Kuralları
 

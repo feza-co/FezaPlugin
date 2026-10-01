@@ -8,8 +8,10 @@ Checks:
   4. Self-containment no skill points outside its own folder (../, shared/, other skills)
   5. Cross-links      every /feza-<package>:<skill> command refers to a real skill
   6. Manifests        JSON is valid; plugin and marketplace manifests are consistent
-  7. Generated files  references copies and the root skills/ mirror match their sources
+  7. Generated files  references copies, script copies and the root skills/ mirror match their sources
   8. Banned terms     legacy names and terms that must not appear anywhere in the repo
+  9. Script refs      every `scripts/<file>.(mjs|js|py|sh)` a skill mentions exists in that skill
+ 10. Thresholds       thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E13 tables stay in sync
 
 Paths are resolved relative to the repository root (the parent of scripts/).
 Only the Python standard library is used. Exit code 0 = no errors, 1 = errors.
@@ -55,11 +57,24 @@ _BANNED_FRAGMENTS = [
 BANNED_RE = re.compile("|".join(r"\b" + a + b for a, b in _BANNED_FRAGMENTS), re.IGNORECASE)
 
 SKIP_DIRS = {".git", ".claude", ".code-review-graph", "node_modules", "__pycache__", ".venv", "venv", "dist", "build"}
-TEXT_SUFFIXES = {".md", ".json", ".py", ".yml", ".yaml", ".txt", ".toml", ".cfg", ".ini", ""}
+TEXT_SUFFIXES = {".md", ".json", ".py", ".mjs", ".js", ".cjs", ".yml", ".yaml", ".txt", ".toml", ".cfg", ".ini", ""}
 
 REF_RE = re.compile(r"references/([A-Za-z0-9._-]+\.md)")
 CROSSLINK_RE = re.compile(r"/(feza-[a-z]+):([a-z0-9-]+)")
 GENERATED_PREFIX = "<!-- generated from "
+
+# A `scripts/<file>` reference counts only when nothing alphanumeric, '/', '.' or
+# '_' precedes it, so project paths like `styles/x.js` or `src/scripts/app.js` are
+# ignored. `app.js` comes from the default project layout shown in a SKILL.md and
+# belongs to the user's project, not to the skill.
+SCRIPT_REF_RE = re.compile(r"(?<![A-Za-z0-9_./])scripts/([A-Za-z0-9._-]+\.(?:mjs|js|py|sh))")
+SCRIPT_REF_ALLOWLIST = {"app.js"}
+
+THRESHOLDS_MD = ROOT / "shared" / "packages" / "feza-hci" / "thresholds.md"
+VERIFY_UI_MJS = ROOT / "plugins" / "feza-hci" / "skills" / "hci-execute" / "scripts" / "verify-ui.mjs"
+QUALITY_GATE_MD = ROOT / "shared" / "quality-gate.md"
+THRESHOLDS_BLOCK_RE = re.compile(r"// THRESHOLDS-BEGIN\s*const THRESHOLDS = (\{.*?\});\s*// THRESHOLDS-END", re.DOTALL)
+E_ROW_RE = re.compile(r"^\|\s*E(\d+)\s*\|")
 
 
 class Report:
@@ -221,6 +236,92 @@ def check_references(r: Report, skills: dict[str, tuple[str, Path]]) -> None:
             if m2:
                 r.error("self-contained", f"{rel(f)}:{i}: points into another skill folder '{m2.group(0)}'")
         r.count("self-contained")
+
+
+def check_script_refs(r: Report, skills: dict[str, tuple[str, Path]]) -> None:
+    """Every scripts/<file> a skill mentions must exist inside that skill."""
+    for name, (_pkg, d) in sorted(skills.items()):
+        for f, i, line in skill_text_lines(d):
+            for m in SCRIPT_REF_RE.finditer(line):
+                fname = m.group(1)
+                r.count("script-refs")
+                if fname in SCRIPT_REF_ALLOWLIST:
+                    continue
+                if not (d / "scripts" / fname).is_file():
+                    r.error("script-refs", f"{rel(f)}:{i}: scripts/{fname} does not exist in skill '{name}'")
+
+
+def _first_json_block(text: str) -> str | None:
+    start = text.find("```json\n")
+    if start == -1:
+        return None
+    start += len("```json\n")
+    end = text.find("\n```", start)
+    if end == -1:
+        return None
+    return text[start:end]
+
+
+def _e_rows(text: str) -> dict[str, str]:
+    rows: dict[str, str] = {}
+    for line in text.split("\n"):
+        if E_ROW_RE.match(line):
+            norm = " ".join(line.split())
+            rows[f"E{E_ROW_RE.match(line).group(1)}"] = norm
+    return rows
+
+
+def check_thresholds(r: Report) -> None:
+    """thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E13 tables must agree."""
+    missing = [path for path in (THRESHOLDS_MD, VERIFY_UI_MJS, QUALITY_GATE_MD) if not path.is_file()]
+    for path in missing:
+        r.error("thresholds", f"{rel(path)} missing")
+    if missing:
+        return
+
+    md_block = _first_json_block(read(THRESHOLDS_MD))
+    if md_block is None:
+        r.error("thresholds", f"{rel(THRESHOLDS_MD)}: no ```json block found")
+        md_obj = None
+    else:
+        try:
+            md_obj = json.loads(md_block)
+        except json.JSONDecodeError as exc:
+            r.error("thresholds", f"{rel(THRESHOLDS_MD)}: json block invalid ({exc})")
+            md_obj = None
+
+    m = THRESHOLDS_BLOCK_RE.search(read(VERIFY_UI_MJS))
+    if m is None:
+        r.error("thresholds", f"{rel(VERIFY_UI_MJS)}: THRESHOLDS-BEGIN/END block not found")
+        mjs_obj = None
+    else:
+        try:
+            mjs_obj = json.loads(m.group(1))
+        except json.JSONDecodeError as exc:
+            r.error("thresholds", f"{rel(VERIFY_UI_MJS)}: THRESHOLDS body invalid ({exc})")
+            mjs_obj = None
+
+    if isinstance(md_obj, dict) and isinstance(mjs_obj, dict):
+        r.count("thresholds")
+        for key in sorted(set(md_obj) | set(mjs_obj)):
+            if key not in md_obj:
+                r.error("thresholds", f"threshold '{key}' present in verify-ui.mjs but not in thresholds.md")
+            elif key not in mjs_obj:
+                r.error("thresholds", f"threshold '{key}' present in thresholds.md but not in verify-ui.mjs")
+            elif md_obj[key] != mjs_obj[key]:
+                r.error("thresholds", f"threshold '{key}' differs: thresholds.md={md_obj[key]!r} verify-ui.mjs={mjs_obj[key]!r}")
+
+    md_rows = _e_rows(read(THRESHOLDS_MD))
+    qg_rows = _e_rows(read(QUALITY_GATE_MD))
+    if md_rows and qg_rows:
+        r.count("thresholds")
+        for code in sorted(set(md_rows) | set(qg_rows), key=lambda c: int(c[1:])):
+            if code not in md_rows:
+                r.error("thresholds", f"{code} row present in quality-gate.md but not in thresholds.md")
+            elif code not in qg_rows:
+                r.error("thresholds", f"{code} row present in thresholds.md but not in quality-gate.md")
+            elif md_rows[code] != qg_rows[code]:
+                r.error("thresholds", f"{code} row differs between thresholds.md and quality-gate.md")
 
 
 def check_crosslinks(r: Report, files: list[Path]) -> None:
@@ -412,9 +513,11 @@ def main() -> int:
     check_package_map(r, skills)
     check_frontmatter(r, skills)
     check_references(r, skills)
+    check_script_refs(r, skills)
     check_crosslinks(r, files)
     check_manifests(r, files)
     check_mirror(r, skills)
+    check_thresholds(r)
     check_banned(r, files)
 
     print(f"validate: {len(skills)} skills in {len(PACKAGES)} packages, {len(files)} text files scanned")
