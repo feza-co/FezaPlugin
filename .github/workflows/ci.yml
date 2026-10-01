@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Sync and validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Generated files are up to date
+        run: python scripts/sync.py --check
+
+      - name: Static validation
+        run: python scripts/validate.py
+
+      - name: JSON lint
+        run: |
+          set -euo pipefail
+          git ls-files -z '*.json' | xargs -0 -n1 python -m json.tool > /dev/null
+          echo "All JSON files are valid."
+
+  markdown:
+    name: Markdown lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          config: .markdownlint-cli2.yaml
+          globs: |
+            *.md
+            docs/**/*.md
+            plugins/*/README.md
+            .github/**/*.md
