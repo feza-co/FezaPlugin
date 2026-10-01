@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/feza-co/FezaPlugin/security/advisories/new
+    about: Report security issues privately, not as public issues.
+  - name: Installation guide
+    url: https://github.com/feza-co/FezaPlugin/blob/main/docs/installation.md
+    about: Check the installation guide for your platform before opening an issue.

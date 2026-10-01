@@ -1,0 +1,38 @@
+name: Feature request
+description: Suggest a new skill, a new package or an improvement to an existing skill.
+labels: ["enhancement"]
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Request type
+      options:
+        - New skill
+        - Improvement to an existing skill
+        - New platform or installation method
+        - Repository tooling
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Package or skill
+      description: For example `feza-sqa` or `test-plan`.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what is missing today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Expected output document, standards it should follow, inputs it should read.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
