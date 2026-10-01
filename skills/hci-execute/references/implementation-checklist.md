@@ -1,0 +1,116 @@
+# Uygulama ve Doğrulama Kontrol Listesi
+
+Kaynaklar: WCAG 2.1 (W3C, 2018), Nielsen (1994) 10 kullanılabilirlik heuristiği, Dix, Finlay, Abowd, Beale (2004) kullanılabilirlik ilkeleri, ISO 9241-110:2020 etkileşim ilkeleri.
+
+Bu liste iki kez kullanılır: **uygularken** kural olarak, **doğrularken** (gizli döngü) denetim listesi olarak.
+
+## 1. WCAG 2.1 A + AA Kontrol Listesi (arayüz üretimi için seçilmiş)
+
+| # | Kriter | Seviye | Uygulamada nasıl karşılanır | Statik kontrol |
+|---|--------|--------|-----------------------------|----------------|
+| W1 | 1.1.1 Non-text Content | A | Anlamlı görselde `alt`, dekoratifte `alt=""`; ikon düğmede erişilebilir ad | `<img>` ve ikon düğmeleri tara |
+| W2 | 1.3.1 Info and Relationships | A | Landmark, başlık sırası, `label`/`fieldset`/`legend`, tablo başlıkları | Başlık ağacı, her `input` için `label` |
+| W3 | 1.3.2 Meaningful Sequence | A | DOM sırası görsel sırayla aynı | CSS `order`/mutlak konum kullanımı |
+| W4 | 1.3.4 Orientation | AA | Yön kilidi yok | `orientation` kilidi aranır |
+| W5 | 1.3.5 Identify Input Purpose | AA | Kişisel veri alanlarında `autocomplete` | Ad, e-posta, telefon alanları |
+| W6 | 1.4.1 Use of Color | A | Durum = renk + ikon + metin | Hata/başarı bileşenleri |
+| W7 | 1.4.3 Contrast (Minimum) | AA | Metin 4.5:1, büyük metin 3:1 | Betikle tüm çiftler |
+| W8 | 1.4.4 Resize Text | AA | `rem`, sabit yükseklikli metin kabı yok | %200 yakınlaştırma |
+| W9 | 1.4.10 Reflow | AA | 320 px'de tek sütun, yatay kaydırma yok (tablo/harita hariç) | 320 px render ya da CSS incelemesi |
+| W10 | 1.4.11 Non-text Contrast | AA | Giriş kenarı, odak halkası, anlamlı ikon 3:1 | Betikle |
+| W11 | 1.4.12 Text Spacing | AA | Satır/harf aralığı arttırılınca kırpılma yok | Sabit `height` + `overflow: hidden` aranır |
+| W12 | 1.4.13 Content on Hover or Focus | AA | Tooltip kapatılabilir (`Esc`), üzerine gelinebilir, kalıcı | Tooltip bileşeni |
+| W13 | 2.1.1 Keyboard | A | Tüm işlevler klavyeyle; `div` tıklama yerine `button` | `onclick` olan etkileşimsiz öğe aranır |
+| W14 | 2.1.2 No Keyboard Trap | A | Diyalogda odak döngüsü + `Esc` çıkışı | Diyalog bileşeni |
+| W15 | 2.4.1 Bypass Blocks | A | "İçeriğe atla" bağlantısı | Sayfa başı |
+| W16 | 2.4.2 Page Titled | A | Ekran başına benzersiz `title` | Her sayfa |
+| W17 | 2.4.3 Focus Order | A | Mantıklı sekme sırası; pozitif `tabindex` yok | `tabindex="[1-9]"` aranır |
+| W18 | 2.4.4 Link Purpose | A | "Buraya tıkla" yok; bağlam içeren bağlantı metni | Bağlantı metinleri |
+| W19 | 2.4.6 Headings and Labels | AA | Açıklayıcı başlık ve etiket | Başlık metinleri |
+| W20 | 2.4.7 Focus Visible | AA | `:focus-visible` stili | `outline: none` aranır |
+| W21 | 2.5.3 Label in Name | A | Görünür etiket erişilebilir adın içinde | `aria-label` ile görünür metin karşılaştır |
+| W22 | 3.1.1 Language of Page | A | `<html lang="tr">` (ya da içerik dili) | Kök öğe |
+| W23 | 3.2.1 / 3.2.2 On Focus / On Input | A | Odak ya da seçim tek başına sayfa değiştirmez | `onchange` ile yönlendirme aranır |
+| W24 | 3.2.3 / 3.2.4 Consistent Navigation / Identification | AA | Navigasyon ve aynı işlevli bileşenler her ekranda aynı | Ekranlar arası karşılaştırma |
+| W25 | 3.3.1 Error Identification | A | Hatalı alan metinle belirtilir, `aria-invalid="true"` | Doğrulama kodu |
+| W26 | 3.3.2 Labels or Instructions | A | Biçim ve zorunluluk önceden belirtilir | Form alanları |
+| W27 | 3.3.3 Error Suggestion | AA | Düzeltme önerisi verilir | Hata metinleri |
+| W28 | 3.3.4 Error Prevention (Legal, Financial, Data) | AA | Geri alınabilir, kontrol edilebilir ya da onaylı gönderim | Silme, ödeme, gönderim |
+| W29 | 4.1.2 Name, Role, Value | A | Özel bileşende doğru rol ve durum (`aria-expanded`, `aria-pressed`) | Özel bileşenler |
+| W30 | 4.1.3 Status Messages | AA | Toast ve durum mesajı `role="status"` / `aria-live="polite"`; acil hata `role="alert"` | Bildirim bileşeni |
+| W31 | 2.5.5 Target Size | AAA (hedef) | ≥ 44 × 44 CSS px | Düğme, bağlantı, ikon boyutları |
+
+## 2. Heuristik Uygulama Listesi (Nielsen 1994 ↔ Dix et al. ↔ ISO 9241-110)
+
+| # | Heuristik | Dix et al. ilkesi | ISO 9241-110 ilkesi | Uygulamada zorunlu karşılık |
+|---|-----------|-------------------|---------------------|-----------------------------|
+| H1 | Sistem durumunun görünürlüğü | Observability, Responsiveness | Self-descriptiveness | ≤ 100 ms görsel tepki; > 1 s işte yükleniyor durumu ve düğmede meşgul durumu; sonuç bildirimi; aktif navigasyon öğesi `aria-current="page"` |
+| H2 | Sistem ile gerçek dünya uyumu | Familiarity, Task conformance | Conformity with user expectations | Kullanıcı dili, teknik jargon yok; tarih/sayı yerel biçimde; tanıdık metaforlar |
+| H3 | Kullanıcı kontrolü ve özgürlüğü | Recoverability, Dialog initiative | Controllability | İptal ve geri her akışta; silmede geri al; çok adımlı akışta önceki adıma dönüş, veri korunur |
+| H4 | Tutarlılık ve standartlar | Consistency, Generalizability | Conformity with user expectations | Aynı eylem aynı etiket/konum/stil; tek bileşen seti; platform kalıpları |
+| H5 | Hata önleme | Predictability | Error robustness | Uygun giriş türü, kısıt ipucu, makul varsayılan, yıkıcı eylemde onay |
+| H6 | Hatırlama yerine tanıma | Synthesizability, Familiarity | Self-descriptiveness | Görünür seçenekler, ikon + metin, son kullanılanlar, alan içi örnek |
+| H7 | Esneklik ve kullanım verimliliği | Substitutivity, Customizability, Multithreading | Suitability for individualisation | Klavye kısayolları (opsiyonel, görünür belgelenmiş), toplu işlem, filtrenin URL'de korunması |
+| H8 | Estetik ve minimalist tasarım | Task conformance | Suitability for the task | Ekran başına tek birincil eylem; görevle ilgisiz içerik yok; boşlukla gruplama |
+| H9 | Hataları tanıma, teşhis ve kurtarma | Recoverability | Error robustness | Mesaj: ne oldu + neden + nasıl düzeltilir; alan yanında + özet; girdi korunur |
+| H10 | Yardım ve dokümantasyon | Familiarity | Learnability | Bağlamsal ipucu, boş durumda yönlendirme, gerekiyorsa yardım bağlantısı |
+
+## 3. Bileşen Durum Matrisi
+
+Her etkileşimli bileşen için doldurulur. "—" uygulanamaz demektir; boş hücre bırakılmaz.
+
+| Bileşen | default | hover | focus-visible | active | disabled | loading | empty | error | success |
+|---------|---------|-------|---------------|--------|----------|---------|-------|-------|---------|
+| Birincil düğme | Dolgu primary | primary-hover | Odak halkası | Hafif koyulaşma / 1 px içe | Düşük opaklık + `disabled` + neden ipucu | Spinner + "Kaydediliyor…" + `aria-busy`, çift gönderim engeli | — | — | Kısa onay ikonu ya da toast |
+| İkincil düğme | Kenarlıklı | Yüzey tonu | Odak halkası | Koyulaşma | Aynı kural | Aynı kural | — | — | — |
+| Metin alanı | `border-strong` | Kenar koyulaşır | Odak halkası | — | Yüzey tonu + `disabled` | Satır içi doğrulama göstergesi | Yer tutucu değil, görünür etiket | Kırmızı kenar + ikon + metin + `aria-invalid` | Onay ikonu (opsiyonel) |
+| Onay kutusu / radyo | Yerel öğe, ≥ 44 px tıklanabilir etiket | Etiket vurgusu | Odak halkası | — | `disabled` | — | — | Grup düzeyi hata metni | — |
+| Liste / tablo | Satırlar | Satır vurgusu | Satır içi odak | Seçili satır (renk + işaret) | — | İskelet (skeleton) satırlar | Boş durum kalıbı | Hata kalıbı + "Tekrar dene" | — |
+| Diyalog | Kapalı | — | Açılışta ilk odaklanabilir öğe | — | — | İçerik yükleniyor | — | İçerik hata | Kapanır, odak tetikleyiciye döner |
+| Navigasyon öğesi | Metin + ikon | Vurgu | Odak halkası | — | — | — | — | — | Aktif: `aria-current` + görsel işaret |
+| Toast / bildirim | — | Duraklatma (opsiyonel) | Kapatma düğmesi odaklanabilir | — | — | — | — | `role="alert"` | `role="status"`, 5-10 s, geri al eylemi |
+
+## 4. Bilişsel Yük Kontrolü
+
+| # | Kontrol | Eşik | Kaynak |
+|---|---------|------|--------|
+| C1 | Bir gruptaki seçenek/öğe sayısı | ≤ 7 (fazlası gruplanır ya da aşamalı gösterilir) | Miller 1956 |
+| C2 | Birincil navigasyon öğe sayısı | ≤ 5 mobil, ≤ 7 masaüstü | Miller 1956, Hick 1952 |
+| C3 | Ekran başına birincil eylem | 1 | Nielsen H8 |
+| C4 | Form adım başına alan | ≤ 7; daha fazlası mantıksal adımlara bölünür | Miller 1956 |
+| C5 | Karar süresi | Seçenek sayısı arttıkça artar (Hick); sık seçenek öne, varsayılan önerilir | Hick 1952 |
+| C6 | Gruplama | Grup içi boşluk < grup arası boşluk; ilişkili öğeler ortak zemin/kenarlıkta | Gestalt yakınlık, ortak bölge |
+| C7 | Benzerlik | Aynı işlevli öğeler aynı görünür; farklı işlevler görsel olarak ayrışır | Gestalt benzerlik |
+| C8 | Aşamalı gösterim | İleri seçenekler `details`/"Diğer seçenekler" altında | Progressive disclosure |
+| C9 | Geri bildirim gecikmesi | Anlık tepki ≤ 100 ms; 1 s üstü ilerleme göstergesi; 10 s üstü ilerleme yüzdesi ya da iptal | Nielsen yanıt süresi sınırları |
+| C10 | Hafıza yükü | Önceki ekrandan bilgi taşımayı gerektiren adım yok (özet/onay ekranında gösterilir) | Nielsen H6 |
+
+## 5. Doğrulama Prosedürü (gizli döngü)
+
+Sonuçlar kullanıcıya puan olarak gösterilmez; yalnız düzeltmeler uygulanır ve kapanmayanlar "Bilinen Boşluklar"a yazılır.
+
+| Adım | Ne yapılır | Araç |
+|------|-----------|------|
+| D1 | Kontrast: `tokens.css` içindeki tüm ön plan/zemin çiftleri, açık ve koyu tema | `references/design-system-rules.md` betiği (Bash) |
+| D2 | Statik tarama: `outline: none`, `tabindex` > 0, `onclick` olan `div`/`span`, `label`'sız `input`, `alt`'sız `img`, ham hex/px değerleri bileşen dosyalarında | Grep |
+| D3 | WCAG listesi W1-W31 tek tek | Kod okuma |
+| D4 | Heuristik listesi H1-H10; her heuristik için en az bir gözlem | Kod okuma + akış yürütme |
+| D5 | Durum matrisi tam mı (boş hücre yok) | Kod okuma |
+| D6 | Bilişsel yük C1-C10 | Ekran envanteri + wireframe |
+| D7 | Render (opsiyonel): 360 px ve 1280 px ekran görüntüsü; yalnız klavyeyle her birincil görev; konsol hatası; açık/koyu tema; `prefers-reduced-motion` emülasyonu | Mevcutsa Playwright / başsız tarayıcı |
+
+### Severity ölçeği (Nielsen)
+
+| Skor | Anlam | Eylem |
+|------|-------|-------|
+| 0 | Sorun değil | — |
+| 1 | Kozmetik | Zaman kalırsa düzelt |
+| 2 | Küçük kullanılabilirlik sorunu | **Düzelt** |
+| 3 | Büyük kullanılabilirlik sorunu | **Düzelt** |
+| 4 | Kullanımı engelleyen | **Düzelt**; kapanmazsa sohbet özetinde de açıkça belirtilir |
+
+Herhangi bir WCAG A/AA ihlali en az severity 2 sayılır. Klavye ile tamamlanamayan birincil görev ve 4.5:1 altında gövde metni severity 4'tür.
+
+### Tur kuralı
+
+En fazla 2 düzeltme turu. Turdan sonra kalan severity ≥ 2 bulgu varsa `DESIGN_RATIONALE_<proje>.md` → "Bilinen Boşluklar" tablosuna severity, konum ve önerilen çözümle yazılır.

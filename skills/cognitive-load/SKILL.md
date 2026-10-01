@@ -1,0 +1,113 @@
+---
+name: cognitive-load
+description: >
+  Cognitive Complexity Theory (CCT) ile bir ekran/akışın bilişsel yükünü
+  değerlendirir. Kieras & Polson (1985) ve Sweller'in bilişsel yük kuramına
+  dayalı 6 ana terim: Cognitive Load, Information Processing, Perceptual Organization (Gestalt),
+  Affordances, Feedback & Feedforward, Skeuomorphism vs Flat Design. Her ekran
+  için yük skoru + azaltma önerileri.
+  Tetikleyici: "cognitive load", "bilişsel yük", "complexity theory",
+  "/feza-hci:cognitive-load".
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
+---
+
+# Cognitive Load
+
+CCT'nin 6 temel terimi üzerinden ekran/akış denetimi.
+
+## Tetikleyici
+- "/feza-hci:cognitive-load"
+- "cognitive load / bilişsel yük analizi"
+- "cognitive complexity"
+
+## Adım 0 — Bağlamı Topla
+1. UI dosyaları (Glob).
+2. `BRIEF.md`/`SCOPE_*.md` — kullanıcı sınıfı (CCT yüksek/düşük complexity)
+3. `HCI_REVIEW_*.md` (varsa) — önceki bulgular.
+4. UI yoksa **TEK** soru: "Hangi ekran/akış? (dosya yolu veya kısa tanım)"
+
+## Adım 1 — Gri Nokta (max 2)
+
+| # | Gri nokta |
+|---|-----------|
+| 1 | **Kullanıcı uzmanlık seviyesi** (yeni / orta / expert) |
+| 2 | **Kullanım sıklığı** (günlük / aylık / nadir) |
+
+Yeni kullanıcı + nadir kullanım → bilişsel yük tolerans **DÜŞÜK**.
+Expert + günlük → tolerans **YÜKSEK** (efficiency tercih edilebilir).
+
+## Adım 2 — Bilgi Tabanı
+- `references/cct-terms.md` — 6 terim + Gestalt prensipleri + uygulama örnekleri.
+- `references/output-conventions.md`.
+
+## Adım 3 — Üret
+
+### CCT 6 Terim Kontrolü
+
+Her terim için: **Tespit + Skor (1-5) + Öneri**.
+
+| # | Terim | Tespit | Skor | Öneri |
+|---|-------|--------|------|-------|
+| 1 | Cognitive Load | Ekranda 18 ayrı interaktif öğe — Miller's 7±2 ihlali | 4 | Gruplama (Gestalt) ile 5 bölüme ayır |
+| 2 | Information Processing | Form alanları sıralaması iş akışıyla uyumsuz | 3 | Sıralamayı user journey'e göre yeniden düzenle |
+| 3 | Perceptual Organization (Gestalt) | Yakınlık (proximity) prensibi ihlali — ilgili öğeler dağınık | 3 | İlgili kontroller fiziksel olarak yakınlaştır |
+| 4 | Affordances | "Sepete ekle" butonu link gibi görünüyor (underline) | 3 | Buton stilinde yap (background, border, padding) |
+| 5 | Feedback | Kayıt sonrası ekran sessiz | 4 | Toast notification + redirect sonrası onay |
+| 6 | Feedforward | Disabled butonun NEDEN disabled olduğu görünmez | 2 | Tooltip ile sebep göster |
+
+### Yük Skoru Toplam
+
+- 6-12: Düşük yük (iyi)
+- 13-20: Orta yük (kabul)
+- 21-30: Yüksek yük (acil revize)
+
+### Skeuomorphism vs Flat Design Notu
+
+Kullanıcı uzmanlık seviyesine göre:
+- Yeni kullanıcı + cross-cultural → Skeuomorphic ipuçları yardımcı (gerçek dünya benzetmesi).
+- Expert + sık kullanım → Flat tercih edilebilir (verimlilik).
+
+Mevcut tasarımın kategorisini tespit et + uygunluğunu yorumla.
+
+### Cognitive Overload Azaltma Önerileri (bilişsel aşırı yükü azaltma)
+
+Tek bir "Aksiyon Listesi" çıkar:
+1. Gruplama (proximity, similarity)
+2. Progressive disclosure (her şeyi tek anda gösterme)
+3. Recognition over recall
+4. Affordance tutarlılığı
+5. Feedback gecikmesini < 1s tut
+6. Feedforward (gelecek aksiyon ipucu) ekle
+
+## Adım 4 — Self-Check
+- [ ] 6 CCT terimin her biri tarandı mı?
+- [ ] Her birine skor verildi mi?
+- [ ] Toplam skor hesaplandı mı?
+- [ ] Skeuomorphism/Flat değerlendirmesi var mı?
+- [ ] Azaltma önerileri sıralı mı?
+
+## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
+
+Üretim akışı: **taslak → gizli puanlama → revizyon → teslim**.
+
+1. Dokümanı yukarıdaki adımlarla tam hâliyle **taslak** olarak üret; henüz dosyaya yazma.
+2. Taslağı `references/quality-gate.md` prosedürüyle **feza-hci (HCI)** kriter setine göre 100 üzerinden puanla (eşik 85; engelleyiciler dahil).
+3. Eşik geçilmediyse ya da engelleyici varsa bulgulara göre revize et ve yeniden puanla (en fazla 2 tur); kapanmayan içerik eksiklerini "Bilinen Boşluklar"a yaz.
+4. Son sürümü `references/output-conventions.md` teslim formatında yaz (kapak, özet, içindekiler, kaynakça, Bilinen Boşluklar; ayrıntılı şablon: `references/delivery-format.md`). Kullanıcı sade format isterse üst bilgi bloğu kullanılır.
+5. Puan, kriter tablosu ve revizyon notları kullanıcıya **gösterilmez**, dosyaya yazılmaz; kullanıcı raporu kalite puanı içermez.
+
+## Adım 5 — Yaz
+- Dosya: `COGNITIVE_LOAD_<proje>.md`
+
+## Adım 6 — Rapor
+1. Dosya yolu.
+2. Toplam yük skoru + kategori (düşük/orta/yüksek).
+3. En kritik 2 terim.
+4. Bilinen boşluk.
+5. Sonraki: azaltma önerilerini uygulamak için `/feza-hci:hci-execute`; ya da `/feza-hci:heuristic-eval` / `/feza-hci:hci-review`.
+
+## Sınırlar
+- Max 3 soru.
+- 6 terimin hepsini eksiksiz tara.
+- Skoru sözel verme — sayı.
+- Gestalt prensiplerini açıkça referansla (proximity, similarity, closure, continuity, figure-ground).
