@@ -74,7 +74,7 @@ Gerisini akıllıca varsay; her varsayımı `Varsayım:` etiketiyle kaydet ve te
 
 - `references/design-system-rules.md` — token yapısı, kontrast formülü ve `scripts/contrast.py` kullanımı, renk, tipografi, boşluk, hareket kuralları.
 - `references/implementation-checklist.md` — erişilebilirlik ve heuristik uygulama kontrol listesi, bileşen durum matrisi, doğrulama prosedürü.
-- `references/screen-patterns.md` — onboarding, form, liste/detay, dashboard, boş durum, hata kalıpları ve HCI gerekçeleri.
+- `references/screen-patterns.md` — ekran tarifleri indeksi; her ekran için ilgili `references/recipe-<ad>.md` (8 bölümlü tarif: yerleşim, zorunlu durumlar, etkileşim, erişilebilirlik, sık hatalar, mikro-metin, kabul kontrolleri).
 - `references/output-conventions.md`, `references/delivery-format.md`, `references/quality-gate.md`.
 
 ## Adım 2 — Kullanıcı ve Görev Modeli (ISO 9241-210)
@@ -94,7 +94,7 @@ G1 Kayıt oluştur: Liste → [Yeni] → Form (3 alan) → [Kaydet] → Geri bil
 
 ## Adım 3 — Bilgi Mimarisi ve Wireframe
 
-1. **Ekran envanteri** — tablo: ekran ID (S1..Sn), amaç, hizmet ettiği görev, giriş noktası, kullanılan kalıp (`references/screen-patterns.md`).
+1. **Ekran envanteri** — tablo: ekran ID (S1..Sn), amaç, hizmet ettiği görev, giriş noktası, kullanılan kalıp, tarif. Her ekran için `references/screen-patterns.md` indeksinden uygun `references/recipe-<ad>.md` tarifini seç ve OKU. Uygun tarif yoksa en yakın kalıbı kullan ve `Varsayım: <ekran> için <tarif> uyarlandı` diye kaydet.
 2. **Navigasyon modeli** — birincil gezinme en fazla 5-7 öğe (Miller); mobilde alt sekme çubuğu ya da başlık menüsü, masaüstünde yan ya da üst gezinme. Her ekranda kullanıcının nerede olduğu görünür (H1, H6).
 3. **İçerik hiyerarşisi** — her ekran için birincil eylem tek ve görsel olarak baskın; ikincil eylemler ayrışık.
 4. **ASCII wireframe** — her ekran için mobil (360 px) ve gerekiyorsa masaüstü (≥ 1024 px) iskeleti:
@@ -116,7 +116,7 @@ G1 Kayıt oluştur: Liste → [Yeni] → Form (3 alan) → [Kaydet] → Geri bil
 +--------------------------------+
 ```
 
-Wireframe'ler `DESIGN_RATIONALE_<proje>.md` dokümanına girer; kod yazmadan önce yapı burada sabitlenir.
+Seçilen tarifin "2. ASCII yerleşim" bölümü wireframe için başlangıç noktasıdır; sapma varsa gerekçesiyle rationale'e yazılır. Wireframe'ler `DESIGN_RATIONALE_<proje>.md` dokümanına girer; kod yazmadan önce yapı burada sabitlenir.
 
 ## Adım 4 — Tasarım Sistemi
 
@@ -176,7 +176,7 @@ Projede zaten `index.html` ya da çakışan dosya varsa üzerine yazmadan önce 
 | 16 | Yardım: alan içi ipucu ve bağlamsal açıklama; boş durumda ilk eylemi öner | Nielsen H10 |
 | 17 | Görseller: anlamlı görselde `alt`, süs görselinde `alt=""`; logo yerine işaretli placeholder | WCAG 1.1.1 |
 
-Her ekran için `references/screen-patterns.md` içindeki ilgili kalıbı uygula; boş, yükleniyor ve hata durumlarını **gerçekten** kodla (yalnızca mutlu yol değil). Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
+Her ekran için seçilen `references/recipe-<ad>.md` tarifini uygula: "3. Zorunlu durumlar" tablosundaki her durumu (varsayılan, yükleniyor, boş, hata, başarı, devre dışı) **gerçekten** kodla, "4. Etkileşim kuralları" ve "5. Erişilebilirlik notları"nı izle, "6. Sık yapılan hatalar"dan kaçın, "8. Kabul kontrolleri"ni Adım 6'da E1-E13'e ek olarak işaretle. Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
 
 ## Adım 6 — Gizli Doğrulama Döngüsü
 
@@ -258,6 +258,7 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] Severity ≥ 2 bulgu kalmadı ya da Bilinen Boşluklar'a gerekçeli yazıldı?
 - [ ] `scripts/verify-ui.mjs` çalıştı ve çıkış 0 verdi (ya da çıkış 2 Bilinen Boşluklar'a yazıldı)?
 - [ ] Ekran görüntüleri görsel olarak incelendi?
+- [ ] Her ekran bir tarife bağlandı; tarif yoksa varsayım kaydedildi?
 - [ ] Logo ve marka varlıkları placeholder olarak işaretli?
 
 ## Sınırlar
