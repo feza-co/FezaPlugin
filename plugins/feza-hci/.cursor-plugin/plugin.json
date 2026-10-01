@@ -1,0 +1,24 @@
+{
+  "name": "feza-hci",
+  "version": "2.0.0",
+  "description": "Human-computer interaction skills: holistic UX review, heuristic evaluation, usability test planning, cognitive load, color and contrast audit, design thinking, prototyping, personas, and HCI-compliant UI design and implementation.",
+  "author": {
+    "name": "Feza"
+  },
+  "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-hci",
+  "repository": "https://github.com/feza-co/FezaPlugin",
+  "license": "MIT",
+  "keywords": [
+    "hci",
+    "ux",
+    "usability",
+    "heuristic-evaluation",
+    "wcag",
+    "accessibility",
+    "persona",
+    "software-engineering",
+    "documentation",
+    "agent-skills"
+  ],
+  "skills": "./skills/"
+}
