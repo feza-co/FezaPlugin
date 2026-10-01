@@ -8,7 +8,8 @@ description: >
   CSS/tailwind/tokens dosyalarından paleti çıkarır, yoksa kullanıcıdan alır.
   Tetikleyici: "color audit", "renk denetimi", "palette review",
   "/feza-hci:color-audit", "renk paleti".
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
+  Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Color Audit
@@ -19,6 +20,7 @@ Renk paletini renk teorisi prensipleri + WCAG 2.1 AA'ya göre denetler.
 - "/feza-hci:color-audit"
 - "renk denetimi / palette audit"
 - "renk paleti analizi"
+- Fix modu: `--fix`, `--fix=all`, "düzelt", "bulguları düzelt", "fix it", "apply fixes"
 
 ## Adım 0 — Bağlamı Topla
 1. **Tasarım token dosyaları:** `tokens.json`, `*.tokens.*`, `figma-tokens.json`
@@ -114,6 +116,7 @@ FAIL'ları düzelten yeni tablo + gerekçe.
 - [ ] 60-30-10 kontrol edildi mi?
 - [ ] Color blindness 3 tip için yorumlandı mı?
 - [ ] FAIL'lar için somut hex önerisi var mı?
+- [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 
@@ -135,8 +138,20 @@ FAIL'ları düzelten yeni tablo + gerekçe.
 4. En kritik 2 düzeltme.
 5. Sonraki: düzeltilmiş paleti token'lara ve arayüze uygulamak için `/feza-hci:hci-execute`; ya da `/feza-hci:hci-review` / `/feza-hci:heuristic-eval`.
 
+## Adım 7 — Fix Modu (yalnızca tetikleyiciyle)
+
+Tetikleyici yoksa bu adım atlanır; yalnızca rapor verilir.
+Tetikleyici: `--fix`, `--fix=all` ya da "düzelt", "bulguları düzelt", "fix it", "apply fixes".
+Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğrulama:
+`node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
+Düzeltme **TOKEN seviyesinde** yapılır: değer tek yerde değişir, kullanım yerleri token'a bağlanır.
+Yeni renk değerleri `scripts/contrast.py` ile hesaplanır; elle tutulan oran kullanılmaz.
+Token katmanı yoksa önce bir katman oluşturulması önerilir ve onay alınır; onay yoksa renk yalnız raporlanır.
+Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
+
 ## Sınırlar
 - Max 4 soru.
 - Hex değer uydurma — varsa palette'tan al, yoksa kullanıcıdan iste.
 - WCAG 2.1 AA minimum, AAA önerisi.
 - Renge ek olarak görsel kanal (ikon/pattern) eklemeden bitirme.
+- Fix modu dışında hiçbir dosya değiştirilmez; fix modu tetiklenirse yalnız UI/token dosyaları değişir.
