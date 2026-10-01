@@ -1,0 +1,22 @@
+{
+  "name": "feza-toolkit",
+  "version": "2.0.0",
+  "description": "Cross-package utilities: skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
+  "author": {
+    "name": "Feza"
+  },
+  "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-toolkit",
+  "repository": "https://github.com/feza-co/FezaPlugin",
+  "license": "MIT",
+  "keywords": [
+    "toolkit",
+    "orchestration",
+    "sdlc",
+    "glossary",
+    "demo",
+    "software-engineering",
+    "documentation",
+    "agent-skills"
+  ],
+  "skills": "./skills/"
+}
