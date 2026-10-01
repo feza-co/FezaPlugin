@@ -4,8 +4,8 @@ description: >
   Proje için Scope Statement üretir. PMBOK Guide kapsam yönetimi yaklaşımına
   uygun: amaç, hedefler, ürün tanımı, başarı kriterleri, In Scope / Out of Scope
   tabloları, varsayımlar ve Project Constraints (Time/Cost/Quality/Scope dörtlüsü).
-  Önce projedeki BRIEF/IDEA/README'yi okur, yoksa kullanıcıdan tek soruyla brief
-  alır. Kritik gri noktaları (max 3) sorar, gerisini akıllıca varsayar.
+  Kapsamı projenin SRS'inden türetir. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir. Kritik gri
+  noktaları (max 3) sorar.
   Tetikleyici: "scope statement", "kapsam belirle", "scope çıkar", "proje kapsamı",
   "define scope", "in/out of scope", "/feza-pm:scope-statement".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -22,20 +22,15 @@ PMBOK kapsam yönetimi yaklaşımına göre projenin kapsam beyanını üretir. 
 - "scope statement / project scope hazırla"
 - "in scope / out of scope listesi"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-`references/input-discovery.md` desenini uygula:
-1. `IDEA.md`, `BRIEF.md`, `FIKIR.md`, `PROJE.md`, `README.md` ara.
-2. Bulunmadıysa **TEK** `AskUserQuestion`:
-   - **Soru:** "Scope Statement için bir proje fikrine ihtiyaç var. Kısa brief'i şimdi yazar mısın? (proje adı + 1 cümle tanım + ana hedefler)"
-   - **Header:** "Proje brief"
-   - **Seçenek 1:** "Şimdi yazacağım (Recommended)" — Other ile yaz.
-   - **Seçenek 2:** "Örnek senaryo üret" — e-ticaret sepeti / mobil bankacılık / SaaS abonelik gibi.
-3. Kullanıcı brief verirse `BRIEF.md` olarak kaydet.
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. SRS'ten çıkar: proje adı, amaç (Introduction/Purpose), ürün tanımı (Product Overview), kullanıcı sınıfları, fonksiyonel gereksinimler (In Scope adayları), kısıtlar ve varsayımlar.
+3. SRS'te açıkça kapsam dışı bırakılan maddeler Out of Scope adaylarıdır.
 
 ## Adım 1 — Gri Nokta Tespiti
 
-Brief'ten ARA, eksikse **EN FAZLA 3 SORU** ile tek `AskUserQuestion`:
+SRS'ten ARA, eksikse **EN FAZLA 3 SORU** ile tek `AskUserQuestion`:
 
 | # | Gri nokta | Neden kritik |
 |---|-----------|--------------|
@@ -43,7 +38,7 @@ Brief'ten ARA, eksikse **EN FAZLA 3 SORU** ile tek `AskUserQuestion`:
 | 2 | **Bitiş tarihi / dönem** (çeyrek sonu? sürüm tarihi? sprint? açık uçlu?) | Time constraint için |
 | 3 | **Out of Scope sınırı** (kesinlikle YAPMAYACAĞIN şey ne?) | Scope creep önlemi |
 
-Brief'te varsa SORMA. Az önemli boşluklar için "TBD — açık" yaz veya akıllı varsayım yap.
+SRS'te varsa SORMA. Az önemli boşluklar için "TBD — açık" yaz veya akıllı varsayım yap.
 
 ## Adım 2 — Bilgi Tabanı
 
@@ -97,13 +92,12 @@ Brief'te varsa SORMA. Az önemli boşluklar için "TBD — açık" yaz veya akı
 
 1. Dosya yolu.
 2. Tek cümle: kaç hedef, kaç in/out scope item.
-3. Kullanılan input (BRIEF.md / kullanıcı / örnek).
+3. Kullanılan input (SRS dosya adı + sürüm).
 4. Bilinen boşluk sayısı.
 5. Sonraki adım: "Sırada `/feza-pm:wbs` çalıştırılabilir — bu scope'u WBS'e çevirir."
 
 ## Sınırlar
 
-- Max 4 soru toplam (1 brief + 3 gri).
-- Brief verilmişse zorla 1+3 soru sorma — sadece eksiği sor.
+- Max 3 soru toplam (yalnızca gri noktalar); SRS'te cevabı olanı sorma.
 - Goals'da "hızlı / kolay / kullanıcı dostu" gibi ölçülemez sözcük yok.
 - Scope dışı item'ları gerekçesiz bırakma (her satırda "Neden hariç").

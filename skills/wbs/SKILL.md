@@ -2,9 +2,9 @@
 name: wbs
 description: >
   Work Breakdown Structure üretir. PMBOK uyumlu 3 seviyeli
-  numaralı kırılım (1.0 → 1.1 → 1.1.1), her yaprak için somut deliverable. Önce
-  cwd'de SCOPE_*.md varsa onu okur; yoksa BRIEF/IDEA/README'den; o da yoksa kullanıcıdan
-  tek soruyla brief alır. Kritik gri noktaları (max 3) sorar.
+  numaralı kırılım (1.0 → 1.1 → 1.1.1), her yaprak için somut deliverable ve
+  karşıladığı SRS gereksinim ID'leri. Önce SCOPE_*.md'yi, yoksa doğrudan SRS'i
+  kullanır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir. Kritik gri noktaları (max 2) sorar.
   Tetikleyici: "WBS oluştur", "work breakdown structure", "iş kırılımı çıkar",
   "/feza-pm:wbs", "deliverable kırılımı".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -12,7 +12,7 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 
 # WBS (Work Breakdown Structure)
 
-3 seviyeli numaralı WBS üretir. Scope dosyası varsa onu kullanır, yoksa brief'ten kapsamı zihninde kurar ve uyarır.
+3 seviyeli numaralı WBS üretir. Scope dosyası varsa onu kullanır, yoksa kapsamı SRS'ten kurar ve uyarır.
 
 ## Tetikleyici
 
@@ -21,20 +21,16 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 - "iş kırılımı / deliverable kırılımı"
 - "work breakdown structure"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-Sırayla:
-1. **`SCOPE_*.md`** dosyasını cwd'de Glob ile ara. Bulduysan oku, kapsamı çıkar.
-2. Yoksa `IDEA.md`/`BRIEF.md`/`PROJE.md`/`README.md` ara.
-3. Hiçbiri yoksa **TEK** `AskUserQuestion`:
-   - **Soru:** "WBS için kapsam tanımına ihtiyaç var. Önce `/feza-pm:scope-statement` çalıştırmamı mı istersin, yoksa burada hızlı bir brief verip direkt WBS mi üreteyim?"
-   - **Header:** "WBS girdisi"
-   - **Seçenek 1:** "Önce scope üret (Recommended)" — `/feza-pm:scope-statement`'i çağırmasını öner, durdur.
-   - **Seçenek 2:** "Direkt brief verip WBS üret" — Other ile brief al, `BRIEF.md` olarak kaydet, devam et.
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`SCOPE_*.md`** dosyasını cwd'de Glob ile ara. Bulduysan oku; In Scope kalemleri WBS dallarının zeminidir.
+3. Yoksa kapsamı doğrudan SRS'in fonksiyonel gereksinimlerinden kur ve "SCOPE dosyası yok, kapsam SRS'ten türetildi" notunu Bilinen Boşluklar'a yaz (rapor sonunda `/feza-pm:scope-statement` öner).
+4. Her yaprak, karşıladığı FR ID'lerini parantez içinde gösterir.
 
 ## Adım 1 — Gri Nokta Tespiti
 
-Scope/brief'ten ARA, eksikse **EN FAZLA 2 SORU** (WBS basit bir araç, çok soru sorma):
+SCOPE/SRS'ten ARA, eksikse **EN FAZLA 2 SORU** (WBS basit bir araç, çok soru sorma):
 
 | # | Gri nokta | Neden kritik |
 |---|-----------|--------------|
@@ -98,7 +94,7 @@ Kurallar:
 
 1. Dosya yolu.
 2. Tek cümle: kaç ana dal, kaç yaprak.
-3. Kullanılan input (SCOPE_*.md / BRIEF.md / kullanıcı).
+3. Kullanılan input (SRS + varsa SCOPE_*.md).
 4. Bilinen boşluk sayısı.
 5. Sonraki adım: "Sırada `/feza-pm:estimate` — her yaprağa 3-point süre tahmini."
 

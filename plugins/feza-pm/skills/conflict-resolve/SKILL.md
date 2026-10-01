@@ -3,9 +3,10 @@ name: conflict-resolve
 description: >
   Verilen conflict senaryosu için tip tespiti + uygun çözüm stratejisi önerir.
   Thomas-Kilmann (1974) ve PMBOK Resolve Conflict yaklaşımına uygun 5 strateji: Avoiding,
-  Smoothing, Compromising, Forcing, Collaborating. Argüman olarak senaryo bekler;
-  yoksa kullanıcıdan tek soruyla alır. Diğer skill'lerden farklı: opsiyonel olarak
-  CONFLICT_LOG.md'ye ekleme yapabilir, ama temel çıktı sohbette yorum.
+  Smoothing, Compromising, Forcing, Collaborating. Proje bağlamını (kapsam, kısıt,
+  paydaş) SRS'ten alır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir. Argüman olarak senaryo bekler;
+  yoksa kullanıcıdan tek soruyla alır. Opsiyonel olarak CONFLICT_LOG.md'ye ekleme
+  yapabilir, ama temel çıktı sohbette yorum.
   Tetikleyici: "conflict resolution", "çatışma çözümü", "/feza-pm:conflict-resolve",
   "anlaşmazlık".
 allowed-tools: Read, Write, Glob, AskUserQuestion
@@ -17,10 +18,12 @@ allowed-tools: Read, Write, Glob, AskUserQuestion
 - "/feza-pm:conflict-resolve <senaryo>"
 - "çatışma çözümü / conflict resolution"
 
-## Adım 0 — Senaryoyu Topla
+## Adım 0 — SRS Kapısı ve Senaryo
 
-1. Komut argümanında senaryo varsa kullan.
-2. Yoksa **TEK** `AskUserQuestion`:
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. SRS çatışmanın proje bağlamını verir (kapsam, kısıtlar, paydaşlar). Çatışma bir gereksinim ya da kısıtla ilgiliyse analizde ilgili SRS ID'sini göster.
+3. Komut argümanında senaryo varsa kullan.
+4. Yoksa **TEK** `AskUserQuestion`:
    - **Soru:** "Çatışma senaryosunu kısa anlat: kim, ne, ne zaman, neden?"
    - **Header:** "Çatışma senaryosu"
    - Tek seçenek: "Şimdi yazacağım" + Other.

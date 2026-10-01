@@ -16,6 +16,9 @@ plugins/<package>/skills/<skill-name>/
     └── quality-gate.md             generated from shared/ (do not edit)
 ```
 
+Skills of a package can also receive package-scoped generated files from
+`shared/packages/<package>/` (for example every feza-pm skill gets `references/srs-gate.md`).
+
 Generated files start with `<!-- generated from ... — do not edit -->`. Edit the source and run
 `python scripts/sync.py`.
 

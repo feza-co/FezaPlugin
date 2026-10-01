@@ -24,6 +24,7 @@ FezaPlugin/
 ├── gemini-extension.json               Gemini CLI extension (uses root skills/)
 ├── VERSION                             Single version for all manifests
 ├── shared/                             Source of shared reference files
+│   └── packages/<package>/             Shared files for one package only
 ├── plugins/
 │   └── <package>/
 │       ├── .claude-plugin/plugin.json
@@ -74,6 +75,8 @@ authoritative.
 
 1. **Shared references.** Every file in `shared/` is copied into every skill's `references/`
    folder. Each copy starts with `<!-- generated from shared/<file> — do not edit -->`.
+   Files in `shared/packages/<package>/` are copied only into the skills of that package (for
+   example `shared/packages/feza-pm/srs-gate.md`, the SRS requirement of every feza-pm skill).
 2. **Cross-skill references.** Some skills reuse a reference file owned by another skill, for
    example `srs-review` reads `well-formed-requirements.md` from `srs-generate`. These pairs are
    listed explicitly in `CROSS_SKILL_REFERENCES` in `scripts/sync.py`, and the file is copied into

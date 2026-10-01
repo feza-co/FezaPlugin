@@ -3,8 +3,8 @@ name: raci
 description: >
   RACI sorumluluk matrisi üretir. PMBOK kaynak yönetimi (RAM/RACI) uyumlu. WBS satırları
   × Stakeholder/Rol sütunları, hücrelerde R (Responsible), A (Accountable), C
-  (Consulted), I (Informed). Önce cwd'de WBS_*.md ve STAKEHOLDERS_*.md varsa onları
-  okur. Yoksa BRIEF/IDEA/README'den çıkarım yapar veya tek soruyla brief alır.
+  (Consulted), I (Informed). WBS_*.md ve STAKEHOLDERS_*.md'yi okur; rol ipuçlarını
+  SRS'in kullanıcı sınıfları ve paydaş tanımlarından alır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
   Tetikleyici: "RACI matrisi", "sorumluluk matrisi", "/feza-pm:raci",
   "kim ne yapacak", "responsibility assignment matrix".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -21,17 +21,17 @@ PMBOK kaynak yönetimi yaklaşımına göre RACI matrisi üretir.
 - "kim ne yapacak"
 - "responsibility assignment matrix"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. **`WBS_*.md`** (zorunlu kaynak — satırlar buradan).
-2. **`STAKEHOLDERS_*.md`** (varsa — sütunlar buradan).
-3. `BRIEF.md`/`README.md` — takım roller hakkında ipucu.
-4. `package.json` `contributors` / `git log --format='%an'` (Bash ile) → gerçek katkıcılar.
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`WBS_*.md`** (zorunlu kaynak — satırlar buradan).
+3. **`STAKEHOLDERS_*.md`** (varsa — sütunlar buradan).
+4. SRS: kullanıcı sınıfları, paydaş ve rol tanımları — rol ipucu.
 
 Eksiklerde **TEK** `AskUserQuestion`:
 
 - WBS yoksa:
-  - **Soru:** "RACI için WBS gerekiyor. Önce `/feza-pm:wbs` çalıştırmamı mı istersin, yoksa kısa feature listesi verip RACI'yi onun üzerinden mi üreteyim?"
+  - **Soru:** "RACI için WBS gerekiyor. Önce `/feza-pm:wbs` çalıştırmamı mı istersin, yoksa RACI'yi SRS'in fonksiyonel gereksinimleri üzerinden mi üreteyim?"
   - Recommended: önce WBS.
 
 ## Adım 1 — Gri Nokta Tespiti

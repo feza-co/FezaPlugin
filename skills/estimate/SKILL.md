@@ -4,8 +4,8 @@ description: >
   WBS yapraklarına süre + efor tahmini üretir. PMBOK Time Management
   ve Cost Management yaklaşımıyla 3 yöntem birlikte: Parametric,
   Bottom-up, Three-point (PERT) — her aktivite için Optimistic / Most Likely /
-  Pessimistic + ağırlıklı ortalama (O+4M+P)/6. Önce cwd'de WBS_*.md varsa onu
-  okur. Yoksa kullanıcıyı yönlendirir veya hızlı brief'ten WBS zihninde kurar.
+  Pessimistic + ağırlıklı ortalama (O+4M+P)/6. WBS_*.md'yi okur; SRS'in kalite ve
+  kısıt gereksinimlerini efor çarpanı olarak kullanır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
   Tetikleyici: "estimate", "tahmin et", "süre tahmini", "PERT", "three-point",
   "/feza-pm:estimate", "efor tahmini".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -21,15 +21,16 @@ WBS yapraklarına 3 yöntemli tahmin üretir.
 - "tahmin et / süre tahmini / efor tahmini"
 - "PERT / three-point estimate"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. **`WBS_*.md`** dosyasını cwd'de Glob ile ara. Bulduysan oku, yapraklarını çıkar.
-2. Yoksa `BRIEF.md`, `SCOPE_*.md`, `README.md` ara — WBS'i zihinden minimum olarak çıkar.
-3. Hiçbiri yoksa **TEK** `AskUserQuestion`:
-   - **Soru:** "Tahmin için WBS gerekiyor. Önce `/feza-pm:wbs` çalıştırmamı mı istersin, yoksa kısa bir feature listesi verip direkt tahmin mi üreteyim?"
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`WBS_*.md`** dosyasını cwd'de Glob ile ara. Bulduysan oku, yapraklarını çıkar.
+3. SRS'in kalite (QoS: performans, güvenlik, erişilebilirlik vb.) ve kısıt bölümleri ilgili yaprakların eforunu artıran faktörlerdir; etkilediği yaprakta ID'siyle belirt.
+4. WBS yoksa **TEK** `AskUserQuestion`:
+   - **Soru:** "Tahmin için WBS gerekiyor. Önce `/feza-pm:wbs` çalıştırılsın mı, yoksa WBS'i SRS'in gereksinimlerinden minimum kurup direkt tahmin mi üreteyim?"
    - **Header:** "Estimate girdisi"
    - **Seçenek 1:** "Önce WBS üret (Recommended)" — durdur, yönlendir.
-   - **Seçenek 2:** "Direkt tahmin yap" — Other ile feature listesi al, devam et.
+   - **Seçenek 2:** "SRS'ten direkt tahmin" — WBS'i SRS'in FR'lerinden minimum kur, Bilinen Boşluklar'a not düş, devam et.
 
 ## Adım 1 — Gri Nokta Tespiti
 
@@ -41,7 +42,7 @@ EN FAZLA 3 SORU ile tek `AskUserQuestion`:
 | 2 | **Deneyim seviyesi** (junior / mid / senior karışımı) | Parametric çarpan için |
 | 3 | **Süre birimi** (saat / gün / sprint) | Çıktı tutarlılığı |
 
-Brief'ten net çıkıyorsa SOR**MA**. Az önemli olanlar için varsayım yap (ör. "varsayılan: gün, 8 saat = 1 gün").
+SRS/WBS'ten net çıkıyorsa SOR**MA**. Az önemli olanlar için varsayım yap (ör. "varsayılan: gün, 8 saat = 1 gün").
 
 ## Adım 2 — Bilgi Tabanı
 

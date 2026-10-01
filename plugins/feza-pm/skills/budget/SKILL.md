@@ -2,10 +2,11 @@
 name: budget
 description: >
   Bütçe planı üretir. PMBOK Cost Management uyumlu: cost baseline,
-  Management Reserve, Contingency Reserve, ay-bazlı cash-flow tablosu. Önce cwd'de
-  ESTIMATES_*.md varsa onu okur (efor → para çevirimi). Yoksa WBS'ten veya brief'ten
-  zihinden minimum tahmin çıkarır. Saatlik ücret bilinmiyorsa varsayım yapar ve
-  etiketler. Tetikleyici: "bütçe oluştur", "budget plan", "cost baseline",
+  Management Reserve, Contingency Reserve, ay-bazlı cash-flow tablosu. Önce
+  ESTIMATES_*.md'yi (efor → para), yoksa WBS_*.md'yi kullanır; SRS'teki maliyet
+  kısıtları üst sınırdır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir. Saatlik ücret bilinmiyorsa
+  varsayım yapar ve etiketler.
+  Tetikleyici: "bütçe oluştur", "budget plan", "cost baseline",
   "/feza-pm:budget", "maliyet planı".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 ---
@@ -20,14 +21,15 @@ Cost baseline + reserves + cash-flow.
 - "bütçe / maliyet planı"
 - "budget plan / cost baseline"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. **`ESTIMATES_*.md`** öncelikli (efor saatleri buradan).
-2. Yoksa `WBS_*.md` → kaba parametric tahmin.
-3. Yoksa `BRIEF.md`/`README.md` → en kaba tahmin + uyarı.
-4. Hiçbiri yoksa **TEK** `AskUserQuestion`:
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`ESTIMATES_*.md`** öncelikli (efor saatleri buradan).
+3. Yoksa `WBS_*.md` → kaba parametric tahmin.
+4. SRS'in kısıt bölümündeki bütçe/maliyet ve süre kısıtları baseline için üst sınırdır; aşılıyorsa Bilinen Boşluklar'a yaz.
+5. ESTIMATES ve WBS yoksa **TEK** `AskUserQuestion`:
    - **Soru:** "Bütçe için süre tahmini gerekiyor. Önce `/feza-pm:estimate` çalıştırmamı mı istersin?"
-   - Recommended: önce estimate.
+   - Recommended: önce estimate. Kullanıcı reddederse SRS'in FR'leri üzerinden en kaba tahmini yap ve uyarı düş.
 
 ## Adım 1 — Gri Nokta Tespiti
 

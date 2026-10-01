@@ -2,11 +2,12 @@
 name: stakeholder-map
 description: >
   Stakeholder analizi + Power/Interest grid üretir. PMBOK Stakeholder Management
-  ve Communications Management uyumlu. Önce git contributors, CODEOWNERS, package.json
-  author/maintainers'tan gerçek isimleri çıkarır; sonra brief'ten dış paydaşları
-  ekler. Tetikleyici: "stakeholder map", "paydaş analizi", "power interest grid",
+  ve Communications Management uyumlu. Paydaşları SRS'in kullanıcı sınıfları,
+  paydaş tanımları, dış sistemleri ve uyumluluk muhataplarından çıkarır; SCOPE_*.md
+  varsa Stakeholder Snapshot'ı ekler. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
+  Tetikleyici: "stakeholder map", "paydaş analizi", "power interest grid",
   "/feza-pm:stakeholder-map".
-allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 ---
 
 # Stakeholder Map
@@ -17,13 +18,12 @@ allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
 - "stakeholder analizi / paydaş analizi"
 - "power interest grid"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. `git log --format='%an' | sort -u` (Bash) → katkıcılar.
-2. `CODEOWNERS`, `package.json` author/contributors/maintainers, `pyproject.toml` authors.
-3. `BRIEF.md`/`README.md` "Team", "Sponsor", "Acknowledgements" bölümleri.
-4. `SCOPE_*.md` Stakeholder Snapshot.
-5. Hiç yoksa **TEK** `AskUserQuestion`: "Proje paydaşlarını listele (sponsor, kullanıcı, dış stakeholder)."
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. SRS: kullanıcı sınıfları, paydaşlar, dış sistemler/arayüzler, uyumluluk ve düzenleyici muhataplar.
+3. `SCOPE_*.md` Stakeholder Snapshot.
+4. SRS'te paydaş bilgisi yetersizse **TEK** `AskUserQuestion`: "Proje paydaşlarını listele (sponsor, ekip, dış paydaş)."
 
 ## Adım 1 — Gri Nokta Tespiti
 

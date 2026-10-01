@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Every `feza-pm` skill now requires an existing SRS (`SRS_*.md` in the project root or `docs/`,
+  with purpose/scope, a requirements section and at least three identified functional
+  requirements). Without one the skill stops and points to `/feza-requirements:srs-generate`;
+  it no longer asks for a brief, offers an example scenario or reads README files, source code,
+  manifests or git history. Outputs cite SRS requirement IDs and list the SRS as the first
+  reference. The rule lives in `shared/packages/feza-pm/srs-gate.md`.
+- `scripts/sync.py` copies files from `shared/packages/<package>/` into that package's skills only.
+
 ## [2.0.0] - 2026-10-01
 
 Initial public release of FezaPlugin.

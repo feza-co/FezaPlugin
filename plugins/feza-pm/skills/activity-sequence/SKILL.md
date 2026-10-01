@@ -4,8 +4,9 @@ description: >
   WBS yapraklarını sıralayıp aktivite ağı + kritik yol (CPM) üretir. PMBOK
   Schedule Management uyumlu: Define Activities → Sequence Activities
   (FS/SS/FF/SF dependency tipleri) → Network Diagram (tablo formatında) → Critical
-  Path Method (en uzun yol). Önce cwd'de WBS_*.md ve ESTIMATES_*.md varsa onları
-  kullanır. Tetikleyici: "activity sequence", "kritik yol", "CPM", "network diagram",
+  Path Method (en uzun yol). WBS_*.md ve ESTIMATES_*.md'yi kullanır; SRS'teki
+  gereksinim bağımlılıklarını dependency kanıtı sayar. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
+  Tetikleyici: "activity sequence", "kritik yol", "CPM", "network diagram",
   "/feza-pm:activity-sequence", "aktivite sıralaması".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 ---
@@ -21,11 +22,13 @@ WBS yapraklarını aktiviteye çevirir, bağımlılıklarla sıralar, kritik yol
 - "CPM / kritik yol / critical path"
 - "network diagram"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. **`WBS_*.md`** zorunlu (yapraklar = aktiviteler).
-2. **`ESTIMATES_*.md`** öncelikli (PERT E süreleri buradan).
-3. Yoksa **TEK** soru: "Önce `/feza-pm:wbs` ve `/feza-pm:estimate` çalıştırılmalı. Yine de devam mı?"
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`WBS_*.md`** zorunlu (yapraklar = aktiviteler).
+3. **`ESTIMATES_*.md`** öncelikli (PERT E süreleri buradan).
+4. SRS'teki gereksinim bağımlılıkları (bir FR'nin başka bir FR'yi ya da dış arayüzü ön koşul alması) dependency kanıtıdır; bağımlılık satırında ID'siyle göster.
+5. WBS/ESTIMATES yoksa **TEK** soru: "Önce `/feza-pm:wbs` ve `/feza-pm:estimate` çalıştırılmalı. Yine de devam mı?"
 
 ## Adım 1 — Gri Nokta Tespiti
 

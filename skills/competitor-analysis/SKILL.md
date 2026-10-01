@@ -1,9 +1,10 @@
 ---
 name: competitor-analysis
 description: >
-  Rakip analizi tablosu üretir. Porter (1980) rekabet stratejileri çerçevesiyle. Önce
-  README'de "alternatives", manifest'te rakip kütüphaneler, BRIEF'te bilinen
-  rakipler aranır. Bilinmeyenler için kullanıcıdan tek soruyla liste alınır.
+  Rakip analizi tablosu üretir. Porter (1980) rekabet stratejileri çerçevesiyle.
+  Karşılaştırma boyutlarını SRS'in ürün tanımı, hedef kullanıcıları ve ana
+  gereksinimlerinden çıkarır; SRS'te rakip yoksa kullanıcıdan tek soruyla liste
+  alır. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
   Tetikleyici: "rakip analizi", "competitor analysis", "/feza-pm:competitor-analysis",
   "alternatif ürünler".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -16,11 +17,11 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 - "rakip analizi / alternatif ürünler"
 - "competitor / competitive landscape"
 
-## Adım 0 — Bağlamı Topla
-1. `BRIEF.md`/`README.md` "Alternatives", "Competitors", "Alternatifler", "Why us" bölümleri.
-2. `package.json` benzer kütüphaneler.
+## Adım 0 — SRS Kapısı ve Bağlam
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. SRS: ürün tanımı, hedef kullanıcılar, ana FR'ler (özellik karşılaştırma satırları) ve varsa "benzer sistemler / alternatives" bölümü.
 3. `SCOPE_*.md` — pazar pozisyonu.
-4. Hiç yoksa **TEK** `AskUserQuestion`:
+4. SRS'te rakip yoksa **TEK** `AskUserQuestion`:
    - **Soru:** "Bilinen 2-5 rakip ürün ya da alternatif çözüm söyler misin?"
    - **Header:** "Rakipler"
    - Tek seçenek: "Şimdi yazacağım" + Other.
@@ -91,5 +92,5 @@ Hangisi seçildi + neden + nasıl operasyonelleştirilir.
 
 ## Sınırlar
 - Max 3 soru.
-- Rakip uydurma — kullanıcı vermediyse ve manifest'te ipucu yoksa "Bilinen rakip yok, varsayım: <pazar genel oyuncuları>" etiketle.
+- Rakip uydurma — kullanıcı vermediyse ve SRS'te ipucu yoksa "Bilinen rakip yok, varsayım: <pazar genel oyuncuları>" etiketle.
 - Web search YOK (bu sürümde).

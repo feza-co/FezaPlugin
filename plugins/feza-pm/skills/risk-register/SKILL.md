@@ -4,11 +4,12 @@ description: >
   Risk Register tablosu üretir. PMBOK Risk Management uyumlu:
   ID, Kategori (Tech/Schedule/Cost/Resource/External/Quality), Açıklama, Olasılık
   (1-5), Etki (1-5), Skor (P×I), Response stratejisi (Avoid/Transfer/Mitigate/Accept
-  pozitif için Exploit/Share/Enhance/Accept), Owner, Trigger, Status. Önce SWOT_*.md
-  varsa onu okur (Threats → riskler), sonra koddaki TODO/FIXME/HACK işaretlerini
-  Grep ile tarar. Tetikleyici: "risk register", "risk listesi", "risk analizi",
+  pozitif için Exploit/Share/Enhance/Accept), Owner, Trigger, Status. SWOT_*.md'nin
+  Threats'ını ve SRS'in kalite/kısıt gereksinimleri, dış arayüzleri, varsayımları ile
+  açık (TBD) maddelerini riske çevirir. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
+  Tetikleyici: "risk register", "risk listesi", "risk analizi",
   "/feza-pm:risk-register".
-allowed-tools: Read, Write, Glob, Grep, Bash, AskUserQuestion
+allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 ---
 
 # Risk Register
@@ -21,16 +22,17 @@ PMBOK Identify Risks ve Qualitative Risk Analysis süreçlerine uygun risk kayd�
 - "risk register / risk listesi / risk analizi"
 - "qualitative risk analysis"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-1. **`SWOT_*.md`** öncelikli — Threats doğrudan riske çevrilir.
-2. **`SCOPE_*.md`** — kapsam = risk yüzeyi.
-3. **`ESTIMATES_*.md`** — yüksek varyanslı (σ büyük) aktiviteler riskli.
-4. **`ACTIVITIES_*.md`** — kritik yoldaki aktiviteler yüksek riskli.
-5. Kod tabanındaki risk sinyalleri (Grep):
-   - `TODO`, `FIXME`, `HACK`, `XXX`, `DEPRECATED`
-   - Güncel olmayan bağımlılıklar (`package.json`, `requirements.txt`)
-6. Brief/README ara, eksikse **TEK** soru ile brief al.
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`SWOT_*.md`** öncelikli — Threats doğrudan riske çevrilir.
+3. **`SCOPE_*.md`** — kapsam = risk yüzeyi.
+4. **`ESTIMATES_*.md`** — yüksek varyanslı (σ büyük) aktiviteler riskli.
+5. **`ACTIVITIES_*.md`** — kritik yoldaki aktiviteler yüksek riskli.
+6. SRS'teki risk sinyalleri:
+   - Kalite (QoS) ve uyumluluk gereksinimleri (performans, güvenlik, mevzuat)
+   - Dış arayüzler ve üçüncü taraf bağımlılıkları
+   - Varsayımlar (yanlış çıkma riski) ve `TBD`/açık maddeler
 
 ## Adım 1 — Gri Nokta Tespiti
 
@@ -127,7 +129,7 @@ EN FAZLA 2 SORU:
 
 1. Dosya yolu.
 2. Toplam risk sayısı + yüksek-skor sayısı.
-3. Kullanılan input (SWOT/SCOPE/code TODO'lar).
+3. Kullanılan input (SRS + SWOT/SCOPE/ESTIMATES/ACTIVITIES).
 4. Top-3 risk başlıkları.
 5. Sonraki adım: "Sırada `/feza-pm:comm-plan` veya kalan PM skill'lerinden biri."
 

@@ -3,6 +3,7 @@
 
 Single sources of truth:
   * shared/*.md                       -> copied into every skill's references/
+  * shared/packages/<pkg>/*.md        -> copied into every skill of package <pkg> only
   * CROSS_SKILL_REFERENCES (below)    -> reference files one skill borrows from another
   * plugins/<pkg>/skills/<skill>/     -> mirrored flat into the root skills/ directory
   * VERSION                           -> "version" field of every versioned manifest
@@ -25,6 +26,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED_DIR = ROOT / "shared"
+PACKAGE_SHARED_DIR = SHARED_DIR / "packages"
 PLUGINS_DIR = ROOT / "plugins"
 ROOT_SKILLS_DIR = ROOT / "skills"
 VERSION_FILE = ROOT / "VERSION"
@@ -90,9 +92,15 @@ def expected_plugin_files(skills: dict[str, Path]) -> dict[Path, str]:
     out: dict[Path, str] = {}
     shared_files = sorted(SHARED_DIR.glob("*.md"))
     for skill_dir in skills.values():
-        for src in shared_files:
+        package = skill_dir.parent.parent.name
+        package_files = sorted((PACKAGE_SHARED_DIR / package).glob("*.md"))
+        for src in shared_files + package_files:
             rel = src.relative_to(ROOT).as_posix()
             out[skill_dir / "references" / src.name] = header(rel) + read_text(src)
+    packages = {d.parent.parent.name for d in skills.values()}
+    for pkg_dir in sorted(PACKAGE_SHARED_DIR.glob("*")) if PACKAGE_SHARED_DIR.is_dir() else []:
+        if pkg_dir.is_dir() and pkg_dir.name not in packages:
+            raise SystemExit(f"package-scoped shared directory for unknown package: {pkg_dir.relative_to(ROOT)}")
     for src_skill, fname, dst_skill in CROSS_SKILL_REFERENCES:
         if src_skill not in skills or dst_skill not in skills:
             raise SystemExit(f"cross-skill reference uses unknown skill: {src_skill} -> {dst_skill}")

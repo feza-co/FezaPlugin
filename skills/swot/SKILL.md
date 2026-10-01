@@ -3,8 +3,8 @@ name: swot
 description: >
   SWOT analizi üretir. PMBOK risk tanımlama tekniklerine uygun:
   Strengths / Weaknesses / Opportunities / Threats matrisi + her hücre için kanıt
-  cümlesi. Önce projedeki BRIEF/IDEA/SCOPE/README'yi okur, yoksa kullanıcıdan tek
-  soruyla brief alır. Kritik gri noktaları (max 3) sorar.
+  cümlesi. Maddeleri SRS'ten (ve varsa SCOPE_*.md'den) türetir. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
+  Kritik gri noktaları (max 2) sorar.
   Tetikleyici: "SWOT analizi", "SWOT yap", "swot çıkar", "/feza-pm:swot",
   "güçlü zayıf yönler".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -20,17 +20,11 @@ Kanıt cümleli, TOWS çapraz stratejili SWOT matrisi.
 - "SWOT analizi / SWOT çıkar"
 - "güçlü ve zayıf yönler / fırsat ve tehditler"
 
-## Adım 0 — Bağlamı Topla
+## Adım 0 — SRS Kapısı ve Bağlam
 
-`references/input-discovery.md` desenini uygula:
-1. `SCOPE_*.md` (varsa öncelikli — proje karakterini gösterir).
-2. `IDEA.md`/`BRIEF.md`/`PROJE.md`/`README.md`.
-3. `package.json`/manifest — bağımlılıklar = teknik güçlü/zayıf yön ipucu.
-4. Hiçbiri yoksa **TEK** `AskUserQuestion`:
-   - **Soru:** "SWOT için bir proje fikrine ihtiyaç var. Kısa brief'i şimdi yazar mısın?"
-   - **Header:** "Proje brief"
-   - **Seçenek 1:** "Şimdi yazacağım" — Other ile yaz.
-   - **Seçenek 2:** "Örnek senaryo üret" — kurgusal bir SaaS/e-ticaret projesiyle örnek.
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. `SCOPE_*.md` (varsa öncelikli — proje karakterini gösterir).
+3. SRS: ürün tanımı ve FR'ler (güçlü yön adayları), kalite/kısıt gereksinimleri ve varsayımlar (zayıf yön/tehdit adayları), dış arayüzler ve uyumluluk (fırsat/tehdit adayları).
 
 ## Adım 1 — Gri Nokta Tespiti
 
@@ -41,7 +35,7 @@ EN FAZLA 2 SORU:
 | 1 | **Bilinen rakip(ler)** | Threats kalitesi için |
 | 2 | **Hedef pazar / kullanıcı segmenti** | Opportunities odağı için |
 
-Brief'te varsa SOR**MA**.
+SRS'te varsa SOR**MA**.
 
 ## Adım 2 — Bilgi Tabanı
 
@@ -54,8 +48,8 @@ Brief'te varsa SOR**MA**.
 
 | Maddenin tipi | Kanıt formatı |
 |---------------|---------------|
-| Brief'ten geliyor | "(Kaynak: BRIEF.md)" |
-| Koddan geliyor | "(Kaynak: package.json — react v18)" |
+| SRS'ten geliyor | "(Kaynak: SRS FR-012)" / "(Kaynak: SRS §3.3)" |
+| Önceki feza-pm çıktısından | "(Kaynak: SCOPE_<proje>.md)" |
 | Sektör bilgisi | "(Genel piyasa)" |
 | Varsayım | "Varsayım: ..." |
 
@@ -127,7 +121,7 @@ Her kombinasyon için 1-2 stratejik öneri.
 
 ## Sınırlar
 
-- Max 3 soru (1 brief + 2 gri).
+- Max 2 soru (yalnızca gri noktalar); SRS'te cevabı olanı sorma.
 - Her madde tek cümle, çoklu cümle yok.
 - Diyagram çizme — markdown tablo yeterli.
 - Rakipleri uydurma — bilgi yoksa "Varsayım: doğrudan rakip belirsiz".

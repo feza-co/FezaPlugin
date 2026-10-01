@@ -2,9 +2,9 @@
 name: comm-plan
 description: >
   Communication Plan matrisi üretir. PMBOK Communications Management yaklaşımıyla
-  (PMI: proje yöneticileri zamanlarının büyük bölümünü iletişime ayırır). Önce STAKEHOLDERS_*.md varsa
-  kullanır, yoksa zihinden minimum çıkarır. CI/CD ipuçlarından (.github/workflows,
-  webhook config) mevcut iletişim kanallarını tespit eder.
+  (PMI: proje yöneticileri zamanlarının büyük bölümünü iletişime ayırır). Önce
+  STAKEHOLDERS_*.md'yi kullanır; SRS'teki kullanıcı sınıfları ve raporlama/bildirim
+  gereksinimlerini ekler. Referans alınacak bir SRS (SRS_*.md) zorunludur; yoksa çalışmaz ve /feza-requirements:srs-generate'e yönlendirir.
   Tetikleyici: "communication plan", "iletişim planı", "/feza-pm:comm-plan",
   "stakeholder communication".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
@@ -16,11 +16,11 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 - "/feza-pm:comm-plan"
 - "iletişim planı / communication plan"
 
-## Adım 0 — Bağlamı Topla
-1. **`STAKEHOLDERS_*.md`** öncelikli (zorunluya yakın).
-2. `BRIEF.md`/`README.md`.
-3. `.github/workflows/*` (Slack/Teams webhook varsa kanal ipucu).
-4. Yoksa **TEK** `AskUserQuestion`: "Önce `/feza-pm:stakeholder-map` çalıştırmamı mı istersin?"
+## Adım 0 — SRS Kapısı ve Bağlam
+1. **SRS kapısı (zorunlu):** `references/srs-gate.md` kurallarını uygula. Geçerli SRS yoksa DUR: dosya üretme, brief isteme, proje dizinini (README, kod, manifest, git) okuma; kullanıcıyı `/feza-requirements:srs-generate`'e yönlendir.
+2. **`STAKEHOLDERS_*.md`** öncelikli (zorunluya yakın).
+3. SRS: kullanıcı sınıfları, paydaşlar, raporlama/bildirim gereksinimleri ve iletişim arayüzleri (kanal ipucu).
+4. STAKEHOLDERS yoksa **TEK** `AskUserQuestion`: "Önce `/feza-pm:stakeholder-map` çalıştırmamı mı istersin?"
 
 ## Adım 1 — Gri Nokta (max 2)
 
