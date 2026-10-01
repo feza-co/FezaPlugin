@@ -90,15 +90,15 @@ FezaPlugin 6 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `f
 ### feza-hci — İnsan-Bilgisayar Etkileşimi
 | Komut | Ne yapar | Dayanak |
 |-------|----------|---------|
-| `/feza-hci:hci-review` | Ekran/akış/proje için bütünsel HCI değerlendirmesi. | ISO 9241-210, Dix et al. "Human-Computer Interaction" |
-| `/feza-hci:heuristic-eval` | Nielsen 10 + Dix prensipleri + WCAG 2.1 AA ile severity (0-4) puanlı bulgu tablosu. | Nielsen 1994, WCAG 2.1 |
+| `/feza-hci:hci-review` | Ekran/akış/proje için bütünsel HCI değerlendirmesi. `--fix` ile düzeltir. | ISO 9241-210, Dix et al. "Human-Computer Interaction" |
+| `/feza-hci:heuristic-eval` | Nielsen 10 + Dix prensipleri + WCAG 2.1 AA ile severity (0-4) puanlı bulgu tablosu. `--fix` ile düzeltir. | Nielsen 1994, WCAG 2.1 |
 | `/feza-hci:usability-eval-plan` | Kullanılabilirlik değerlendirme planı: yöntemler, katılımcı formu, görevler, pilot, metrikler. | Nielsen 1993, ISO 9241-11 |
-| `/feza-hci:cognitive-load` | Ekran/akışın bilişsel yükünü değerlendirir (Gestalt, feedback/feedforward). | Sweller, Miller 1956, Card-Moran-Newell |
-| `/feza-hci:color-audit` | Renk paleti ve kontrast denetimi (uyum şemaları, 60-30-10, WCAG oranları). | WCAG 2.1 (1.4.3 / 1.4.11) |
+| `/feza-hci:cognitive-load` | Ekran/akışın bilişsel yükünü değerlendirir (Gestalt, feedback/feedforward). `--fix` ile düzeltir. | Sweller, Miller 1956, Card-Moran-Newell |
+| `/feza-hci:color-audit` | Renk paleti ve kontrast denetimi (uyum şemaları, 60-30-10, WCAG oranları). `--fix` ile düzeltir. | WCAG 2.1 (1.4.3 / 1.4.11) |
 | `/feza-hci:design-thinking` | 5 aşamalı Design Thinking yol haritası (Empathize → Test). | Stanford d.school, IDEO |
 | `/feza-hci:prototype-plan` | Prototip stratejisi: Sketch → Wireframe → Mockup → Prototype, low-fi vs hi-fi seçimi. | Dix et al., Rettig 1994 |
 | `/feza-hci:persona` | Kullanıcı persona(ları): hedefler, acı noktaları, davranışlar, teknoloji düzeyi, senaryo. | Cooper "The Inmates Are Running the Asylum" |
-| `/feza-hci:hci-execute` | HCI ilkelerine uygun arayüzü baştan sona tasarlar ve çalışan dosyalar olarak kodlar (görev modeli, wireframe, token'lı tasarım sistemi, erişilebilir ekranlar, gizli doğrulama) + `DESIGN_RATIONALE_<proje>.md`. | ISO 9241-210/110, Nielsen 1994, WCAG 2.1, Dix et al. |
+| `/feza-hci:hci-execute` | HCI ilkelerine uygun arayüzü baştan sona tasarlar ve çalışan dosyalar olarak kodlar (görev modeli, wireframe, token'lı tasarım sistemi, erişilebilir ekranlar, gizli doğrulama, render doğrulaması (verify-ui)) + `DESIGN_RATIONALE_<proje>.md`. | ISO 9241-210/110, Nielsen 1994, WCAG 2.1, Dix et al. |
 
 ### feza-sqa — Yazılım Kalite Güvencesi
 | Komut | Ne yapar | Dayanak |
