@@ -486,6 +486,8 @@ def check_mirror(r: Report, skills: dict[str, tuple[str, Path]]) -> None:
     skills_root = ROOT / "skills"
     if skills_root.is_dir():
         for path in sorted(p for p in skills_root.rglob("*") if p.is_file()):
+            if sync.is_ignored(path):
+                continue
             if path not in mirror:
                 r.error("mirror", f"{rel(path)} has no source under plugins/ (run python scripts/sync.py)")
 

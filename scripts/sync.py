@@ -86,6 +86,21 @@ Edit skills under `plugins/`, then run `python scripts/sync.py`.
 """
 
 
+# Files that are never treated as skill sources or mirror content: byte-code caches
+# and editor/OS droppings. These must be skipped everywhere a skill tree is walked,
+# otherwise a stray __pycache__/*.pyc (e.g. produced by `python -m py_compile` in CI)
+# would be reported as a missing or stale generated file.
+IGNORED_PARTS = {"__pycache__", ".DS_Store"}
+IGNORED_SUFFIXES = {".pyc", ".pyo"}
+
+
+def is_ignored(path: Path) -> bool:
+    """True when a path is a byte-code cache or OS/editor dropping to be skipped."""
+    if path.suffix.lower() in IGNORED_SUFFIXES:
+        return True
+    return any(part in IGNORED_PARTS for part in path.parts)
+
+
 def header(source: str) -> str:
     return f"<!-- generated from {source} — do not edit -->\n"
 
@@ -172,7 +187,7 @@ def stale_generated_files(skills: dict[str, Path], expected: dict[Path, str]) ->
         # scripts are never removed by accident and source scripts are kept.
         sources = {fname: src for src, fname, _ in CROSS_SKILL_SCRIPTS}
         for f in sorted((skill_dir / "scripts").glob("*")):
-            if f in expected or f.name not in sources:
+            if is_ignored(f) or f in expected or f.name not in sources:
                 continue
             if skill_dir == skills.get(sources[f.name]):
                 continue
@@ -201,7 +216,7 @@ def root_skill_tree(skills: dict[str, Path], plugin_files: dict[Path, str], stal
     """Expected content of the flat root skills/ mirror (after plugin files are synced)."""
     out: dict[Path, bytes] = {ROOT_SKILLS_DIR / "README.md": ROOT_SKILLS_README.encode("utf-8")}
     for name, skill_dir in skills.items():
-        files = {p for p in skill_dir.rglob("*") if p.is_file()} | {
+        files = {p for p in skill_dir.rglob("*") if p.is_file() and not is_ignored(p)} | {
             p for p in plugin_files if p.is_relative_to(skill_dir)
         }
         for f in sorted(files - set(stale)):
@@ -240,13 +255,13 @@ def main() -> int:
 
     removals = list(stale)
     if ROOT_SKILLS_DIR.is_dir():
-        removals += [p for p in ROOT_SKILLS_DIR.rglob("*") if p.is_file() and p not in mirror]
+        removals += [p for p in ROOT_SKILLS_DIR.rglob("*") if p.is_file() and not is_ignored(p) and p not in mirror]
     for path in sorted(set(removals)):
         drift.append("remove " + path.relative_to(ROOT).as_posix())
         if not args.check:
             path.unlink()
     if not args.check and ROOT_SKILLS_DIR.is_dir():
-        for d in sorted((p for p in ROOT_SKILLS_DIR.rglob("*") if p.is_dir()), reverse=True):
+        for d in sorted((p for p in ROOT_SKILLS_DIR.rglob("*") if p.is_dir() and not is_ignored(p)), reverse=True):
             if not any(d.iterdir()):
                 shutil.rmtree(d)
 
