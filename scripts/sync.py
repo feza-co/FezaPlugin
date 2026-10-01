@@ -4,7 +4,9 @@
 Single sources of truth:
   * shared/*.md                       -> copied into every skill's references/
   * shared/packages/<pkg>/*.md        -> copied into every skill of package <pkg> only
+                                         (or only the skills listed in PACKAGE_SHARED_SCOPE)
   * CROSS_SKILL_REFERENCES (below)    -> reference files one skill borrows from another
+  * CROSS_SKILL_SCRIPTS (below)       -> tool scripts a skill runs from another skill
   * plugins/<pkg>/skills/<skill>/     -> mirrored flat into the root skills/ directory
   * VERSION                           -> "version" field of every versioned manifest
                                          and the version badge in README.md / README.tr.md
@@ -42,7 +44,31 @@ CROSS_SKILL_REFERENCES: list[tuple[str, str, str]] = [
     ("srs-generate", "language-guidelines.md", "req-classify"),
     ("srs-generate", "well-formed-requirements.md", "iso29148-req"),
     ("iso12207-audit", "12207-processes.md", "complaints-to-compliance"),
+    ("hci-execute", "ux-writing.md", "heuristic-eval"),
+    ("hci-execute", "ux-writing.md", "hci-review"),
 ]
+
+# Tool scripts that a skill runs from another skill. Unlike references these copies
+# carry no generated header (they are executed byte for byte), so drift is detected
+# by content comparison and stale copies by the rule below.
+# (source skill, file name, destination skill) -> <destination skill>/scripts/<file>
+CROSS_SKILL_SCRIPTS: list[tuple[str, str, str]] = [
+    ("hci-execute", "verify-ui.mjs", "heuristic-eval"),
+    ("hci-execute", "verify-ui.mjs", "color-audit"),
+    ("hci-execute", "verify-ui.mjs", "cognitive-load"),
+    ("hci-execute", "verify-ui.mjs", "hci-review"),
+    ("hci-execute", "contrast.py", "heuristic-eval"),
+    ("hci-execute", "contrast.py", "color-audit"),
+    ("hci-execute", "contrast.py", "cognitive-load"),
+    ("hci-execute", "contrast.py", "hci-review"),
+]
+
+# Shared dependency files copied only into the listed skills instead of every skill
+# of the package. Files absent from this map keep the package-wide behaviour.
+PACKAGE_SHARED_SCOPE: dict[str, set[str]] = {
+    "fix-mode.md": {"heuristic-eval", "color-audit", "cognitive-load", "hci-review"},
+    "thresholds.md": {"hci-execute", "heuristic-eval", "color-audit", "cognitive-load", "hci-review"},
+}
 
 # Manifests whose top-level "version" field follows VERSION.
 PLUGIN_MANIFEST_DIRS = (".claude-plugin", ".codex-plugin", ".cursor-plugin")
@@ -87,6 +113,14 @@ def is_generated(path: Path) -> bool:
         return False
 
 
+def _scope_skills(fname: str) -> set[str] | None:
+    """Skills a package-shared file is restricted to, or None for package-wide."""
+    scope = PACKAGE_SHARED_SCOPE.get(fname)
+    if scope is None:
+        return None
+    return scope
+
+
 def expected_plugin_files(skills: dict[str, Path]) -> dict[Path, str]:
     """Generated files that live inside plugins/."""
     out: dict[Path, str] = {}
@@ -95,12 +129,19 @@ def expected_plugin_files(skills: dict[str, Path]) -> dict[Path, str]:
         package = skill_dir.parent.parent.name
         package_files = sorted((PACKAGE_SHARED_DIR / package).glob("*.md"))
         for src in shared_files + package_files:
+            scope = _scope_skills(src.name)
+            if scope is not None and skill_dir.name not in scope:
+                continue
             rel = src.relative_to(ROOT).as_posix()
             out[skill_dir / "references" / src.name] = header(rel) + read_text(src)
     packages = {d.parent.parent.name for d in skills.values()}
     for pkg_dir in sorted(PACKAGE_SHARED_DIR.glob("*")) if PACKAGE_SHARED_DIR.is_dir() else []:
         if pkg_dir.is_dir() and pkg_dir.name not in packages:
             raise SystemExit(f"package-scoped shared directory for unknown package: {pkg_dir.relative_to(ROOT)}")
+    for fname, scope in PACKAGE_SHARED_SCOPE.items():
+        unknown = scope - set(skills)
+        if unknown:
+            raise SystemExit(f"PACKAGE_SHARED_SCOPE[{fname!r}] lists unknown skill(s): {sorted(unknown)}")
     for src_skill, fname, dst_skill in CROSS_SKILL_REFERENCES:
         if src_skill not in skills or dst_skill not in skills:
             raise SystemExit(f"cross-skill reference uses unknown skill: {src_skill} -> {dst_skill}")
@@ -109,6 +150,13 @@ def expected_plugin_files(skills: dict[str, Path]) -> dict[Path, str]:
             raise SystemExit(f"cross-skill reference source missing: {src.relative_to(ROOT)}")
         rel = src.relative_to(ROOT).as_posix()
         out[skills[dst_skill] / "references" / fname] = header(rel) + read_text(src)
+    for src_skill, fname, dst_skill in CROSS_SKILL_SCRIPTS:
+        if src_skill not in skills or dst_skill not in skills:
+            raise SystemExit(f"cross-skill script uses unknown skill: {src_skill} -> {dst_skill}")
+        src = skills[src_skill] / "scripts" / fname
+        if not src.is_file():
+            raise SystemExit(f"cross-skill script source missing: {src.relative_to(ROOT)}")
+        out[skills[dst_skill] / "scripts" / fname] = read_text(src)
     return out
 
 
@@ -119,6 +167,16 @@ def stale_generated_files(skills: dict[str, Path], expected: dict[Path, str]) ->
         for f in sorted((skill_dir / "references").glob("*.md")):
             if f not in expected and is_generated(f):
                 stale.append(f)
+        # Script copies carry no header. A script is stale only when it has the name
+        # of a cross-skill script and the skill is not its source, so hand-added
+        # scripts are never removed by accident and source scripts are kept.
+        sources = {fname: src for src, fname, _ in CROSS_SKILL_SCRIPTS}
+        for f in sorted((skill_dir / "scripts").glob("*")):
+            if f in expected or f.name not in sources:
+                continue
+            if skill_dir == skills.get(sources[f.name]):
+                continue
+            stale.append(f)
     return stale
 
 

@@ -8,7 +8,8 @@ description: >
   için yük skoru + azaltma önerileri.
   Tetikleyici: "cognitive load", "bilişsel yük", "complexity theory",
   "/feza-hci:cognitive-load".
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
+  Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Cognitive Load
@@ -19,6 +20,7 @@ CCT'nin 6 temel terimi üzerinden ekran/akış denetimi.
 - "/feza-hci:cognitive-load"
 - "cognitive load / bilişsel yük analizi"
 - "cognitive complexity"
+- Fix modu: `--fix`, `--fix=all`, "düzelt", "bulguları düzelt", "fix it", "apply fixes"
 
 ## Adım 0 — Bağlamı Topla
 1. UI dosyaları (Glob).
@@ -85,6 +87,7 @@ Tek bir "Aksiyon Listesi" çıkar:
 - [ ] Toplam skor hesaplandı mı?
 - [ ] Skeuomorphism/Flat değerlendirmesi var mı?
 - [ ] Azaltma önerileri sıralı mı?
+- [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 
@@ -106,8 +109,19 @@ Tek bir "Aksiyon Listesi" çıkar:
 4. Bilinen boşluk.
 5. Sonraki: azaltma önerilerini uygulamak için `/feza-hci:hci-execute`; ya da `/feza-hci:heuristic-eval` / `/feza-hci:hci-review`.
 
+## Adım 7 — Fix Modu (yalnızca tetikleyiciyle)
+
+Tetikleyici yoksa bu adım atlanır; yalnızca rapor verilir.
+Tetikleyici: `--fix`, `--fix=all` ya da "düzelt", "bulguları düzelt", "fix it", "apply fixes".
+Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğrulama:
+`node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
+CCT terim skoru (1-5), `references/fix-mode.md` eşleme tablosuyla Nielsen 0-4 ölçeğine çevrilir; eşik uygulanır.
+Yapısal yeniden tasarım (ekran bölme, akış değiştirme) fix modu kapsamı dışıdır: "Elle düzeltilmeli" yazılır ve `/feza-hci:hci-execute` önerilir.
+Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
+
 ## Sınırlar
 - Max 3 soru.
 - 6 terimin hepsini eksiksiz tara.
 - Skoru sözel verme — sayı.
 - Gestalt prensiplerini açıkça referansla (proximity, similarity, closure, continuity, figure-ground).
+- Fix modu dışında hiçbir dosya değiştirilmez; fix modu tetiklenirse yalnız UI dosyaları değişir.

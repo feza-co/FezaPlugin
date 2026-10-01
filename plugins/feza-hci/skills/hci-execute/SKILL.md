@@ -72,9 +72,10 @@ Gerisini akıllıca varsay; her varsayımı `Varsayım:` etiketiyle kaydet ve te
 
 Üretime geçmeden oku:
 
-- `references/design-system-rules.md` — token yapısı, kontrast formülü ve hesap betiği, renk, tipografi, boşluk, hareket kuralları.
+- `references/design-system-rules.md` — token yapısı, kontrast formülü ve `scripts/contrast.py` kullanımı, renk, tipografi, boşluk, hareket kuralları.
 - `references/implementation-checklist.md` — erişilebilirlik ve heuristik uygulama kontrol listesi, bileşen durum matrisi, doğrulama prosedürü.
-- `references/screen-patterns.md` — onboarding, form, liste/detay, dashboard, boş durum, hata kalıpları ve HCI gerekçeleri.
+- `references/screen-patterns.md` — ekran tarifleri indeksi; her ekran için ilgili `references/recipe-<ad>.md` (8 bölümlü tarif: yerleşim, zorunlu durumlar, etkileşim, erişilebilirlik, sık hatalar, mikro-metin, kabul kontrolleri).
+- `references/ux-writing.md` — buton, form, hata, boş durum, onay, toast, yükleniyor ve izin metinleri; ton rehberi (TR 'siz', EN aktif çatı); mikro-metin kontrol listesi.
 - `references/output-conventions.md`, `references/delivery-format.md`, `references/quality-gate.md`.
 
 ## Adım 2 — Kullanıcı ve Görev Modeli (ISO 9241-210)
@@ -94,7 +95,7 @@ G1 Kayıt oluştur: Liste → [Yeni] → Form (3 alan) → [Kaydet] → Geri bil
 
 ## Adım 3 — Bilgi Mimarisi ve Wireframe
 
-1. **Ekran envanteri** — tablo: ekran ID (S1..Sn), amaç, hizmet ettiği görev, giriş noktası, kullanılan kalıp (`references/screen-patterns.md`).
+1. **Ekran envanteri** — tablo: ekran ID (S1..Sn), amaç, hizmet ettiği görev, giriş noktası, kullanılan kalıp, tarif. Her ekran için `references/screen-patterns.md` indeksinden uygun `references/recipe-<ad>.md` tarifini seç ve OKU. Uygun tarif yoksa en yakın kalıbı kullan ve `Varsayım: <ekran> için <tarif> uyarlandı` diye kaydet.
 2. **Navigasyon modeli** — birincil gezinme en fazla 5-7 öğe (Miller); mobilde alt sekme çubuğu ya da başlık menüsü, masaüstünde yan ya da üst gezinme. Her ekranda kullanıcının nerede olduğu görünür (H1, H6).
 3. **İçerik hiyerarşisi** — her ekran için birincil eylem tek ve görsel olarak baskın; ikincil eylemler ayrışık.
 4. **ASCII wireframe** — her ekran için mobil (360 px) ve gerekiyorsa masaüstü (≥ 1024 px) iskeleti:
@@ -116,7 +117,7 @@ G1 Kayıt oluştur: Liste → [Yeni] → Form (3 alan) → [Kaydet] → Geri bil
 +--------------------------------+
 ```
 
-Wireframe'ler `DESIGN_RATIONALE_<proje>.md` dokümanına girer; kod yazmadan önce yapı burada sabitlenir.
+Seçilen tarifin "2. ASCII yerleşim" bölümü wireframe için başlangıç noktasıdır; sapma varsa gerekçesiyle rationale'e yazılır. Wireframe'ler `DESIGN_RATIONALE_<proje>.md` dokümanına girer; kod yazmadan önce yapı burada sabitlenir.
 
 ## Adım 4 — Tasarım Sistemi
 
@@ -125,7 +126,7 @@ Kurallar ve formül: `references/design-system-rules.md`. Token'lar kodda **tek 
 | Alan | Zorunlu içerik |
 |------|----------------|
 | **Renk** | Harmoni seçimi ve gerekçesi; 60-30-10 dağılımı (nötr zemin / yüzey-ikincil / vurgu); anlamsal roller (`--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-primary`, `--color-on-primary`, `--color-border`, `--color-focus`, `--color-danger`, `--color-success`, `--color-warning`, `--color-info`) |
-| **Kontrast** | Her metin/zemin ve UI/zemin çifti **hesaplanır** (tahmin edilmez): metin ≥ 4.5:1, büyük metin (≥ 24 px ya da ≥ 18.66 px kalın) ve UI bileşeni/odak göstergesi ≥ 3:1. Hesap `references/design-system-rules.md` içindeki betikle Bash üzerinden yapılır; araç yoksa formül elle uygulanır |
+| **Kontrast** | Her metin/zemin ve UI/zemin çifti **hesaplanır** (tahmin edilmez): metin ≥ 4.5:1, büyük metin (≥ 24 px ya da ≥ 18.66 px kalın) ve UI bileşeni/odak göstergesi ≥ 3:1. Hesap `scripts/contrast.py` ile Bash üzerinden yapılır (`python scripts/contrast.py --css styles/tokens.css --pairs <çiftler.json>`); Python yoksa formül `references/design-system-rules.md` 2.4'e göre elle uygulanır |
 | **Renk körlüğü** | Durum bilgisi asla yalnız renkle verilmez (ikon + metin önek); kırmızı/yeşil çiftleri parlaklık farkıyla da ayrışır |
 | **Tema** | Açık ve koyu tema; `prefers-color-scheme` ile otomatik, `[data-theme]` ile elle seçim; koyu temada tüm çiftler yeniden hesaplanır |
 | **Tipografi** | Sistem yazı tipi yığını (marka fontu verilmediyse); oranlı ölçek (ör. 1.25), gövde ≥ 16 px, satır yüksekliği gövdede 1.5, satır uzunluğu 45-75 karakter; `rem` birimi |
@@ -176,25 +177,37 @@ Projede zaten `index.html` ya da çakışan dosya varsa üzerine yazmadan önce 
 | 16 | Yardım: alan içi ipucu ve bağlamsal açıklama; boş durumda ilk eylemi öner | Nielsen H10 |
 | 17 | Görseller: anlamlı görselde `alt`, süs görselinde `alt=""`; logo yerine işaretli placeholder | WCAG 1.1.1 |
 
-Her ekran için `references/screen-patterns.md` içindeki ilgili kalıbı uygula; boş, yükleniyor ve hata durumlarını **gerçekten** kodla (yalnızca mutlu yol değil). Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
+Her ekran için seçilen `references/recipe-<ad>.md` tarifini uygula: "3. Zorunlu durumlar" tablosundaki her durumu (varsayılan, yükleniyor, boş, hata, başarı, devre dışı) **gerçekten** kodla, "4. Etkileşim kuralları" ve "5. Erişilebilirlik notları"nı izle, "6. Sık yapılan hatalar"dan kaçın, "8. Kabul kontrolleri"ni Adım 6'da E1-E13'e ek olarak işaretle. Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
+
+### Mikro-metin
+
+Tüm arayüz metni (buton, form etiketi, hata, boş durum, onay, toast, yükleniyor, izin) `references/ux-writing.md` §2-§4'e göre yazılır. Kullanılan terimlerin **terim sözlüğü** `DESIGN_RATIONALE_<proje>.md` dosyasına eklenir ve tüm ekranlar bu sözlüğe uyar. Brief marka tonu verdiyse metin ona uyarlanır; ton uyarlaması netlik kurallarını (§2) gevşetmez.
 
 ## Adım 6 — Gizli Doğrulama Döngüsü
 
 Kullanıcıya puan, kontrol listesi sonucu ya da tur sayısı **gösterme**. `references/quality-gate.md` mantığıyla çalışır; prosedürün ayrıntısı `references/implementation-checklist.md` → "Doğrulama Prosedürü".
 
 ```text
-Uygulama v1 → Denetle → severity ≥ 2 bulgu var mı?
-   ├─ Hayır → Teslim
-   └─ Evet → Düzelt (v2) → yeniden denetle → en fazla 2 tur
-             └─ kapanmayan bulgular → DESIGN_RATIONALE "Bilinen Boşluklar"
+Uygulama v1 → verify-ui.mjs + görsel inceleme + statik kontroller
+   → ihlal ya da severity ≥ 2 bulgu var mı?
+      ├─ Hayır → Teslim
+      └─ Evet → Düzelt → yeniden çalıştır → en fazla 2 tur
+                └─ kapanmayanlar → DESIGN_RATIONALE "Bilinen Boşluklar"
 ```
 
-1. **Nielsen 10** — her heuristik için en az bir kontrol; bulgulara Nielsen 0-4 severity ver.
-2. **Dix et al. ilkeleri** — öğrenilebilirlik (öngörülebilirlik, tutarlılık, aşinalık), esneklik (diyalog inisiyatifi, ikame edilebilirlik), sağlamlık (gözlenebilirlik, kurtarılabilirlik, yanıt verebilirlik, görev uygunluğu).
-3. **WCAG 2.1 AA kontrol listesi** — `references/implementation-checklist.md` A ve AA maddeleri.
-4. **Kontrast hesabı** — `styles/tokens.css` içindeki her çift betikle yeniden hesaplanır; açık ve koyu tema ayrı.
-5. **Bilişsel yük** — `/feza-hci:cognitive-load` mantığı: ekran başına etkileşimli öğe sayısı, grup sayısı, karar noktası, geri bildirim gecikmesi.
-6. **Render kontrolü (opsiyonel)** — Bash ile Playwright ya da başsız tarayıcı mevcutsa 360 px ve 1280 px'de ekran görüntüsü al, yalnız klavyeyle birincil görevi tamamla, konsol hatasını kontrol et; araç yoksa statik kontrolle yetin ve bunu rationale'de belirt. Doğrulama için yeni paket indirip kurma.
+1. **Render doğrulaması (önce):** `node scripts/verify-ui.mjs <giriş sayfası ya da yerel sunucu URL'si>` — script bu skill klasöründedir; kullanıcı projesinin kökünde çalıştırılırken skill klasöründeki dosyanın mutlak yolu verilir. 320/390/768/1280 px'de ekran görüntüsü, axe-core (WCAG 2.1 A/AA), yatay kaydırma, dokunma hedefi, klavye/odak testi, reduced-motion + koyu tema ikinci geçişi ve %200 metin büyütme yapar. Çıktı `.feza/ui-check/<zaman>/` altında (ekran görüntüleri + `report.json`); bu klasör teslimin parçası değildir, kullanıcıya `.feza/` dizinini `.gitignore`'a eklemesi önerilir. Çıkış kodu 0 = eşikler sağlandı, 1 = ihlal, 2 = araç yok. Projeye bağımlılık eklenmez; script gerekirse paketleri geçici kullanıcı önbelleğine kurar.
+2. **Görsel inceleme:** ekran görüntülerini Read aracıyla aç; hizalama, taşma, görsel hiyerarşi, boşluk tutarlılığı ve koyu temada okunurluk sorunlarını bulgu olarak ekle.
+3. **Sayısal eşikler:** `references/thresholds.md` E1-E13; sonuçlar `report.json` → `results` alanında. Statik kriterler (E9, E10, E11) elle kontrol edilir. E1-E13'ten biri FAIL ise severity'den bağımsız düzeltilir.
+4. **Nielsen 10** — her heuristik için en az bir kontrol; bulgulara Nielsen 0-4 severity ver.
+5. **Dix et al. ilkeleri** — öğrenilebilirlik (öngörülebilirlik, tutarlılık, aşinalık), esneklik (diyalog inisiyatifi, ikame edilebilirlik), sağlamlık (gözlenebilirlik, kurtarılabilirlik, yanıt verebilirlik, görev uygunluğu).
+6. **WCAG 2.1 AA kontrol listesi** — `references/implementation-checklist.md` A ve AA maddeleri.
+7. **Kontrast hesabı** — `scripts/contrast.py` ile `styles/tokens.css` içindeki her çift yeniden hesaplanır; açık ve koyu tema ayrı (`--theme light` / `--theme dark`); Python yoksa formül `references/design-system-rules.md` 2.4'e göre elle uygulanır.
+8. **Bilişsel yük** — `/feza-hci:cognitive-load` mantığı: ekran başına etkileşimli öğe sayısı, grup sayısı, karar noktası, geri bildirim gecikmesi.
+9. **Mikro-metin kontrolü** — `references/ux-writing.md` §6 listesi: belirsiz buton etiketi, suçlayıcı hata dili, terim tutarsızlığı, placeholder-etiket, eksik düzeltme yönergesi, yerel ayar biçimi. Her ihlal severity ≥ 2 sayılır.
+
+**Düzeltme turu:** `report.json` ihlalleri ve görsel bulgular düzeltilir; script yeniden çalıştırılır. En fazla 2 tur.
+
+**Araç yoksa (çıkış 2):** statik kontrole düşülür; DESIGN_RATIONALE "Bilinen Boşluklar" bölümüne "Otomatik render doğrulaması yapılamadı (Playwright/Node bulunamadı); statik kontrol yapıldı." yazılır.
 
 Severity ≥ 2 her bulgu düzeltilir. 0-1 bulgular zaman kalırsa düzeltilir, kalmazsa "Bilinen Boşluklar"a yazılır.
 
@@ -224,7 +237,7 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 | 3 | Bilgi mimarisi | Ekran envanteri, navigasyon modeli, ASCII wireframe'ler |
 | 4 | Tasarım sistemi | Token tablosu (ad, açık değer, koyu değer, rol), kontrast tablosu (çift, oran, eşik, sonuç), tipografi ölçeği, boşluk ızgarası, hareket kuralları |
 | 5 | Tasarım kararları | Tablo: karar, gerekçe, ilke (Nielsen/Dix/ISO 9241-110/WCAG), kod konumu (`dosya:satır` ya da seçici) |
-| 6 | Erişilebilirlik beyanı | Hedef: WCAG 2.1 AA; karşılanan kriterler; doğrulama yöntemi (statik / tarayıcıda render); bilinen sınırlamalar. Uygunluk "iddia" değil "hedef ve öz-denetim sonucu" olarak yazılır |
+| 6 | Erişilebilirlik beyanı | Hedef: WCAG 2.1 AA; karşılanan kriterler; doğrulama yöntemi (verify-ui render + axe / statik); bilinen sınırlamalar. Uygunluk "iddia" değil "hedef ve öz-denetim sonucu" olarak yazılır |
 | 7 | Bulgu izlenebilirliği | Yalnız bulgu uygulama modunda: bulgu ID → yapılan değişiklik → dosya |
 | 8 | Varsayımlar | Her biri `Varsayım:` etiketiyle |
 | 9 | Kaynakça | Nielsen 1994; ISO 9241-210:2019; ISO 9241-110:2020; WCAG 2.1 (W3C, 2018); Dix, Finlay, Abowd, Beale 2004; Miller 1956; Hick 1952 — yalnız kullanılanlar |
@@ -249,6 +262,10 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] 320 px'de yatay kaydırma yok; dokunma hedefleri ≥ 44 px?
 - [ ] `prefers-reduced-motion` ve `prefers-color-scheme` destekleniyor?
 - [ ] Severity ≥ 2 bulgu kalmadı ya da Bilinen Boşluklar'a gerekçeli yazıldı?
+- [ ] `scripts/verify-ui.mjs` çalıştı ve çıkış 0 verdi (ya da çıkış 2 Bilinen Boşluklar'a yazıldı)?
+- [ ] Ekran görüntüleri görsel olarak incelendi?
+- [ ] Her ekran bir tarife bağlandı; tarif yoksa varsayım kaydedildi?
+- [ ] Mikro-metinler `references/ux-writing.md` §6 kontrol listesinden geçti?
 - [ ] Logo ve marka varlıkları placeholder olarak işaretli?
 
 ## Sınırlar

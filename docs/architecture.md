@@ -71,7 +71,7 @@ authoritative.
 
 ## The sync flow
 
-`python scripts/sync.py` performs four steps:
+`python scripts/sync.py` performs five steps:
 
 1. **Shared references.** Every file in `shared/` is copied into every skill's `references/`
    folder. Each copy starts with `<!-- generated from shared/<file> — do not edit -->`.
@@ -81,9 +81,15 @@ authoritative.
    example `srs-review` reads `well-formed-requirements.md` from `srs-generate`. These pairs are
    listed explicitly in `CROSS_SKILL_REFERENCES` in `scripts/sync.py`, and the file is copied into
    the consumer's `references/` folder with the same generated header.
-3. **Root mirror.** Every `plugins/<package>/skills/<skill>/` folder is copied to `skills/<skill>/`,
+3. **Cross-skill scripts.** Helper scripts under a skill's `scripts/` folder are copied to other
+   skills with the `CROSS_SKILL_SCRIPTS` list, so a shared script has a single source and is never
+   copied by hand. Package-scoped shared files are limited to their recipients by the
+   `PACKAGE_SHARED_SCOPE` map, which distributes each file to exactly the named skills (for
+   example `shared/packages/feza-hci/fix-mode.md` reaches the four evaluation skills as
+   `references/fix-mode.md`).
+4. **Root mirror.** Every `plugins/<package>/skills/<skill>/` folder is copied to `skills/<skill>/`,
    and `skills/README.md` marks the directory as generated. Stale files are removed.
-4. **Versions.** The `version` field of every plugin manifest and of `gemini-extension.json`, and
+5. **Versions.** The `version` field of every plugin manifest and of `gemini-extension.json`, and
    the version badge in both READMEs, are set from `VERSION`.
 
 `python scripts/sync.py --check` performs the same computation without writing and exits with

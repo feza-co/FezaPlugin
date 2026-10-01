@@ -9,7 +9,8 @@ description: >
   okur. Kritik gri noktaları (max 3) sorar. Bulguları öncelik sırasına dizer
   ve önerileri somut adımlara çevirir. Tetikleyici: "HCI review", "HCI değerlendir",
   "frontend revize", "UI değerlendirmesi", "/feza-hci:hci-review".
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
+  Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # HCI Review
@@ -20,6 +21,7 @@ UI/akış için holistik HCI değerlendirmesi. Heuristic-eval'den farkı: sadece
 - "/feza-hci:hci-review"
 - "HCI değerlendirmesi / review"
 - "frontend / UI eleştir / revize öner"
+- Fix modu: `--fix`, `--fix=all`, "düzelt", "bulguları düzelt", "fix it", "apply fixes"
 
 ## Adım 0 — Bağlamı Topla
 
@@ -49,6 +51,7 @@ EN FAZLA 3 SORU:
 ## Adım 2 — Bilgi Tabanı
 
 - `references/hci-principles.md` — ISO 9241-210 + Dix et al. prensipleri + sezgisel kontrol listesi.
+- `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -79,6 +82,7 @@ EN FAZLA 3 SORU:
 - Her bulguda **somut aksiyon önerisi** (genel "iyileştir" demek yok).
 - En az **3 olumlu nokta** (denge için).
 - "kullanıcı dostu / modern / temiz" gibi sözcükler YOK; ölçülebilir tespit.
+- Mikro-metin bulgularında `references/ux-writing.md` ilkesine (§2) atıf verilir ve somut önerilen metin yazılır (TR, gerekiyorsa EN).
 
 ## Adım 4 — Self-Check
 
@@ -87,6 +91,7 @@ EN FAZLA 3 SORU:
 - [ ] Olumlu noktalar var mı?
 - [ ] Bulgular kullanıcı sınıfına özelleştirildi mi (junior bir kullanıcıya farklı, expert'e farklı)?
 - [ ] Yasak terimler yok mu?
+- [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 
@@ -109,7 +114,18 @@ EN FAZLA 3 SORU:
 4. Top-3 kritik bulgu başlığı.
 5. Sonraki: "Detaylı kural denetimi için `/feza-hci:heuristic-eval`; bulguları arayüze uygulamak için `/feza-hci:hci-execute`."
 
+## Adım 7 — Fix Modu (yalnızca tetikleyiciyle)
+
+Tetikleyici yoksa bu adım atlanır; yalnızca rapor verilir.
+Tetikleyici: `--fix`, `--fix=all` ya da "düzelt", "bulguları düzelt", "fix it", "apply fixes".
+Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğrulama:
+`node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
+Severity ölçeği Nielsen'e şöyle eşlenir: Critical/High/Medium/Low → 4/3/2/1; varsayılan eşik ≥ 2, `--fix=all` ile tümü.
+Bulgu konumu dosya + seçici/satır değilse bulgu düzeltilmez, "Elle düzeltilmeli" olarak işaretlenir.
+Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
+
 ## Sınırlar
 - Max 4 soru.
 - Tasarım çizme — markdown bulgu tablosu yeterli.
 - "Beğendim/beğenmedim" yargısı yok — kanıt + standart referansı.
+- Fix modu dışında hiçbir dosya değiştirilmez; fix modu tetiklenirse yalnız UI dosyaları değişir.

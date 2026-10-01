@@ -7,7 +7,8 @@ description: >
   UI dosyalarını tarar, yoksa brief'ten ekranı kurgular.
   Tetikleyici: "heuristic evaluation", "Nielsen 10", "heuristik denetim",
   "/feza-hci:heuristic-eval".
-allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
+  Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
+allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
 # Heuristic Evaluation
@@ -18,6 +19,7 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 - "/feza-hci:heuristic-eval"
 - "Nielsen 10 / heuristic evaluation"
 - "heuristik denetim / inceleme"
+- Fix modu: `--fix`, `--fix=all`, "düzelt", "bulguları düzelt", "fix it", "apply fixes"
 
 ## Adım 0 — Bağlamı Topla
 1. UI dosyaları (Glob): `*.html`, `*.tsx`, `*.jsx`, `*.vue`, `*.svelte`, `templates/**`, `pages/**`, `components/**`
@@ -35,6 +37,7 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 
 ## Adım 2 — Bilgi Tabanı
 - `references/heuristics.md` — Nielsen 10 + Dix et al. mapping + severity rubric.
+- `references/ux-writing.md` — H2 (gerçek dünya ile eşleşme) ve H9 (hata kurtarma) bulgularında mikro-metin ölçütü olarak kullanılır.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -57,6 +60,8 @@ allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 | H2 | H2: Match real world | "Cancel" yerine "Abort" kullanılmış | `components/Modal.tsx` | 2 | "Vazgeç" / "Cancel" yap | Nielsen H2 |
 | ... |
 
+H2 ve H9 mikro-metin bulguları yazılırken `references/ux-writing.md` §5 tablosundaki kötü→iyi örneğe benzer somut **"önerilen metin"** verilir (TR, gerekiyorsa EN karşılığıyla); "daha net yaz" gibi soyut öneri kabul edilmez. Örnek: butondaki "Tamam" → "Değişiklikleri kaydet" (H2); "Yanlış şifre girdiniz." → "Şifre eşleşmedi. Yeniden deneyin ya da şifrenizi sıfırlayın." (H9).
+
 ### Heuristic'lerin Tümü Taranır
 
 10 Nielsen heuristic'in **HER BİRİ** için en az bir gözlem yap (uygulanabilir değilse "Kapsamlı tarama yapıldı, bu ekranda ihlal yok" yaz). Toplam bulgu ≥ **15**.
@@ -78,6 +83,7 @@ Cosmetic (0-1): W
 - [ ] Düzeltme önerisi spesifik mi (genel "iyileştir" değil)?
 - [ ] Toplam ≥ 15 bulgu mu?
 - [ ] WCAG ihlali varsa AA seviyesi referansıyla işaretli mi?
+- [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 
@@ -99,8 +105,19 @@ Cosmetic (0-1): W
 4. Kullanılan input.
 5. Sonraki: bulguları uygulamak için `/feza-hci:hci-execute`; kullanıcılarla doğrulamak için `/feza-hci:usability-eval-plan` veya `/feza-hci:color-audit`.
 
+## Adım 7 — Fix Modu (yalnızca tetikleyiciyle)
+
+Tetikleyici yoksa bu adım atlanır; yalnızca rapor verilir.
+Tetikleyici: `--fix`, `--fix=all` ya da "düzelt", "bulguları düzelt", "fix it", "apply fixes".
+Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğrulama:
+`node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
+Severity zaten Nielsen 0-4'tür; eşik doğrudan uygulanır (varsayılan ≥ 2, `--fix=all` ile tümü).
+Bulgu tablosundaki konum dosya + seçici/satır değilse bulgu düzeltilmez, "Elle düzeltilmeli" olarak işaretlenir.
+Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
+
 ## Sınırlar
 - Max 3 soru.
 - Hiçbir heuristic'i atlama.
+- Fix modu dışında hiçbir dosya değiştirilmez; fix modu tetiklenirse yalnız UI dosyaları değişir.
 - Severity vermeden bulgu yazma.
 - Sadece Nielsen'la sınırlı kalma — Dix et al. prensiplerini de eşleştir.

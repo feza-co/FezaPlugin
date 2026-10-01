@@ -91,6 +91,8 @@ or "Bütünleşik paket raporu" for integrated package reports). Conversational 
 - Refer to bundled files only as `references/<file>.md`, relative to the skill folder.
 - Never use `../`, `shared/` or another skill's folder in a path. Different platforms install
   skills in different places, and only the skill folder is guaranteed to be present.
+- Scripts live one level below the skill root and are referred to as `scripts/<name>`, for example
+  `scripts/verify-ui.mjs`.
 - If your skill needs a reference file that another skill owns, add an entry to
   `CROSS_SKILL_REFERENCES` in `scripts/sync.py`:
 
@@ -99,6 +101,33 @@ or "Bütünleşik paket raporu" for integrated package reports). Conversational 
   ```
 
   and refer to it as `references/well-formed-requirements.md`.
+
+## Scripts inside a skill
+
+A skill may ship small helper scripts under its own `scripts/` folder. The rules are:
+
+- The folder sits exactly one level below the skill root (`plugins/<package>/skills/<skill>/scripts/`)
+  and a script is referred to as `scripts/x.mjs` or `scripts/x.py`. Scripts must not reach outside
+  the skill folder.
+- A script uses only the standard library of its runtime, or a dependency installed at run time
+  into a temporary user cache (for example Playwright and axe-core for `verify-ui.mjs`). The
+  repository never contains `node_modules` or a vendored dependency tree.
+- A script exits with `0` when every check passes, `1` when it finds a problem, and `2` when the
+  check cannot run (a missing tool or an invalid input), so a caller can tell a finding from an
+  unavailable check.
+- Scripts shared between skills are copied by `scripts/sync.py` via the `CROSS_SKILL_SCRIPTS` list;
+  never copy a script between skill folders by hand.
+- `scripts/validate.py` checks every `scripts/<name>` reference made by a skill.
+
+## Shared fix mode
+
+The fix-mode instructions are written once in `shared/packages/feza-hci/fix-mode.md`. The
+`PACKAGE_SHARED_SCOPE` table in `scripts/sync.py` distributes that file to the four evaluation
+skills (`hci-review`, `heuristic-eval`, `cognitive-load`, `color-audit`) as
+`references/fix-mode.md`, and only to them. To give a new evaluation skill fix mode, add it to the
+scope, then add a "Fix Modu" step to its `SKILL.md` and the trigger phrases to its `description`.
+Fix mode applies findings to UI files only, defaults to severity ≥ 2, accepts `--fix=all`, verifies
+the result with `verify-ui` and adds an applied-fixes table to the report.
 
 ## Cross-links between skills
 

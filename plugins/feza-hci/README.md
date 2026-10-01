@@ -45,7 +45,16 @@ the document, checks it internally against the shared quality criteria and write
 version in the shared delivery format. `hci-execute` is the exception that builds: it writes
 working interface files in the project's existing UI stack (or dependency-free HTML, CSS and
 JavaScript), verifies them internally against Nielsen's heuristics, WCAG 2.1 AA and cognitive
-load checks, and delivers a short design rationale document alongside them. The shared rules are bundled in every skill's
+load checks, and delivers a short design rationale document alongside them. The evaluation skills
+(`hci-review`, `heuristic-eval`, `cognitive-load`, `color-audit`) support a fix mode: with `--fix`
+(or "fix") they apply their findings to the UI files, verify the result with `verify-ui` and add an
+applied-fixes table to the report. When Node.js is available, `hci-execute` also loads the
+generated interface in a real browser with Playwright at 320/390/768/1280 px and runs axe-core
+(WCAG 2.1/2.2 A/AA), horizontal-scroll, touch-target, keyboard/focus, reduced-motion with dark
+theme and 200% text-zoom checks, writing screenshots and `report.json` to `.feza/ui-check/`.
+Node.js 18+ is optional and only needed for that render check and fix mode; Playwright and
+axe-core are installed into a user cache on first run, and without Node.js the skills fall back to
+a static check. The shared rules are bundled in every skill's
 `references/` folder (`output-conventions.md`, `delivery-format.md`, `input-discovery.md`,
 `quality-gate.md`); edit them in the repository's [`shared/`](https://github.com/feza-co/FezaPlugin/tree/main/shared) directory, not here.
 

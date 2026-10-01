@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2026-10-01
+
+### Added
+
+- `hci-execute` renders the generated interface with `scripts/verify-ui.mjs` (Playwright and axe-core) at
+  320, 390, 768 and 1280 px and checks accessibility violations, reflow, touch targets, keyboard focus,
+  reduced motion with the dark theme and 200% text zoom; it writes screenshots and `report.json` to
+  `.feza/ui-check/`. Node.js is optional; without it the skill falls back to a static check.
+- `scripts/contrast.py` computes WCAG contrast ratios, including token pairs read from a CSS file for the
+  light and dark themes.
+- Measurable acceptance thresholds E1-E13 for HCI deliverables, used as blockers in the quality gate.
+- Eleven screen recipes for `hci-execute` (auth, checkout, settings, search and filter, data dashboard,
+  mobile navigation, onboarding, form, list/detail, empty state, error) in one eight-part template.
+- UX writing guidelines with Turkish and English examples for buttons, errors, empty states, dialogs,
+  toasts, loading text and permission requests.
+- Fix mode for `heuristic-eval`, `color-audit`, `cognitive-load` and `hci-review`: with `--fix` they apply
+  findings to UI files, verify them with `verify-ui` and add an applied-fixes table to the report.
+
 ### Changed
 
 - Every `feza-pm` skill now requires an existing SRS (`SRS_*.md` in the project root or `docs/`,
@@ -16,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   manifests or git history. Outputs cite SRS requirement IDs and list the SRS as the first
   reference. The rule lives in `shared/packages/feza-pm/srs-gate.md`.
 - `scripts/sync.py` copies files from `shared/packages/<package>/` into that package's skills only.
+- `scripts/sync.py` mirrors skill scripts between skills (`CROSS_SKILL_SCRIPTS`) and can limit
+  package-shared files to named skills (`PACKAGE_SHARED_SCOPE`); `scripts/validate.py` checks script
+  references, scans `.mjs`/`.js` files for banned terms and checks threshold consistency.
+- CI checks the syntax of skill scripts with `node --check` and `python -m py_compile`.
 
 ## [2.0.0] - 2026-10-01
 
@@ -42,5 +64,6 @@ Initial public release of FezaPlugin.
 - `scripts/sync.py` to distribute shared references, mirror skills and keep versions aligned,
   and `scripts/validate.py` for static checks, both run in CI.
 
-[Unreleased]: https://github.com/feza-co/FezaPlugin/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/feza-co/FezaPlugin/compare/v2.1.0...HEAD
+[2.1.0]: https://github.com/feza-co/FezaPlugin/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/feza-co/FezaPlugin/releases/tag/v2.0.0
