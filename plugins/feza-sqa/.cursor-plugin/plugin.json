@@ -1,0 +1,24 @@
+{
+  "name": "feza-sqa",
+  "version": "2.0.0",
+  "description": "Software quality assurance skills: IEEE 730 SQA plan, test plan, metrics plan, IEEE 1028 inspection, traceability matrix, change control and defect reporting.",
+  "author": {
+    "name": "Feza"
+  },
+  "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-sqa",
+  "repository": "https://github.com/feza-co/FezaPlugin",
+  "license": "MIT",
+  "keywords": [
+    "sqa",
+    "quality-assurance",
+    "test-plan",
+    "ieee-730",
+    "ieee-1028",
+    "traceability",
+    "defect-tracking",
+    "software-engineering",
+    "documentation",
+    "agent-skills"
+  ],
+  "skills": "./skills/"
+}
