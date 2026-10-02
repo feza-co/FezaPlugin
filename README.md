@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/feza-co/FezaPlugin/actions/workflows/ci.yml/badge.svg)](https://github.com/feza-co/FezaPlugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-informational.svg)](CHANGELOG.md)
 [![Platforms](https://img.shields.io/badge/platforms-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20Gemini%20CLI-555.svg)](docs/installation.md)
 
 [Türkçe](README.tr.md)
@@ -103,6 +103,79 @@ name (for example `$srs-generate` in Codex) or pick it automatically from the re
 | `/feza-hci:hci-execute` | Designs and builds a working user interface instead of a report: user and task model (ISO 9241-210), information architecture and ASCII wireframes, a token-based design system (WCAG 2.1 AA contrast, light and dark themes, 4/8 pt grid), then accessible, responsive screens in the detected stack (React, Next.js, Vue, Svelte, Tailwind, plain HTML) or in dependency-free HTML, CSS and JS. Before delivery it checks its own output against Nielsen's heuristics, Dix et al., WCAG 2.1 AA and cognitive load and fixes what it finds; it can also apply findings from earlier HCI audits. When Node.js is available it also loads the generated interface in a real browser with Playwright at 320/390/768/1280 px, runs axe-core (WCAG 2.1/2.2 A/AA), horizontal-scroll, touch-target, keyboard/focus, reduced-motion with dark theme and 200% text-zoom checks, and writes screenshots plus `report.json` to `.feza/ui-check/`. | UI files plus `DESIGN_RATIONALE_<project>.md` |
 
 > **Node.js 18+ is optional.** It is only needed for the automated render check of `hci-execute` and fix mode (Playwright and axe-core are installed into a user cache on first run). Without it the skills fall back to a static check.
+
+#### Measuring and verifying HCI output (v2.2.0)
+
+The HCI evaluation skills share one numeric acceptance set, **E1-E29**. It lives in
+`shared/packages/feza-hci/thresholds.md` and reaches every skill as `references/thresholds.md`;
+`scripts/verify-ui.mjs` repeats the same numbers in its `THRESHOLDS` block, and `scripts/validate.py`
+fails the build if the two ever diverge. Every result is written to `report.json` as
+`results.E<code>` with `{ ok, value, threshold, method }`, where `method` is `otomatik`, `karma` or
+`statik`; `ok: null` means a criterion could not be measured automatically and must be checked by
+hand (it does not change the exit code).
+
+The new **E14-E29** criteria added in this release:
+
+| Code | Criterion | Measurement |
+|------|-----------|-------------|
+| E14 | Focus not obscured (minimum) | automatic |
+| E15 | Target spacing exception (24 px) | automatic |
+| E16 | Text spacing (line 1.5, paragraph 2x, letter 0.12em, word 0.16em) | automatic |
+| E17 | Accessible authentication (paste, autocomplete, show button) | mixed |
+| E18 | Dragging alternatives | mixed |
+| E19 | Redundant entry | static |
+| E20 | Consistent help | static |
+| E21 | `forced-colors: active` boundaries and focus | automatic |
+| E22 | `prefers-contrast: more` (text >= 7:1, border >= 4.5:1) | automatic |
+| E23 | Transparent surfaces and the opaque fallback | mixed |
+| E24 | RTL overflow and physical direction properties | automatic |
+| E25 | Text expansion (30% longer, accented) | automatic |
+| E26 | Turkish case handling (`uppercase` / `toUpperCase()`) | static |
+| E27 | Locale formatting (`Intl.*` instead of manual formatting) | static |
+| E28 | Heading and landmark structure (`ariaSnapshot()`) | automatic |
+| E29 | Deceptive design: equal prominence of accept/reject | mixed |
+
+> **Note (E29).** The measurement type above follows the single source
+> `shared/packages/feza-hci/thresholds.md`. In this version `verify-ui.mjs` does **not** measure E29
+> automatically: it is reported as `ok: null`. Equal prominence of accept/reject and pre-checked
+> consent boxes are reviewed by hand with the `deceptive-patterns.md` checklist.
+
+`scripts/verify-ui.mjs` validates an E code with these flags (see `--help`):
+
+- `--profile wcag22aa|en301549` selects the axe rule tags; if the installed axe version has no
+  `EN-301-549` tag the profile falls back to `wcag22aa` and says so in `report.json.profile`.
+- `--static <directory>` scans source without a browser (E23, E24 physical direction, E26, E27).
+- `--engines axe,ibm` runs IBM Equal Access as a second, advisory-only engine (E1 stays with axe).
+- `--visual <baseline-directory>` and `--visual-max-diff N` compare screenshots against a baseline.
+- `--aria-baseline <file>` stores or diffs the E28 accessibility-tree snapshot.
+- `--fix` mode (in the four evaluation skills) applies findings to the UI files, verifies them and
+  **rejects any change that does not strictly reduce the violation count** or that introduces a new
+  violation type; the report gains an applied-fixes table with `Before | After | Decision`.
+
+Related tools and references:
+
+- `contrast.py --tokens <file.tokens.json> [--tokens-dark <file>]` reads DTCG design tokens
+  (supported subset: color, dimension, duration, cubicBezier, shadow, typography), resolves aliases
+  and gives the same ratios as the equivalent `--css` file; `--apca` adds an advisory APCA Lc column.
+- `scripts/measure-vitals.mjs <URL | file.html>` is an optional lab INP (Interaction to Next Paint)
+  measurement: <= 200 ms is good, > 500 ms is critical. It is a lab estimate, not field INP.
+- The evaluation skills ship an **evidence rubric** (`references/evidence-rubric.md`): every finding
+  carries an evidence type (screenshot, DOM selector, accessibility tree, verify-ui output); severity
+  3-4 requires a DOM selector or verify-ui evidence, and a purely visual guess is capped at severity 2.
+  Findings at severity >= 3 are re-scored independently, and a report cannot be called deliverable
+  until the manual checklist is ticked. "0 violations = accessible" is never claimed: automated tools
+  cover only part of WCAG.
+- A **deceptive design dictionary** (`references/deceptive-patterns.md`) defines the patterns
+  (confirmshaming, obstruction, preselection, nagging, hidden costs, hard to cancel, fake urgency,
+  trick wording) with a definition, an example, a fix and the related E code.
+- `usability-eval-plan` adds SEQ, UMUX-Lite, the SUS percentile/adjective table, a HEART
+  goal-signal-metric table and conditional NASA-TLX; `persona` adds a mandatory data-basis label and
+  a proto-persona mode with a job-to-be-done statement; `cognitive-load` adds Hick-Hyman, Fitts and
+  per-screen competing-item and colour counts.
+
+> **Limits.** The automated tools measure only part of WCAG, and a clean run is not proof of
+> accessibility. Static criteria (E9-E11, E19, E20, E26, E27) are reported with `ok: null` and must
+> be read by hand.
 
 ### feza-sqa
 

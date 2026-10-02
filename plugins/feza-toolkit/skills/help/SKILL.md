@@ -90,15 +90,17 @@ FezaPlugin 6 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `f
 ### feza-hci — İnsan-Bilgisayar Etkileşimi
 | Komut | Ne yapar | Dayanak |
 |-------|----------|---------|
-| `/feza-hci:hci-review` | Ekran/akış/proje için bütünsel HCI değerlendirmesi. `--fix` ile düzeltir. | ISO 9241-210, Dix et al. "Human-Computer Interaction" |
-| `/feza-hci:heuristic-eval` | Nielsen 10 + Dix prensipleri + WCAG 2.1 AA ile severity (0-4) puanlı bulgu tablosu. `--fix` ile düzeltir. | Nielsen 1994, WCAG 2.1 |
-| `/feza-hci:usability-eval-plan` | Kullanılabilirlik değerlendirme planı: yöntemler, katılımcı formu, görevler, pilot, metrikler. | Nielsen 1993, ISO 9241-11 |
-| `/feza-hci:cognitive-load` | Ekran/akışın bilişsel yükünü değerlendirir (Gestalt, feedback/feedforward). `--fix` ile düzeltir. | Sweller, Miller 1956, Card-Moran-Newell |
-| `/feza-hci:color-audit` | Renk paleti ve kontrast denetimi (uyum şemaları, 60-30-10, WCAG oranları). `--fix` ile düzeltir. | WCAG 2.1 (1.4.3 / 1.4.11) |
+| `/feza-hci:hci-review` | Ekran/akış/proje için bütünsel HCI değerlendirmesi. `--fix` ile düzeltir; `--acr` ile VPAT 2.5 INT/EU yapısına uyumlu ACR (WCAG 2.2 A/AA) üretir. | ISO 9241-210, Dix et al. "Human-Computer Interaction" |
+| `/feza-hci:heuristic-eval` | Nielsen 10 + Dix prensipleri + WCAG 2.1 AA ile kanıt türlü ve severity (0-4) puanlı bulgu tablosu; aldatıcı tasarım sözlüğünü de uygular. `--fix` ile düzeltir. | Nielsen 1994, WCAG 2.1 |
+| `/feza-hci:usability-eval-plan` | Kullanılabilirlik değerlendirme planı: yöntemler, katılımcı formu, görevler, pilot, metrikler; SEQ + UMUX-Lite + HEART, koşullu NASA-TLX. | Nielsen 1993, ISO 9241-11 |
+| `/feza-hci:cognitive-load` | Ekran/akışın bilişsel yükünü değerlendirir (Gestalt, feedback/feedforward); Hick-Hyman ve Fitts etkileşim maliyeti. `--fix` ile düzeltir. | Sweller, Miller 1956, Card-Moran-Newell |
+| `/feza-hci:color-audit` | Renk paleti ve kontrast denetimi (uyum şemaları, 60-30-10, WCAG oranları, DTCG token desteği). `--fix` ile düzeltir. | WCAG 2.1 (1.4.3 / 1.4.11) |
 | `/feza-hci:design-thinking` | 5 aşamalı Design Thinking yol haritası (Empathize → Test). | Stanford d.school, IDEO |
 | `/feza-hci:prototype-plan` | Prototip stratejisi: Sketch → Wireframe → Mockup → Prototype, low-fi vs hi-fi seçimi. | Dix et al., Rettig 1994 |
-| `/feza-hci:persona` | Kullanıcı persona(ları): hedefler, acı noktaları, davranışlar, teknoloji düzeyi, senaryo. | Cooper "The Inmates Are Running the Asylum" |
-| `/feza-hci:hci-execute` | HCI ilkelerine uygun arayüzü baştan sona tasarlar ve çalışan dosyalar olarak kodlar (görev modeli, wireframe, token'lı tasarım sistemi, erişilebilir ekranlar, gizli doğrulama, render doğrulaması (verify-ui)) + `DESIGN_RATIONALE_<proje>.md`. | ISO 9241-210/110, Nielsen 1994, WCAG 2.1, Dix et al. |
+| `/feza-hci:persona` | Kullanıcı persona(ları): hedefler, acı noktaları, davranışlar, teknoloji düzeyi, senaryo; zorunlu veri dayanağı etiketi ve JTBD cümlesi. | Cooper "The Inmates Are Running the Asylum" |
+| `/feza-hci:hci-execute` | HCI ilkelerine uygun arayüzü baştan sona tasarlar ve çalışan dosyalar olarak kodlar; E1-E29 kabul setine göre gizli doğrulama yapar + `DESIGN_RATIONALE_<proje>.md`. | ISO 9241-210/110, Nielsen 1994, WCAG 2.1/2.2, Dix et al. |
+
+> **E1-E29 kabul seti:** E1-E13 (axe ihlali, kontrast, dokunma hedefi, yeniden akış, odak, etiket, hareket, metin büyütme) 2.1.0'da eklendi. 2.2.0'da eklenen **E14-E29**: E14 odak örtülmesi, E15 hedef aralığı, E16 metin aralığı, E17 erişilebilir kimlik doğrulama, E18 sürükleme alternatifi, E19 tekrar giriş, E20 tutarlı yardım, E21 forced-colors, E22 prefers-contrast, E23 saydam yüzey, E24 RTL, E25 metin genişlemesi, E26 Türkçe harf dönüşümü, E27 yerel biçim, E28 başlık/bölge yapısı, E29 aldatıcı tasarım (eşit belirginlik). Eşikler feza-hci skill'lerindeki eşik dosyasında; doğrulama ilgili skill'in verify-ui betiğiyle yapılır. `--profile wcag22aa|en301549`, `--static <dizin>`, `--engines axe,ibm`, `--visual <dizin>`, `--aria-baseline <dosya>` bayrakları desteklenir. contrast betiği `--tokens`/`--apca`, measure-vitals betiği lab INP ölçer. Otomatik araçlar WCAG'nin bir kısmını ölçer; 0 ihlal erişilebilirlik kanıtı değildir.
 
 ### feza-sqa — Yazılım Kalite Güvencesi
 | Komut | Ne yapar | Dayanak |
