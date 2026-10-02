@@ -135,3 +135,5 @@ Tarih biçimi: TR `1 Ekim 2026`, EN `Oct 1, 2026`.
 - [ ] Onboarding yalnız bir kez otomatik açılıyor; Yardım'dan yeniden başlatılabiliyor.
 - [ ] %200 yakınlaştırma ve 320 px genişlikte metin kırpılmıyor, yatay kaydırma yok.
 - [ ] İllüstrasyonlar süs ise `alt=""`, anlamlıysa açıklayıcı `alt` taşıyor ve logo placeholder olarak işaretli.
+- [ ] İzin/bildirim isteğinde kabul ve ret eşit belirginlikte (aynı boyut sınıfı, E2 kontrastı) ve ret metni nötr (E29, E2; `references/deceptive-patterns.md` §2.8).
+- [ ] Reddedilen izin yeniden sormadan önce kullanıcı eylemi ya da makul bekleme gerektiriyor; her ekran geçişinde tekrar sorulmuyor (E29, E10; §2.4).

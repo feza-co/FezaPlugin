@@ -128,6 +128,16 @@
     "fail": [],
     "null": []
   },
+  "E29-fail.html": {
+    "exit": 0,
+    "fail": [],
+    "note": "E29 karma; otomatik ölçüm yok, statik inceleme örneği"
+  },
+  "E29-pass.html": {
+    "exit": 0,
+    "fail": [],
+    "note": "E29 karma; otomatik ölçüm yok, statik inceleme örneği"
+  },
   "bad.html": {
     "exit": 1,
     "fail": ["E1", "E2", "E3", "E4", "E15", "E5", "E8"],

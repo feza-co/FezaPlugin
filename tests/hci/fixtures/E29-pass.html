@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E29 PASS — eşit belirginlik, ön-işaretsiz onay</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  p { color: #1B2430; max-width: 60ch; }
+  /* E29: kabul ve ret aynı boyut sınıfında ve aynı E2 kontrastında. */
+  .choice { min-width: 160px; min-height: 44px; padding: 10px 20px; border-radius: 8px; font: inherit; margin: 4px 4px 4px 0; }
+  .choice-accept { background: #1D5FD1; color: #FFFFFF; border: 2px solid #1D5FD1; }
+  .choice-reject { background: #FFFFFF; color: #1B2430; border: 2px solid #1D5FD1; }
+  .consent { display: block; margin-top: 12px; }
+  .consent input { width: 24px; height: 24px; vertical-align: middle; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Çerez ve pazarlama tercihleri</h1>
+  <p>Deneyimini iyileştirmek için çerez kullanıyoruz. Kabul et ya da Reddet.</p>
+  <form>
+    <button class="choice choice-accept" type="submit">Kabul et</button>
+    <button class="choice choice-reject" type="button">Reddet</button>
+    <label class="consent"><input type="checkbox"> Pazarlama e-postaları almak istiyorum</label>
+  </form>
+</main>
+</body>
+</html>

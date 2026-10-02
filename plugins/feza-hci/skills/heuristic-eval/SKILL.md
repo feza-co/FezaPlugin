@@ -38,6 +38,7 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ## Adım 2 — Bilgi Tabanı
 - `references/heuristics.md` — Nielsen 10 + Dix et al. mapping + severity rubric.
 - `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
+- `references/deceptive-patterns.md` — aldatıcı tasarım kalıpları (tek kaynak): tanım, TR örnek, düzeltme, ilgili E kodu.
 - `references/ux-writing.md` — H2 (gerçek dünya ile eşleşme) ve H9 (hata kurtarma) bulgularında mikro-metin ölçütü olarak kullanılır.
 - `references/output-conventions.md`.
 
@@ -73,6 +74,14 @@ H2 ve H9 mikro-metin bulguları yazılırken `references/ux-writing.md` §5 tabl
 
 10 Nielsen heuristic'in **HER BİRİ** için en az bir gözlem yap (uygulanabilir değilse "Kapsamlı tarama yapıldı, bu ekranda ihlal yok" yaz). Toplam bulgu ≥ **15**.
 
+### Aldatıcı Tasarım (zorunlu bölüm)
+
+Çerez/izin pencereleri, ödeme (checkout), abonelik ve ayar ekranlarında raporun **"Aldatıcı
+tasarım"** bölümü **boş bırakılamaz**; her ekran için `references/deceptive-patterns.md` §4
+kontrol soruları tek tek yanıtlanır ve en az bir satır bulgu/teyit yazılır ("Kapsamlı tarama
+yapıldı, bu ekranda aldatıcı kalıp yok" kabul edilir). E29 engelleyicidir; ihlal varsa severity
+≥ 3 verilir.
+
 ### Severity Dağılımı
 
 Her seviyenin sayısı bir özet kutuda gösterilir; etiketler `references/evidence-rubric.md` §2'deki
@@ -97,6 +106,7 @@ Severity 0: V
 
 ## Adım 4 — Self-Check
 - [ ] 10 heuristic'in her biri tarandı mı?
+- [ ] Çerez/izin/ödeme/abonelik/ayar ekranlarında aldatıcı tasarım bölümü boş değil mi (E29; `references/deceptive-patterns.md` §4 soruları yanıtlandı mı)?
 - [ ] Her bulgu severity skorlu mu?
 - [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
 - [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?

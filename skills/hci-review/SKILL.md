@@ -52,6 +52,7 @@ EN FAZLA 3 SORU:
 
 - `references/hci-principles.md` — ISO 9241-210 + Dix et al. prensipleri + sezgisel kontrol listesi.
 - `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
+- `references/deceptive-patterns.md` — aldatıcı tasarım kalıpları (tek kaynak): tanım, TR örnek, düzeltme, ilgili E kodu.
 - `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
 - `references/output-conventions.md`.
 
@@ -86,9 +87,10 @@ farklıysa bulgu "elle doğrulanmalı" işaretlenir, raporda ayrı listelenir ve
 büyüğü olur.
 
 5. **Olumlu noktalar** — Doğru yapılan 3-5 şey
-6. **Elle doğrulanmalı** — ikinci geçişte puanı farklı çıkan (severity ≥ 3) bulgular
-7. **Otomatik doğrulanamayanlar** — `references/evidence-rubric.md` §5'teki zorunlu manuel kontrol listesi (`- [ ]` biçiminde): okuma sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı, ekran okuyucuyla deneme, hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edilebilir" sayılmaz; "0 ihlal = erişilebilir" gibi ifadeler kullanılmaz.
-8. **Sonraki adım önerileri** — `/feza-hci:heuristic-eval` (detay), `/feza-hci:usability-eval-plan` (test), `/feza-hci:color-audit`, `/feza-hci:hci-execute` (bulguları uygula)
+6. **Aldatıcı tasarım** — Çerez/izin/ödeme/abonelik/ayar ekranlarında bu bölüm **boş bırakılamaz**; `references/deceptive-patterns.md` §4 kontrol soruları yanıtlanır ve en az bir bulgu/teyit yazılır ("Kapsamlı tarama yapıldı, aldatıcı kalıp yok" kabul edilir). E29 engelleyicidir; ihlal severity ≥ 3 (Critical/High) alır.
+7. **Elle doğrulanmalı** — ikinci geçişte puanı farklı çıkan (severity ≥ 3) bulgular
+8. **Otomatik doğrulanamayanlar** — `references/evidence-rubric.md` §5'teki zorunlu manuel kontrol listesi (`- [ ]` biçiminde): okuma sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı, ekran okuyucuyla deneme, hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edilebilir" sayılmaz; "0 ihlal = erişilebilir" gibi ifadeler kullanılmaz.
+9. **Sonraki adım önerileri** — `/feza-hci:heuristic-eval` (detay), `/feza-hci:usability-eval-plan` (test), `/feza-hci:color-audit`, `/feza-hci:hci-execute` (bulguları uygula)
 
 ### Kurallar
 
@@ -102,6 +104,7 @@ büyüğü olur.
 ## Adım 4 — Self-Check
 
 - [ ] Bulgu sayısı ≥ 8 mi?
+- [ ] Çerez/izin/ödeme/abonelik/ayar ekranlarında aldatıcı tasarım bölümü boş değil mi (E29; `references/deceptive-patterns.md` §4 soruları yanıtlandı mı)?
 - [ ] Her bulguda etki + aksiyon var mı?
 - [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
 - [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?

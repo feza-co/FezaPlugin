@@ -53,6 +53,24 @@ tekrar edilmez. Özet: 4 = görev tamamlanamıyor / WCAG A-AA erişim engeli; 3 
 birden çok grubu etkileme; 2 = sürtünme; 1 = kozmetik; 0 = sorun değil. Kanıt türleri ve severity
 3-4 için kanıt zorunluluğu aynı dosyadadır.
 
+## Etik / aldatıcı olmayan tasarım
+
+Heuristik denetimde etik boyut ayrı bir başlıktır: kullanıcıyı yanıltan, utandıran ya da
+bilinçli kararından sapan kalıplar işlevsel hata sayılmazsa bile **E29** kapsamında engelleyici
+bulgudur. Kalıpların tam listesi, TR örnekleri, düzeltmeleri ve ilgili E kodları için
+`references/deceptive-patterns.md` (tek kaynak) okunur; aşağıdaki liste yalnız hızlı kontrol
+içindir.
+
+Kısa kontrol listesi (her **hayır** bir bulgudur):
+
+- [ ] Kabul ve ret seçenekleri aynı boyut sınıfında mı (E2 kontrastı da sağlanıyor mu)? (E29, E2, E9)
+- [ ] Ret metni nötr mü; ret seçeneği gizli/soluk/küçültülmüş değil mi? (E29)
+- [ ] Hiçbir onay kutusu ön-işaretli değil mi (pazarlama/izleme/ek ürün)? (E29, E19)
+- [ ] Abonelik iptali en fazla kayıt kadar adım gerektiriyor mu? (E29, E10)
+- [ ] Toplam fiyat ve olası ek ücretler ödeme öncesi tam görünüyor mu? (E29, E11)
+- [ ] Reddedilen istek yeniden sormadan önce bekleme/kullanıcı eylemi gerektiriyor mu? (E29, E10)
+- [ ] Aciliyet/kıtlık bilgisi gerçek ve doğrulanabilir mi? (E29, E11)
+
 ## Bulgu Cümle Şablonu
 
 ```

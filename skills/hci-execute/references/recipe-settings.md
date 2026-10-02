@@ -134,6 +134,8 @@ Masaüstünde sol dikey sekmeler, sağda içerik. Tehlikeli eylemler bölümü a
 
 - [ ] **E20:** Yardım/iletişim mekanizması (destek bağlantısı, SSS) bu ekran ile diğer sayfalarda aynı göreli sırada duruyor (SC 3.2.6).
 - [ ] **E20:** Yardım bağlantısı ekran genişliğine göre yeniden sıralanırken göreli konumunu koruyor (mobilde de aynı bölgede).
+- [ ] Abonelik/üyelik iptali en fazla kayıt kadar adım gerektiriyor ve kayıtla aynı kanaldan sunuluyor (E29, E10; `references/deceptive-patterns.md` §2.6).
+- [ ] İptal ve hesap silme akışında ısrarlı "vazgeç/vazgeçme" teklifi yok; onay kısa ve nötr (E29, E10; §2.1, §2.4).
 - [ ] Tehlikeli eylemler ayrı bölgede, farklı görsel ağırlıkta ve adlandırılmış onayla korunuyor.
 - [ ] Hesap silme onayında düğme "Hesabı sil" diyor ve kaybedilecek veriler listeleniyor.
 - [ ] Bildirim anahtarları anında kaydediliyor ve 5-10 s "Geri al" toast'ı sunuyor.

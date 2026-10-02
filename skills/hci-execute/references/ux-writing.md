@@ -298,3 +298,20 @@ ilkeye bağlıdır.
 
 URL verilmedi; kaynaklar yalnızca ad ve sürümle anılır. Yukarıdaki ilkeler dışında kaynaksız
 istatistik kullanılmaz.
+
+## 8. Aldatıcı tasarım yasakları
+
+Mikro metin, aldatıcı kalıbın taşıyıcısı olabilir; aşağıdaki metin kararları yasaktır ve E29
+kapsamında engelleyici bulgudur. Kalıpların tam tanımı, düzeltmeleri ve ilgili E kodları için
+`references/deceptive-patterns.md` okunur.
+
+| # | Bağlam | Yasak (TR) | Doğru (TR) | Neden | E kodu |
+|---|--------|------------|------------|-------|--------|
+| 1 | İzin/çerez ret metni | "Hayır, fırsatları kaçırıp geride kalmak istemiyorum." | "Şimdi değil" | Utançla ikna (confirmshaming) | E29, E2 |
+| 2 | İzin/çerez ret metni | "Kabul et" büyük düğme + 11 px soluk "Reddet" bağlantısı | Kabul ve ret aynı boyut sınıfı ve E2 kontrastında | Görsel karıştırma | E29, E9, E2 |
+| 3 | Pazarlama onayı | Ön-işaretli "Kampanya e-postaları almak istiyorum" | Boş gelen onay kutusu; kullanıcı açık eylemle işaretler | Ön-seçim | E29, E19 |
+| 4 | Abonelik iptali | "Aboneliği iptal et" yalnız çağrı merkezi numarasıyla | İptal, kayıtla aynı kanaldan ve en fazla kayıt kadar adım | Zor iptal (roach motel) | E29, E10 |
+| 5 | Sahte aciliyet | Her yüklemede sıfırlanan "Bu fiyat 09:59'da bitiyor" sayacı | Gerçek bitiş mutlak tarih-saatle ("15 Ekim 2026, 23:59") | Sahte aciliyet/kıtlık | E29, E11 |
+| 6 | Gizli maliyet | Ödeme anında ortaya çıkan hizmet/kargo bedeli | Toplam (kargo/vergi dahil) en baştan görünür | Gizli maliyet | E29, E11 |
+| 7 | Yeniden sorma | "Şimdi değil" sonrası her ekranda aynı pencere | Ret sonrası yeniden sorma için kullanıcı eylemi beklenir | Israr (nagging) | E29, E10 |
+| 8 | Çift olumsuz | "Devam etmemeyi seçmezseniz onaylamış sayılırsınız." | "Devam etmek için onaylayın." | Metin karıştırma | E29, H2 |
