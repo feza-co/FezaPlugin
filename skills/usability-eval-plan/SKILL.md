@@ -4,8 +4,10 @@ description: >
   Usability Evaluation Plan üretir. Endüstri standardı kullanılabilirlik testi
   akışı: Questioning Methods, User Tests, Heuristic Walkthrough, standart
   demografik form, pre-test ve SUS (System Usability Scale) tabanlı post-test
-  anketi, pilot test, test ortamı, katılımcı sayısı tartışması (Virzi 1992,
-  Nielsen 1993, Spool & Schroeder 2001). Tetikleyici: "usability test plan",
+  anketi, SEQ (görev sonrası) ve UMUX-Lite (oturum sonu) araçları, HEART
+  hedef→sinyal→metrik tablosu, NASA-TLX yalnız karmaşık/kritik görevlerde,
+  pilot test, test ortamı, katılımcı sayısı tartışması (Virzi 1992, Nielsen 1993,
+  Spool & Schroeder 2001). Tetikleyici: "usability test plan",
   "kullanılabilirlik testi", "user testing", "/feza-hci:usability-eval-plan".
 allowed-tools: Read, Write, Glob, Grep, AskUserQuestion
 ---
@@ -35,6 +37,7 @@ Kullanıcı testi prosedürünün (ISO 9241-11: etkinlik, verimlilik, memnuniyet
 
 ## Adım 2 — Bilgi Tabanı
 - `references/usability-test-protocol.md` — adım adım test protokolü + form şablonları (demografik form, SUS).
+- `references/metrics.md` — SEQ, UMUX-Lite, SUS yorumlama, HEART tablosu, örneklem kuralları, NASA-TLX.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -62,40 +65,54 @@ Kullanıcı testi prosedürünün (ISO 9241-11: etkinlik, verimlilik, memnuniyet
    - En çok zorlandığınız görev hangisiydi, neden?
    - Eksik veya yanlış bulduğunuz bir şey var mı?
    - Bu ürünü bir meslektaşınıza nasıl anlatırdınız?
-7. **Test Ortamı** (kontrol listesi):
-   - İzole laboratuvar vs doğal iş ortamı
-   - İnternet hızı
-   - Gürültü/ışık
-   - Distractions
-8. **Pilot Test** — kontrol listesi:
-   - Pre-test soruları açık mı?
-   - Görevler iyi tanımlı mı?
-   - Oryantasyon ne kadar sürüyor?
-   - Teknik engel?
-   - Anket soruları açık mı?
-9. **Katılımcı Profili + Sayısı**:
-   - Yaygın bulgu: 5 kullanıcı sorunların ~%85'ini ortaya çıkarır (Virzi 1992; Nielsen 1993)
-   - Sık/orta/ilk kez kullanıcı karışımı
-   - Eğitim/yaş/cinsiyet çeşitliliği
-10. **Yürütme Adımları** (a-d):
+   - SUS puanını yorumlarken derece ölçeği ve sıfat derecelendirmesi kullanılır (bkz. `references/metrics.md` §3; kaynaklar Sauro & Lewis, Bangor, Kortum & Miller 2009). Bilinmeyen sayı uydurulmaz.
+7. **Görev Sonrası Ölçüm — SEQ**: her görev bittiğinde 7'li tek soru ("Bu görevi tamamlamak ne kadar kolaydı?"); görev başına ortalama + n raporlanır (`references/metrics.md` §1).
+8. **Oturum Sonu Kısa Araç — UMUX-Lite**: 2 madde, 7'li ölçek, `((m1+m2)-2)/12×100`; SUS dönüşümü Lewis, Utesch & Maher 2013 modeliyle yapılır ve katsayılar `references/metrics.md` §2'deki kaynağa bırakılır (katsayı bu planda yazılmaz). Zaman kısıtlıysa SUS yerine kullanılabilir.
+9. **HEART Tablosu** (`references/metrics.md` §4; Rodden, Hutchinson & Fu 2010): her satır hedef → sinyal → metrik. En az bir boyut zorunlu; seçilemeyen boyutun gerekçesi Bilinen Boşluklar'a yazılır.
+10. **NASA-TLX (koşullu)**: yalnız karmaşık/kritik ve bilişsel yükü karar girdisi olan görevlerde (Raw TLX). Plan tablosuna her NASA-TLX satırı için **gerekçe** satırı zorunlu; basit görevlerde kullanılmaz (`references/metrics.md` §6).
+11. **Test Ortamı** (kontrol listesi):
+    - İzole laboratuvar vs doğal iş ortamı
+    - İnternet hızı
+    - Gürültü/ışık
+    - Distractions
+12. **Pilot Test** — kontrol listesi:
+    - Pre-test soruları açık mı?
+    - Görevler iyi tanımlı mı?
+    - Oryantasyon ne kadar sürüyor?
+    - Teknik engel?
+    - Anket soruları açık mı?
+13. **Katılımcı Profili + Sayısı** (`references/metrics.md` §5):
+    - Niteliksel sorun keşfi: 5 katılımcı (Nielsen & Landauer 1993; Virzi 1992)
+    - Niceliksel metrik: ≥ 20 katılımcı
+    - Birden çok segment: segment başına 3-4 (Nielsen)
+    - Sık/orta/ilk kez kullanıcı karışımı; eğitim/yaş/cinsiyet çeşitliliği
+    - Niteliksel bulgular oran olarak sunulmaz; niceliksel oran yalnız yeterli n ile verilir.
+14. **Yürütme Adımları** (a-d):
     - a) Test amacını açıkla + gönüllü katılım ve kayıt onay formu
     - b) Demografik formu doldur
     - c) Kısa sistem tanıtımı
     - d) Görev tamamlama oranı + süresi kayda al
-11. **Metrikler**:
+15. **Metrikler**:
     - Task completion rate (%)
     - Task completion time (saniye)
     - Error count (kullanıcı başına)
     - SUS skoru (0-100)
-    - Öznel memnuniyet (SEQ veya anket ortalaması)
-12. **Çıktı / Raporlama** — bulguların önceliklendirilmesi
-13. **Bilinen Boşluklar**
+    - SEQ ortalaması (görev başına, 1-7)
+    - UMUX-Lite skoru (0-100) ve SUS dönüşümü (kaynağa bakın)
+    - NASA-TLX / Raw TLX (yalnız gerekçeli karmaşık görevler)
+16. **Çıktı / Raporlama** — bulguların önceliklendirilmesi
+17. **Bilinen Boşluklar**
 
 ## Adım 4 — Self-Check
 - [ ] Demografik form alanları tam mı?
 - [ ] SUS 10 madde + açık uçlu sorular tam mı?
+- [ ] SEQ (görev sonrası, 7'li) planda var mı ve görev başına ortalama + n ile raporlanıyor mu?
+- [ ] UMUX-Lite 2 maddesi + puan formülü var mı; SUS dönüşümü katsayı yazmadan kaynağa (Lewis, Utesch & Maher 2013) bırakılmış mı?
+- [ ] SUS yorumu derece ölçeği (Sauro & Lewis) ve sıfat derecelendirmesi (Bangor, Kortum & Miller 2009) ile mi yapılıyor; sayı uydurma yok mu?
+- [ ] HEART tablosu hedef → sinyal → metrik olarak doldurulmuş mu; seçilemeyen boyutun gerekçesi yazılı mı?
+- [ ] Örneklem kuralı gerekçeli mi (niteliksel 5 [Nielsen & Landauer 1993], niceliksel ≥ 20, segment başına 3-4)?
+- [ ] NASA-TLX yalnız karmaşık/kritik görevlerde mi ve her satırda "gerekçe" var mı?
 - [ ] Pilot test kontrol listesi var mı?
-- [ ] Katılımcı sayısı gerekçeli mi (Virzi/Nielsen referansı)?
 - [ ] Görev senaryoları "ipucu vermeyen" formatta mı?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)

@@ -4,8 +4,9 @@ description: >
   Cognitive Complexity Theory (CCT) ile bir ekran/akışın bilişsel yükünü
   değerlendirir. Kieras & Polson (1985) ve Sweller'in bilişsel yük kuramına
   dayalı 6 ana terim: Cognitive Load, Information Processing, Perceptual Organization (Gestalt),
-  Affordances, Feedback & Feedforward, Skeuomorphism vs Flat Design. Her ekran
-  için yük skoru + azaltma önerileri.
+  Affordances, Feedback & Feedforward, Skeuomorphism vs Flat Design. Hick-Hyman ve Fitts ile
+  etkileşim maliyeti, ekran başına eşzamanlı rakip öğe/renk sayısı, Türkçe okunabilirlik sözel
+  kontrolü (skor hesaplanmaz). Her ekran için yük skoru + azaltma önerileri.
   Tetikleyici: "cognitive load", "bilişsel yük", "complexity theory",
   "/feza-hci:cognitive-load".
   Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
@@ -58,6 +59,48 @@ Her terim için: **Tespit + Skor (1-5) + Öneri**.
 | 5 | Feedback | Kayıt sonrası ekran sessiz | 4 | verify-ui kodu | `E11 FAIL` — başarı durumu yok | Toast notification + redirect sonrası onay |
 | 6 | Feedforward | Disabled butonun NEDEN disabled olduğu görünmez | 2 | DOM seçici | `button[disabled]` — açıklama öğesi yok | Tooltip ile sebep göster |
 
+### Ekran Ölçüm Sütunları (her ekran/akış için zorunlu)
+
+Her ekran için ayrıca iki sayısal ölçüm tabloya eklenir (kaynak: Miller 1956; Hick-Hyman ve
+Fitts ile ilgili ayrıntı `references/cct-terms.md` §7-§8):
+
+| Ekran | Eşzamanlı rakip öğe sayısı | Anlam taşıyan renk sayısı | Not |
+|-------|----------------------------|---------------------------|-----|
+| `<ekran adı>` | <n> | <n> | <7±2 karşılaştırması; renk körlüğü riski> |
+
+- **Eşzamanlı rakip öğe sayısı:** aynı anda dikkat çeken (vurgulu buton, rozet, uyarı, animasyon
+  dâhil) öğeler sayılır; Miller'ın 7±2 aralığı çerçevesinde yorumlanır (Miller 1956). Ham DOM öğe
+  sayısı değil, dikkat için yarışan öğeler sayılır.
+- **Anlam taşıyan renk sayısı:** yalnız dekoratif değil, anlam kodlayan (durum/öncelik/kategori)
+  renkler sayılır; sayı ve ayırt edicilik (renk körlüğü) birlikte not edilir. Anlam yalnız renkle
+  veriliyorsa bu bir bulgudur.
+
+### Hick–Hyman ve Fitts (etkileşim maliyeti)
+
+Karar/konum süreleri ekran karmaşıklığını somutlar; formüller ve istisnalar `references/cct-terms.md`
+§7-§8'dedir.
+
+- **Hick–Hyman:** seçenek sayısı arttıkça karar süresi `RT = a + b·log2(n+1)` ile artar. Katsayılar
+  (a, b) bağlama özgüdür; **sayı uydurulmaz**, plana sabit değer yazılmaz. İstisna: alfabetik,
+  aranabilir ya da çok tanıdık listelerde (menü arama, kısayol) bu model uygulanmaz.
+- **Fitts:** hedefe ulaşma süresi `MT = a + b·log2(D/W + 1)` (Shannon formu); hedef boyutu ve
+  mesafesi belirleyicidir. Küçük/uzak hedefler E4 dokunma hedefi eşiğiyle (`references/thresholds.md`)
+  birlikte değerlendirilir; a, b bağlama özgüdür ve uydurulmaz.
+
+### Türkçe Okunabilirlik — Sözel Kontrol
+
+Türkçe okunabilirlik formülleri (ör. Ateşman, Bezirci–Yılmaz) birincil kaynaktan doğrulanmadığı
+için **otomatik skor hesaplanmaz** ve katsayı yazılmaz. Bunun yerine sözel kontrol yapılır:
+
+- Cümleler kısa ve tek fikirli mi? (Uzun, iç içe cümleler işaretlenir.)
+- Yaygın/gündelik kelimeler mi kullanılıyor; gereksiz teknik terim var mı?
+- Edilgen yapı ve isimleştirme az mı? (Edilgen, özneyi gizleyip yükü artırır.)
+- Aynı kavram için tek terim mi kullanılıyor (tutarlı terminoloji)?
+- Liste/tablo ile parçalama mümkün mü?
+
+> **Not:** Türkçe okunabilirlik formülleri birincil kaynaktan doğrulanmadığı için skor hesaplanmaz;
+> bu bölüm nitel bir kontrol listesidir.
+
 Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. CCT skoru (1-5),
 `references/fix-mode.md` eşleme tablosuyla Nielsen 0-4 ölçeğine çevrilir; Nielsen ölçeğinin somut
 ankrajları `references/evidence-rubric.md` §2'dedir. Nielsen eşdeğeri ≥ 3 (CCT 4-5) bulgular için DOM
@@ -96,6 +139,10 @@ Tek bir "Aksiyon Listesi" çıkar:
 ## Adım 4 — Self-Check
 - [ ] 6 CCT terimin her biri tarandı mı?
 - [ ] Her birine skor verildi mi?
+- [ ] Ekran başına "eşzamanlı rakip öğe sayısı" ve "anlam taşıyan renk sayısı" sütunları dolduruldu mu?
+- [ ] Hick–Hyman uygulandıysa istisna (alfabetik/aranabilir/çok tanıdık liste) kontrol edildi mi ve katsayı uydurulmadı mı?
+- [ ] Fitts değerlendirmesi hedef boyut/mesafe üzerinden yapıldı mı ve E4 eşiğine bağlandı mı?
+- [ ] Türkçe okunabilirlik sözel kontrolle mi yapıldı; "formüller doğrulanmadığı için skor hesaplanmaz" notu var mı?
 - [ ] Toplam skor hesaplandı mı?
 - [ ] Skeuomorphism/Flat değerlendirmesi var mı?
 - [ ] Azaltma önerileri sıralı mı?

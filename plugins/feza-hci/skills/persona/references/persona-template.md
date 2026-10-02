@@ -6,13 +6,17 @@ Kaynak çerçeve: Cooper "The Inmates Are Running the Asylum" / "About Face" (go
 
 ```markdown
 > **Personas** — <Proje>
-> Validation: <Validated (n=X) | Provisional (varsayım)>
+> Veri dayanağı: proto | niteliksel | istatistiksel (n=<X>, <tarih>, <yöntem>)
 > Üretildi: <tarih>
 > Üretici: FezaPlugin · /feza-hci:persona
 
 # Persona 1: <İsim>, <Yaş> (Primary)
 
+**Veri dayanağı:** proto | niteliksel | istatistiksel (n=<X>, <tarih>, <yöntem>)
 **Özet:** "..."
+
+## JTBD
+> "<durum> olduğunda, <motivasyon/eylem> istiyorum, böylece <beklenen sonuç>."
 
 ## Demografi
 | Alan | Değer |
@@ -36,6 +40,10 @@ Kaynak çerçeve: Cooper "The Inmates Are Running the Asylum" / "About Face" (go
 ## Davranışlar
 - ...
 
+## Başarı Kriterleri
+- **İşlevsel:** ...
+- **Duygusal:** ...
+
 ## Senaryo
 <2-4 cümle>
 
@@ -44,6 +52,9 @@ Kaynak çerçeve: Cooper "The Inmates Are Running the Asylum" / "About Face" (go
 
 ## Ürün İçin
 - ...
+
+## Kapsayıcılık Notu
+- <Kimlik kalıbı, çeşitlilik gerekçesi, yardımcı teknoloji>
 
 ---
 
@@ -60,6 +71,24 @@ Kaynak çerçeve: Cooper "The Inmates Are Running the Asylum" / "About Face" (go
 (devam — minimum demografi + pain point)
 ```
 
+## Proto-persona Modu (veri yoksa)
+
+Birincil veri yokken üretim durmaz; ama şeffaflık zorunludur. Aşağıdaki blok her `proto` personada
+bulunur:
+
+```markdown
+**Veri dayanağı:** proto — Varsayım (birincil veri yok)
+**Doğrulama planı**
+1. Sorulacak sorular: <en kritik 3-5 varsayımı test eden sorular>
+2. Katılımcı: niteliksel için 5 (Nielsen & Landauer 1993); segment başına 3-4
+3. Segment: <hangi kullanıcı sınıfından>
+4. Etiket yükseltmesi: <hangi veri toplanınca `niteliksel`/`istatistiksel`>
+```
+
+Kurallar:
+- Varsayım cümleleri "**Varsayım:**" ön ekiyle yazılır; kanıtı olmayan kesin ifade kullanılmaz.
+- `proto` persona hiçbir zaman "Validated" sayılmaz.
+
 ## İYİ Persona Örneği
 
 Örnek ürün: küçük işletmeler için mobil ön muhasebe/fatura uygulaması.
@@ -67,8 +96,13 @@ Kaynak çerçeve: Cooper "The Inmates Are Running the Asylum" / "About Face" (go
 ```
 ## Persona 1: Elif Demir, 34 (Primary)
 
+**Veri dayanağı:** niteliksel (n=6 mülakat, 2026-Q1)
 **Özet:** "Tek kişilik grafik tasarım stüdyosunun sahibi; faturaları ve tahsilatları
 telefondan hızlıca yönetmek ister, muhasebe terimleri onu yavaşlatır."
+
+### JTBD
+> "İşi teslim ettikten hemen sonra müşteri fatura istediğinde, tek ekrandan tutarı
+> girip göndermek istiyorum, böylece akşam işi büyümeden bitirebileyim."
 
 ### Demografi
 - Yaş: 34
@@ -94,6 +128,11 @@ telefondan hızlıca yönetmek ister, muhasebe terimleri onu yavaşlatır."
 - Sesli not ve ekran görüntüsünü bilgi kaynağı olarak kullanır
 - Hızlı karar verir, uzun form doldurmaktan kaçınır
 
+### Başarı Kriterleri
+- **İşlevsel:** İlk fatura 3 dakikadan kısa sürede oluşturulup gönderilebilmeli
+- **Duygusal:** Hata yaptığında kaybolmadan düzeltebileceğine güvenmeli; "muhasebeciye
+  sormam gerekecek" endişesi duymamalı
+
 ### Senaryo
 "Cuma akşamı, bir logo projesini teslim etti. Müşteri aynı gün fatura istiyor.
 Telefondan uygulamayı açıp son müşteriyi seçti, tutarı girdi, faturayı
@@ -107,6 +146,11 @@ paylaşım bağlantısıyla gönderdi; 2 dakikada işi bitirdi."
 - Mobil tasarım birinci öncelik
 - Zorunlu alanlar yanında kısa açıklama (feedforward) içermeli
 - Vadesi gelen faturalar için otomatik hatırlatma kritik
+
+### Kapsayıcılık Notu
+- Temsili isim; kimlik kalıbı dayatılmadı
+- Çeşitlilik: farklı meslek/yaş segmentleri ayrı personalarda temsil edilir
+- Yardımcı teknoloji ihtiyacı: mülakatta bildirilmedi (varsayım yapılmadı)
 ```
 
 ## KÖTÜ Persona Örneği (yapma)
@@ -125,6 +169,40 @@ Neden kötü:
 - "Kullanışlı" - yasak terim
 - Quote yok
 - Senaryo yok
+- Veri dayanağı etiketi yok
+- JTBD yok, başarı kriteri yok
+
+## Kapsayıcı Tasarım Kontrolü
+
+- **İsim/kimlik alanları zorunlu kalıba sokulmaz:** Tek bir normatif isim/kimlik kalıbı dayatılmaz;
+  farklı köken, alfabe, kısaltma, unvan ve cinsiyet ifadeleri kabul edilir. Temsili isim kullanıldığında
+  belirtilir ("Ad (temsili)").
+- **Çeşitlilik:** cinsiyet, yaş, engellilik ve teknoloji erişimi ürünle ilgili olduğu ölçüde
+  çeşitlendirilir; tek segmenti tek kimliğe indirgemek yasaktır.
+- **Kalıp yargı kontrolü:** meslek-cinsiyet, yaş-teknoloji, engellilik-yetkinsizlik kalıpları yasak.
+  Her özellik ürün davranışıyla gerekçelendirilir.
+- **Erişilebilirlik:** engellilik yalnız olumsuzluk olarak değil, yardımcı teknoloji kullanımı ve
+  kapsayıcı ihtiyaç olarak yazılır.
+
+## Persona Sayısı Kuralları
+
+| Persona sayısı | Ne zaman uygun |
+|----------------|-----------------|
+| 1 | Çok dar segment, MVP odak |
+| 2-3 | **Tipik** — Primary + Secondary (+Anti) |
+| 4 | İki ayrı pazar segmenti hedefliyorsa |
+| 5+ | Dilution — odak kaybı; SAKIN |
+
+## Veri Dayanağı Seviyeleri
+
+| Etiket | Anlam | Ne zaman |
+|--------|-------|----------|
+| **proto** | Varsayıma dayalı (açıkça "Varsayım" etiketli) | Brief/sektör bilgisinden çıkarım; doğrulama planı zorunlu |
+| **niteliksel** | Nitel araştırmaya dayalı | n ≥ 5 mülakat veya eşdeğer nitel oturum |
+| **istatistiksel** | Nicel veriye dayalı | n ≥ 30 anket veya temsili kullanım verisi |
+
+> proto → niteliksel geçişi: 5 mülakat ile geçerli sayılabilir (Nielsen & Landauer, 1993).
+> Etiket yükseltmesi için toplanan veri raporda (n, tarih, yöntem) belgelenir.
 
 ## Anti-persona Örneği
 
@@ -140,21 +218,3 @@ Neden kötü:
 > Ürünü mobil-first + self-servis olarak tasarladığımız için bu segment
 > v1.0 kapsamında değil. v2.0'da telefon destekli + sesli mod düşünülebilir.
 ```
-
-## Persona Sayısı Kuralları
-
-| Persona sayısı | Ne zaman uygun |
-|----------------|-----------------|
-| 1 | Çok dar segment, MVP odak |
-| 2-3 | **Tipik** — Primary + Secondary (+Anti) |
-| 4 | İki ayrı pazar segmenti hedefliyorsa |
-| 5+ | Dilution — odak kaybı; SAKIN |
-
-## Validation Seviyeleri
-
-| Etiket | Anlam | Ne zaman |
-|--------|-------|----------|
-| **Validated Persona** | Gerçek araştırmaya dayalı | n ≥ 5 mülakat veya n ≥ 30 anket |
-| **Provisional Persona** | Varsayıma dayalı | Brief/sektör bilgisinden çıkarım |
-
-> Provisional → Validated geçişi: 5 mülakat ile geçerli sayılabilir (Nielsen, 1993).
