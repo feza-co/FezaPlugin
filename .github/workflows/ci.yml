@@ -60,7 +60,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: DavidAnson/markdownlint-cli2-action@v20
+      - uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           config: .markdownlint-cli2.yaml
           globs: |
