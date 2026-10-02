@@ -1414,6 +1414,9 @@ async function dragTest(context, url) {
 
 // forced-colors altında etkileşimli öğe sınırı: kenarlık (genişlik>0, stil≠none)
 // ya da outline. box-shadow forced-colors'ta silindiği için sayılmaz.
+// Yerel (appearance:auto) onay kutusu/radyo tarayıcı çiziminde olduğundan E3
+// ile aynı kural uygulanır: sınır kontrolünden muaf, `skipped` listesine yazılır
+// (odak göstergesi kontrolü sürer). appearance:none özelleştirmeleri denetlenir.
 function forcedColorsBoundaryInPage(selector) {
   const describe = (el) => {
     let sel = el.tagName.toLowerCase();
@@ -1424,6 +1427,7 @@ function forcedColorsBoundaryInPage(selector) {
     return sel;
   };
   const items = [];
+  const skipped = [];
   for (const el of document.querySelectorAll(selector)) {
     const r = el.getBoundingClientRect();
     const s = getComputedStyle(el);
@@ -1433,6 +1437,18 @@ function forcedColorsBoundaryInPage(selector) {
       s.display === 'none' ||
       Number(s.opacity) === 0
     ) {
+      continue;
+    }
+    const tag = el.tagName.toLowerCase();
+    const type = (el.getAttribute('type') || '').toLowerCase();
+    const nativeChoice =
+      tag === 'input' &&
+      (type === 'checkbox' || type === 'radio') &&
+      (s.appearance === 'auto' ||
+        s.webkitAppearance === 'checkbox' ||
+        s.webkitAppearance === 'radio');
+    if (nativeChoice) {
+      skipped.push(describe(el));
       continue;
     }
     let border = false;
@@ -1454,12 +1470,12 @@ function forcedColorsBoundaryInPage(selector) {
       appearance: s.appearance,
     });
   }
-  return items;
+  return { items, skipped };
 }
 
 async function forcedColorsTest(context, url) {
   const page = await context.newPage();
-  const out = { total: 0, boundary: [], focus: [] };
+  const out = { total: 0, boundary: [], focus: [], skipped: [] };
   try {
     await page.goto(url, { waitUntil: 'load', timeout: 60000 });
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -1469,8 +1485,9 @@ async function forcedColorsTest(context, url) {
       forcedColorsBoundaryInPage,
       INTERACTIVE_SELECTOR
     );
-    out.total = items.length;
-    out.boundary = items
+    out.total = items.items.length;
+    out.skipped = items.skipped;
+    out.boundary = items.items
       .filter((i) => !i.boundary)
       .map((i) => ({ selector: i.selector, reason: 'görünür sınır yok' }));
 
@@ -2556,6 +2573,7 @@ function evaluateResults(report) {
       threshold: 0,
       method: 'otomatik',
       violations: { boundary: fcBoundary, focus: fcFocus },
+      skipped: fc.skipped || [],
       total: fc.total || 0,
       na: (fc.total || 0) === 0 ? 'etkileşimli öğe bulunamadı' : undefined,
     };

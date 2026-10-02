@@ -135,6 +135,11 @@
     "fail": [],
     "null": ["E9", "E10", "E11", "E17", "E19", "E20", "E22", "E23", "E26", "E27", "E28", "E29"]
   },
+  "E21-custom-checkbox-fail.html": {
+    "exit": 1,
+    "fail": ["E21"],
+    "note": "appearance:none özel onay kutusu sistem çizimini kapatır; sınırsız/zeminsiz kaldığından forced-colors sınır kontrolü düşer (yerel input değil)."
+  },
   "E21-fail.html": {
     "exit": 1,
     "fail": ["E21"],
