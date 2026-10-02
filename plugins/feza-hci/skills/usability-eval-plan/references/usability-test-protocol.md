@@ -60,7 +60,7 @@ Gerçek testten önce en az 1-2 pilot oturum ile doğrula:
 - **Virzi 1992** — ilk 4-5 katılımcı kullanılabilirlik sorunlarının büyük kısmını (~%80-85) açığa çıkarır.
 - **Nielsen & Landauer 1993** — sorun keşfi için matematiksel model; 5 kullanıcı tipik olarak ~%85.
 - **Spool & Schroeder 2001** — karmaşık sitelerde 5 kullanıcı yetersiz kalabilir; uzmanlar arasında sayı tartışmalıdır.
-- Öneri: sık / orta / ilk kez kullanıcı KARIŞIMI; farklı yaş ve eğitim profilleri. Birden çok kullanıcı segmenti varsa segment başına en az 5.
+- Öneri: sık / orta / ilk kez kullanıcı KARIŞIMI; farklı yaş ve eğitim profilleri. Birden çok kullanıcı segmenti varsa segment başına 3-4 katılımcı (Nielsen); niceliksel metrik için toplam ≥ 20 (`references/metrics.md` §5).
 
 ## Görev Senaryosu Yazma Kuralları
 

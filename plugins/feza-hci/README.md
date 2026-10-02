@@ -8,15 +8,15 @@ Human-computer interaction skills: holistic UX review, heuristic evaluation, usa
 
 | Command | What it does | Output |
 |---------|--------------|--------|
-| `/feza-hci:hci-review` | Holistic usability review of a screen, flow or whole product through user-centred design (ISO 9241-210), affordance and the HCI principles of Dix et al. Scans the UI files (HTML, JSX, Vue, Svelte, templates, CSS, design tokens) or works from a described screen or mockup, and returns prioritized findings with concrete fix steps. | `HCI_REVIEW_<project>.md` |
-| `/feza-hci:heuristic-eval` | Systematic heuristic evaluation: inspects screens against Nielsen's 10 usability heuristics, the principles of Dix et al. and WCAG 2.1 AA accessibility criteria. Every finding gets a Nielsen severity rating from 0 (not a problem) to 4 (usability catastrophe); results are sorted in a table with a severity distribution. Works from the UI files or from a described screen. | `HEURISTIC_EVAL_<project>.md` |
-| `/feza-hci:usability-eval-plan` | Plans a usability test with real users: methods (questioning, user tests, heuristic walkthrough), how many participants and why, a demographic form, a pre-test questionnaire and a SUS (System Usability Scale) post-test survey, test tasks, pilot test, environment and metrics. The most critical tasks are taken from earlier HCI review or heuristic evaluation findings when present. | `USABILITY_PLAN_<project>.md` |
-| `/feza-hci:cognitive-load` | Estimates how much mental effort a screen or flow demands, using Cognitive Complexity Theory (Kieras and Polson) and Sweller's cognitive load theory. Checks six aspects (cognitive load, information processing, Gestalt perceptual organization, affordances, feedback and feedforward, skeuomorphic versus flat design), gives each screen a load score and suggests how to reduce overload. | `COGNITIVE_LOAD_<project>.md` |
-| `/feza-hci:color-audit` | Audits the colour palette, extracted from design tokens, CSS variables, the Tailwind config or stylesheets (or supplied by you): identifies the colour harmony, checks the 60-30-10 balance, computes WCAG 2.1 AA contrast ratios, simulates colour blindness, reviews colour coding and dark mode, and proposes a corrected palette. | `COLOR_AUDIT_<project>.md` |
+| `/feza-hci:hci-review` | Holistic usability review of a screen, flow or whole product through user-centred design (ISO 9241-210), affordance and the HCI principles of Dix et al. Scans the UI files (HTML, JSX, Vue, Svelte, templates, CSS, design tokens) or works from a described screen or mockup, and returns prioritized findings with concrete fix steps. With `--fix` it applies its findings to the UI files and verifies them. With `--acr` it also writes an Accessibility Conformance Report (VPAT 2.5 INT/EU layout, WCAG 2.2 A/AA), driving the automated rows from `report.json` and marking the rest "Not evaluated". | `HCI_REVIEW_<project>.md`, plus `ACR_<product>_<date>.md` with `--acr` |
+| `/feza-hci:heuristic-eval` | Systematic heuristic evaluation: inspects screens against Nielsen's 10 usability heuristics, the principles of Dix et al., WCAG 2.1 AA accessibility criteria and the shared deceptive-design dictionary. Every finding gets a Nielsen severity rating from 0 (not a problem) to 4 (usability catastrophe) and an evidence type; results are sorted in a table with a severity distribution. Works from the UI files or from a described screen. With `--fix` it applies its findings to the UI files and verifies them. | `HEURISTIC_EVAL_<project>.md` |
+| `/feza-hci:usability-eval-plan` | Plans a usability test with real users: methods (questioning, user tests, heuristic walkthrough), how many participants and why, a demographic form, a pre-test questionnaire and a SUS (System Usability Scale) post-test survey, test tasks, pilot test, environment and metrics. Also adds SEQ (per task) and UMUX-Lite (end of session) instruments, the SUS percentile and adjective table, a HEART goal-signal-metric table and NASA-TLX for complex or critical tasks only. The most critical tasks are taken from earlier HCI review or heuristic evaluation findings when present. | `USABILITY_PLAN_<project>.md` |
+| `/feza-hci:cognitive-load` | Estimates how much mental effort a screen or flow demands, using Cognitive Complexity Theory (Kieras and Polson) and Sweller's cognitive load theory. Checks six aspects (cognitive load, information processing, Gestalt perceptual organization, affordances, feedback and feedforward, skeuomorphic versus flat design), adds Hick-Hyman and Fitts interaction-cost estimates plus per-screen competing-item and meaningful-colour counts, gives each screen a load score and suggests how to reduce overload. | `COGNITIVE_LOAD_<project>.md` |
+| `/feza-hci:color-audit` | Audits the colour palette, extracted from design tokens (including DTCG `*.tokens.json`), CSS variables, the Tailwind config or stylesheets (or supplied by you): identifies the colour harmony, checks the 60-30-10 balance, computes WCAG 2.1 AA contrast ratios, simulates colour blindness, reviews colour coding and dark mode, and proposes a corrected palette. | `COLOR_AUDIT_<project>.md` |
 | `/feza-hci:design-thinking` | Produces a five-stage design thinking roadmap (Empathize, Define, Ideate, Prototype, Test, after the Stanford d.school / IDEO model) for a given problem or opportunity, with goals, activities, deliverables, duration and suggested tools for each stage, plus iteration notes and a worked example scenario. | `DESIGN_THINKING_<project>.md` |
 | `/feza-hci:prototype-plan` | Plans how to prototype the product: why prototype, the fidelity ladder (sketch, wireframe, mockup, prototype), when to use low- or high-fidelity, low-cost tools, a short test plan and the reminder that a prototype is not the product. Uses existing design files, scope and personas. | `PROTOTYPE_PLAN_<project>.md` |
-| `/feza-hci:persona` | Creates one to three user personas, fictional but evidence-based profiles of target users in the goal-directed design tradition: demographics, goals, pain points, behaviours, technical skill level, a usage scenario and a quote, plus an anti-persona. Draws on brief, scope and stakeholder files and labels assumed data. | `PERSONAS_<project>.md` |
-| `/feza-hci:hci-execute` | Designs and builds a working user interface instead of a report: user and task model (ISO 9241-210), information architecture and ASCII wireframes, a token-based design system (WCAG 2.1 AA contrast, light and dark themes, 4/8 pt grid), then accessible, responsive screens in the detected stack (React, Next.js, Vue, Svelte, Tailwind, plain HTML) or in dependency-free HTML, CSS and JS. Before delivery it checks its own output against Nielsen's heuristics, Dix et al., WCAG 2.1 AA and cognitive load and fixes what it finds; it can also apply findings from earlier HCI audits. | UI files plus `DESIGN_RATIONALE_<project>.md` |
+| `/feza-hci:persona` | Creates one to three user personas, fictional but evidence-based profiles of target users in the goal-directed design tradition: demographics, goals, pain points, behaviours, technical skill level, a usage scenario and a quote, plus an anti-persona. Each persona carries a mandatory data-basis label (proto / qualitative / statistical), a job-to-be-done statement with functional and emotional success criteria, and an inclusive-design check; proto-personas ship with a validation plan. Draws on brief, scope and stakeholder files and labels assumed data. | `PERSONAS_<project>.md` |
+| `/feza-hci:hci-execute` | Designs and builds a working user interface instead of a report: user and task model (ISO 9241-210), information architecture and ASCII wireframes, a token-based design system (WCAG 2.1 AA contrast, light and dark themes, 4/8 pt grid, optional DTCG `tokens.tokens.json`), then accessible, responsive screens in the detected stack (React, Next.js, Vue, Svelte, Tailwind, plain HTML) or in dependency-free HTML, CSS and JS. Checks its own output against the E1-E29 acceptance set (Nielsen's heuristics, Dix et al., WCAG 2.1/2.2 AA, preference modes, localisation and deceptive design) and fixes what it finds; it can also apply findings from earlier HCI audits. | UI files plus `DESIGN_RATIONALE_<project>.md` |
 
 ## Installation
 
@@ -44,19 +44,35 @@ Each skill discovers existing project context, asks only for critical missing in
 the document, checks it internally against the shared quality criteria and writes the final
 version in the shared delivery format. `hci-execute` is the exception that builds: it writes
 working interface files in the project's existing UI stack (or dependency-free HTML, CSS and
-JavaScript), verifies them internally against Nielsen's heuristics, WCAG 2.1 AA and cognitive
-load checks, and delivers a short design rationale document alongside them. The evaluation skills
+JavaScript), verifies them against the shared **E1-E29** acceptance set, and delivers a short
+design rationale document alongside them.
+
+The acceptance set lives in `shared/packages/feza-hci/thresholds.md` and is copied into every
+skill as `references/thresholds.md`; `scripts/verify-ui.mjs` repeats the numbers and
+`scripts/validate.py` fails the build if they drift. `verify-ui` supports `--profile
+wcag22aa|en301549`, `--static <dir>` (browserless source scan), `--engines axe,ibm`, `--visual
+<dir>` / `--visual-max-diff N` and `--aria-baseline <file>`. The evaluation skills
 (`hci-review`, `heuristic-eval`, `cognitive-load`, `color-audit`) support a fix mode: with `--fix`
-(or "fix") they apply their findings to the UI files, verify the result with `verify-ui` and add an
-applied-fixes table to the report. When Node.js is available, `hci-execute` also loads the
+(or "fix") they apply their findings to the UI files, verify the result and reject any change that
+does not strictly reduce the violation count, adding an applied-fixes table to the report. They
+also share an evidence rubric (`references/evidence-rubric.md`) and a deceptive-design dictionary
+(`references/deceptive-patterns.md`). When Node.js is available, `hci-execute` also loads the
 generated interface in a real browser with Playwright at 320/390/768/1280 px and runs axe-core
-(WCAG 2.1/2.2 A/AA), horizontal-scroll, touch-target, keyboard/focus, reduced-motion with dark
-theme and 200% text-zoom checks, writing screenshots and `report.json` to `.feza/ui-check/`.
+(WCAG 2.1/2.2 A/AA), horizontal-scroll, touch-target, keyboard/focus, focus-not-obscured, target
+spacing, text spacing, accessible-authentication, dragging, forced-colors, prefers-contrast, RTL,
+text-expansion, heading/landmark and deceptive-design checks, writing screenshots and
+`report.json` to `.feza/ui-check/`. `hci-review` can also write an Accessibility Conformance Report
+with `--acr`, and measure lab INP with `scripts/measure-vitals.mjs`. `contrast.py --tokens` reads
+DTCG design tokens and `--apca` adds an advisory APCA Lc column.
 Node.js 18+ is optional and only needed for that render check and fix mode; Playwright and
 axe-core are installed into a user cache on first run, and without Node.js the skills fall back to
 a static check. The shared rules are bundled in every skill's
 `references/` folder (`output-conventions.md`, `delivery-format.md`, `input-discovery.md`,
 `quality-gate.md`); edit them in the repository's [`shared/`](https://github.com/feza-co/FezaPlugin/tree/main/shared) directory, not here.
+
+> **Limits.** Automated tools measure only part of WCAG; a clean run is not proof of
+> accessibility. Static criteria (E9-E11, E19, E20, E26, E27) are reported with `ok: null` and must
+> be read by hand.
 
 ## License
 

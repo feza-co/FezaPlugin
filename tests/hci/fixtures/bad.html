@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bad — birden çok ihlal (E2, E3, E4, E5, E8)</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* E2: düşük kontrastlı metin. */
+  p.dim { color: #9A9A9A; }
+  /* E3: düşük kontrastlı giriş kenarlığı. */
+  input { font: inherit; width: 100%; max-width: 320px; height: 44px; padding: 8px; border: 1px solid #EEEEEE; border-radius: 8px; }
+  /* E4 + E15: 20 px küçük ve bitişik düğmeler (E1 target-size tetikler). */
+  .tiny { width: 20px; height: 20px; padding: 0; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 4px; font: inherit; }
+  .row { display: flex; gap: 0; }
+  /* E5: sabit genişlik 320 px'de taşar. */
+  .panel { width: 480px; padding: 8px; border: 1px solid #79808C; border-radius: 8px; }
+  .btn-primary { min-width: 40px; min-height: 40px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; padding: 8px 16px; border-radius: 8px; font: inherit; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Hesap</h1>
+  <p class="dim">Bu metin beyaz zeminde düşük kontrastlıdır ve okunması zordur.</p>
+  <form>
+    <!-- E8: etiketsiz alan. -->
+    <input id="user" type="text" autocomplete="username">
+    <div class="row">
+      <button class="tiny" type="button" aria-label="Yukarı taşı">↑</button>
+      <button class="tiny" type="button" aria-label="Aşağı taşı">↓</button>
+    </div>
+    <div class="panel">
+      <p>Sabit genişlikli panel.</p>
+    </div>
+    <button class="btn-primary" type="submit">Kaydet</button>
+  </form>
+</main>
+</body>
+</html>

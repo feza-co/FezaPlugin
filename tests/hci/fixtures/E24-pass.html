@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E24 PASS — logical properties, no horizontal overflow in RTL</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Mantıksal özellikler: RTL'de ikisi de doğru yöne akar, taşma olmaz. */
+  .panel { max-width: 100%; padding-inline: 12px; border-inline-start: 3px solid #1D5FD1; border-radius: 8px; background: #F4F6F8; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Panel</h1>
+  <p>Logical properties keep the layout inside the viewport when the document flips to RTL.</p>
+  <div class="panel">
+    <p>Bidirectional-safe content.</p>
+  </div>
+</main>
+</body>
+</html>

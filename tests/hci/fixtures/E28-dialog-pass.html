@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E28 PASS — dialog içi başlık sayfa sayımına katılmaz</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1, h2 { margin: 8px 0; }
+  dialog { padding: 16px; }
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Products</h1>
+  <h2>Categories</h2>
+  <p>Page has a single h1 and a main landmark. The open dialog keeps its own heading hierarchy, so its h1 must not count as a second page level-one heading.</p>
+  <button class="btn" type="button">Open details</button>
+</main>
+<dialog open>
+  <h1>Product details</h1>
+  <h3>Specifications</h3>
+  <p>This dialog has its own heading tree (h1 then h3); it is self-contained and must not affect the page outline.</p>
+  <button class="btn" type="button">Close</button>
+</dialog>
+</body>
+</html>

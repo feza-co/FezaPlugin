@@ -1,0 +1,14 @@
+/* sample.tokens.json ile AYNI değerleri taşıyan CSS token
+   dosyası. contrast.py --css ve --tokens aynı oranları vermelidir. */
+:root {
+  --color-bg: #FFFFFF;
+  --color-surface: #F4F6F8;
+  --color-text: #1B2430;
+  --color-text-muted: #4A5565;
+  --color-primary: #1D5FD1;
+  --color-on-primary: #FFFFFF;
+  --color-interactive: var(--color-primary);
+  --color-danger: #B42318;
+  --color-legacy-accent: #8A4B00;
+  --color-wide-gamut: #1D5FD1;
+}

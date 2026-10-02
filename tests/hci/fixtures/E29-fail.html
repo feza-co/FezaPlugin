@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E29 FAIL — aldatıcı çerez/abonelik penceresi</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  p { color: #1B2430; max-width: 60ch; }
+  /* E29 statik: "Kabul et" büyük ve dolu birincil; "Reddet" küçük/soluk bir bağlantı. */
+  .btn-primary { min-width: 44px; min-height: 44px; padding: 10px 20px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
+  /* Ret bağlantısı: E4/E15 bozulmasın diye >= 24 px ve E2 kontrastını geçer (≥ 4.5:1). */
+  .reject { display: inline-block; min-height: 24px; line-height: 24px; padding: 6px 8px; font-size: 14px; color: #5B6270; text-decoration: underline; border: 1px solid transparent; }
+  .consent { display: block; margin-top: 12px; }
+  .consent input { width: 24px; height: 24px; vertical-align: middle; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Çerez ve pazarlama tercihleri</h1>
+  <p>Deneyimini iyileştirmek için çerez kullanıyoruz. Tercihini seç.</p>
+  <form>
+    <button class="btn-primary" type="submit">Kabul et</button>
+    <a class="reject" href="#reddet">Reddet</a>
+    <label class="consent"><input type="checkbox" checked> Pazarlama e-postaları almak istiyorum</label>
+  </form>
+</main>
+</body>
+</html>

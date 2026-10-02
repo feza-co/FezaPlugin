@@ -95,23 +95,39 @@ Eşleşme yoksa en yakın kriter seti seçilir; emin olunamıyorsa paket kriter 
 
 #### feza-hci engelleyicileri (arayüz üreten çıktılar)
 
-`hci-execute` ve fix modu uygulanan değerlendirmelerde aşağıdaki eşiklerin hepsi sağlanmadan puan ne olursa olsun teslim yapılmaz; ağırlıklı puanlama korunur.
+`hci-execute` ve fix modu uygulanan değerlendirmelerde aşağıdaki eşiklerin hepsi sağlanmadan puan ne olursa olsun teslim yapılmaz; ağırlıklı puanlama korunur. Değerlendirme raporlarında manuel kontrol listesi işaretlenmeden teslim edilebilir denmez ve "0 ihlal = erişilebilir" ifadesi kullanılmaz.
 
-| # | Kriter | Eşik | Ölçüm |
-|---|---|---|---|
-| E1 | axe-core ihlali (serious + critical) | 0 | verify-ui |
-| E2 | Metin kontrastı | ≥ 4.5:1 (büyük metin ≥ 3:1) | axe + contrast.py |
-| E3 | UI bileşeni / grafik kontrastı | ≥ 3:1 | contrast.py |
-| E4 | Dokunma hedefi | ≥ 44×44 CSS px (birincil eylemler); en az 24×24 her yerde (WCAG 2.2 SC 2.5.8) | verify-ui |
-| E5 | Yeniden akış | 320px'de yatay kaydırma yok (WCAG 1.4.10) | verify-ui |
-| E6 | Görünür odak | Tüm etkileşimli öğelerde | verify-ui klavye testi |
-| E7 | Odak sırası | Görsel sırayla uyumlu, tuzak yok | verify-ui klavye testi |
-| E8 | Form etiketleri | Her alanın erişilebilir adı var | axe |
-| E9 | Birincil eylem | Ekran başına en fazla 1 birincil (vurgulu) eylem | statik inceleme |
-| E10 | Görev derinliği | Birincil görevler en fazla 3 ekran/adım | görev akışı (Adım 2) |
-| E11 | Durum kapsaması | Her asenkron işlemde yükleniyor + hata + başarı; her listede boş durum | statik inceleme |
-| E12 | Hareket | `prefers-reduced-motion` altında animasyon kapalı/azaltılmış | verify-ui |
-| E13 | Metin büyütme | %200 yakınlaştırmada içerik kaybı yok (WCAG 1.4.4) | verify-ui |
+| # | Kriter | Eşik | Ölçüm | Araç |
+|---|---|---|---|---|
+| E1 | axe-core ihlali (serious + critical) | 0 | otomatik | verify-ui (axe) |
+| E2 | Metin kontrastı | ≥ 4.5:1 (büyük metin ≥ 3:1) | otomatik | verify-ui (axe) + contrast.py |
+| E3 | UI bileşeni / grafik kontrastı | ≥ 3.0:1 (yuvarlama yok; 2.999 FAIL) | otomatik | verify-ui (getComputedStyle) |
+| E4 | Dokunma hedefi | ≥ 44×44 CSS px (birincil eylemler); en az 24×24 her yerde (WCAG 2.2 SC 2.5.8) | otomatik | verify-ui |
+| E5 | Yeniden akış | 320px'de yatay kaydırma yok (WCAG 2.2 SC 1.4.10) | otomatik | verify-ui |
+| E6 | Görünür odak | Tüm etkileşimli öğelerde | otomatik | verify-ui klavye testi |
+| E7 | Odak sırası | Görsel sırayla uyumlu, tuzak yok | otomatik | verify-ui klavye testi |
+| E8 | Form etiketleri | Her alanın erişilebilir adı var | otomatik | verify-ui (axe) |
+| E9 | Birincil eylem | Ekran başına en fazla 1 birincil (vurgulu) eylem | statik | statik inceleme |
+| E10 | Görev derinliği | Birincil görevler en fazla 3 ekran/adım | statik | görev akışı (Adım 2) |
+| E11 | Durum kapsaması | Her asenkron işlemde yükleniyor + hata + başarı; her listede boş durum | statik | statik inceleme |
+| E12 | Hareket | `reduce` altında `transform: scale/translate` tabanlı animasyon/parallax yok; yalnız opaklık (WCAG 2.2 SC 2.3.3) | otomatik | verify-ui |
+| E13 | Metin büyütme | %200 yakınlaştırmada içerik kaybı yok (WCAG 2.2 SC 1.4.4) | otomatik | verify-ui |
+| E14 | Focus Not Obscured (Min) | Odaklanan öğe sabit/yapışkan katman tarafından tamamen örtülmez; kısmi örtülme bilgidir (WCAG 2.2 SC 2.4.11) | otomatik | verify-ui klavye testi |
+| E15 | Hedef aralığı istisnası | 24 px altı hedefin 24 px çaplı dairesi başka hedef/daireyle kesişmez (WCAG 2.2 SC 2.5.8) | otomatik | verify-ui |
+| E16 | Metin aralığı | Satır 1.5, paragraf 2×, harf 0.12em, kelime 0.16em uygulanınca kırpılma/taşma yok (WCAG 2.2 SC 1.4.12) | otomatik | verify-ui |
+| E17 | Erişilebilir kimlik doğrulama | Parola/OTP alanına yapıştırma çalışır, `autocomplete` doğru, "göster" düğmesi var (WCAG 2.2 SC 3.3.8) | karma | verify-ui |
+| E18 | Sürükleme | Sürükleme işleyicisi bulunan her öğe için tek-işaretçi alternatifi var (tespit otomatik, onay statik) (WCAG 2.2 SC 2.5.7) | karma | verify-ui (CDP) |
+| E19 | Tekrar giriş | Aynı akışta aynı bilgi ikinci kez boş istenmez (WCAG 2.2 SC 3.3.7) | statik | statik inceleme |
+| E20 | Tutarlı yardım | Yardım mekanizması sayfalar arasında aynı göreli sırada (WCAG 2.2 SC 3.2.6) | statik | statik inceleme |
+| E21 | forced-colors | `forced-colors: active` emülasyonunda etkileşimli öğe sınırı ve odak göstergesi görünür | otomatik | verify-ui |
+| E22 | prefers-contrast: more | Emülasyonda metin kontrastı ≥ 7.0:1, kenarlık ≥ 4.5:1 | otomatik | verify-ui |
+| E23 | Saydam yüzey | Saydam/blur yüzey üstü metin en kötü zemine göre ≥ 4.5:1; opak yedek tanımlı (`prefers-reduced-transparency`) | karma | verify-ui |
+| E24 | RTL | `dir=rtl` geçişinde yatay taşma yok; fiziksel yön özelliği (`margin-left` vb.) statik bulgu | otomatik | verify-ui |
+| E25 | Metin genişlemesi | %30 uzatılmış aksanlı metinde yatay kaydırma/kırpma yok | otomatik | verify-ui |
+| E26 | Türkçe büyük/küçük harf | Kullanıcıya görünen metinde `text-transform: uppercase` / `.toUpperCase()` yok; `toLocaleUpperCase(locale)` | statik | statik inceleme |
+| E27 | Yerel biçim | Elle sayı/tarih/para biçimi yok (`toFixed(2)+" TL"`, sabit `dd/MM/yyyy`); `Intl.*` kullanılır | statik | statik inceleme |
+| E28 | Başlık/bölge yapısı | Tek `h1`, başlık seviyesi atlaması yok, `main` var, adı boş etkileşimli öğe yok | otomatik | verify-ui (ariaSnapshot) |
+| E29 | Aldatıcı tasarım: eşit belirginlik | Kabul/ret ve kayıt/iptal eylemleri aynı boyut sınıfı ve E2 kontrastında; ön-işaretli onay kutusu yok | karma | verify-ui + statik inceleme |
 
 Sayısal araçlarla ölçülemeyen kriter statik incelemeyle kontrol edilir ve gerekçesi `DESIGN_RATIONALE` dokümanının erişilebilirlik bölümüne kısa bir satırla yazılır; tam tanım ve makine okunur eşikler için feza-hci skill'lerindeki eşik dosyası geçerlidir.
 
@@ -151,7 +167,7 @@ Bütünleşik paket raporu setinde her kriter yine 1-5 puanlanır (1 = yok, 3 = 
 - Varsayılan teslim formatında kapak, özet veya içindekilerden birinin eksik olması (kullanıcı sade format istemediyse).
 - Yinelenen veya yeniden kullanılmış ID (FR-001 iki kez vb.).
 - Etiketsiz maliyet/ücret rakamı ("Varsayım: ..." etiketi olmadan).
-- feza-hci arayüz çıktılarında E1-E13 eşiklerinden birinin sağlanmaması (bkz. feza-hci engelleyicileri).
+- feza-hci arayüz çıktılarında E1-E29 eşiklerinden birinin sağlanmaması (bkz. feza-hci engelleyicileri).
 
 ## 5. Görünürlük Kuralları
 

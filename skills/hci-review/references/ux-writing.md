@@ -262,6 +262,8 @@ edilebilirlik).
 | 20 | Jargon | "API çağrısı 429 döndü" | "Kısa sürede çok fazla istek geldi. Birkaç saniye bekleyip tekrar deneyin." | "API returned 429" | "Too many requests in a short time. Wait a few seconds and try again." | Teknik jargon; H2 |
 | 21 | Terim tutarsızlığı | Aynı ekranda "görev / iş / madde" | Her yerde "görev" | "task / item / todo" | "task" everywhere | Terim tutarsızlığı; H4 |
 | 22 | Yerel ayar | "10/01/2026" ve "$1,250.00" TR bağlamında | "1 Ekim 2026" ve "1.250,00 TL" | "01/10/2026" in EN context | "Oct 1, 2026" | Yerel biçim; ISO 9241-110 |
+| 23 | Büyük/küçük harf | CSS `text-transform: uppercase` ya da `metin.toUpperCase()` ("KAYDET") | Metni doğrudan "Kaydet" yaz; gerekirse `toLocaleUpperCase('tr-TR')` | CSS `text-transform: uppercase` or `text.toUpperCase()` ("SAVE") | Write "Save" directly; if needed `toLocaleUpperCase(locale)` | Türkçe i/İ: "i"→"İ", "ı"→"I"; yerel ayarsız dönüşüm yanlış harf üretir (E26, WCAG 3.1.1) |
+| 24 | Yerel biçim kodu | `price.toFixed(2) + " TL"`, `"₺" + n`, sabit `"dd/MM/yyyy"` | `Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'})`, `Intl.DateTimeFormat('tr-TR', …)` | `"$" + n.toFixed(2)`, hardcoded `"MM/dd/yyyy"` | `Intl.NumberFormat(locale, …)`, `Intl.DateTimeFormat(locale, …)` | Grup/ondalık ayracı ve tarih sırası yerel ayara göre değişir; elle birleştirme yanlış (E27, ISO 9241-110) |
 
 ## 6. Mikro-Metin Kontrol Listesi
 
@@ -276,12 +278,14 @@ ilkeye bağlıdır.
 - [ ] Hiçbir yerde placeholder etiket yerine kullanılmıyor; görünür `<label>` var (WCAG 3.3.2, 1.3.1; Nielsen H6).
 - [ ] Alan yardımcı metinleri biçim örneği veriyor (ör. "GG.AA.YYYY") (WCAG 3.3.3).
 - [ ] Hata mesajları alanın yanında ve gönderimde özet olarak; düzeltme yönergesi var (WCAG 3.3.1, 3.3.3; Nielsen H9).
-- [ ] Sayı, tarih, saat ve para biçimleri yerel ayara uygun, `Intl` ile üretiliyor (ISO 9241-110 öz-betimleyicilik).
+- [ ] Sayı, tarih, saat ve para biçimleri `Intl` ile üretiliyor; elle `toFixed(2)+" TL"` ya da sabit `dd/MM/yyyy` gibi birleştirme yok (E27; ISO 9241-110 öz-betimleyicilik).
 - [ ] Boş durumlar neden boş olduğunu ve ilk eylemi söylüyor; tamamen boş alan yok (Nielsen H10).
 - [ ] Başarı bildirimleri ne olduğunu söylüyor; geri alınabilir eylemde "Geri al" sunuluyor (Nielsen H1, H3).
 - [ ] Yükleniyor metinleri 1 s'yi aşan işte ne yapıldığını belirtiyor (Nielsen H1; Dix: responsiveness).
 - [ ] İzin/çerez istekleri gerekçe veriyor, reddetme seçeneği eşit görünüyor (Nielsen H3; ISO 9241-110 kontrol edilebilirlik).
 - [ ] Hata mesajlarında ünlem, emoji, büyük harfle bağırma ve espri yok (Nielsen H2).
+- [ ] Kullanıcıya görünen metinde `text-transform: uppercase/lowercase` ve `.toUpperCase()/.toLowerCase()` yok; gerekliyse `toLocaleUpperCase('tr-TR')` kullanılıyor (E26; Türkçe i/İ).
+- [ ] Sayı, tarih ve para `Intl.NumberFormat`/`Intl.DateTimeFormat` ile biçimleniyor; elle `toFixed(2)+" TL"` ya da sabit `dd/MM/yyyy` deseni yok (E27; ISO 9241-110).
 - [ ] Sayfa başlıkları ve başlık metinleri ekranın amacını açıkça tanımlıyor (WCAG 2.4.6).
 - [ ] Teknik hata kodları başlık değil, ikincil destek bilgisi olarak veriliyor (Nielsen H2, H9).
 
@@ -299,3 +303,20 @@ ilkeye bağlıdır.
 
 URL verilmedi; kaynaklar yalnızca ad ve sürümle anılır. Yukarıdaki ilkeler dışında kaynaksız
 istatistik kullanılmaz.
+
+## 8. Aldatıcı tasarım yasakları
+
+Mikro metin, aldatıcı kalıbın taşıyıcısı olabilir; aşağıdaki metin kararları yasaktır ve E29
+kapsamında engelleyici bulgudur. Kalıpların tam tanımı, düzeltmeleri ve ilgili E kodları için
+`references/deceptive-patterns.md` okunur.
+
+| # | Bağlam | Yasak (TR) | Doğru (TR) | Neden | E kodu / heuristik |
+|---|--------|------------|------------|-------|--------|
+| 1 | İzin/çerez ret metni | "Hayır, fırsatları kaçırıp geride kalmak istemiyorum." | "Şimdi değil" | Utançla ikna (confirmshaming) | E29, E2 |
+| 2 | İzin/çerez ret metni | "Kabul et" büyük düğme + 11 px soluk "Reddet" bağlantısı | Kabul ve ret aynı boyut sınıfı ve E2 kontrastında | Görsel karıştırma | E29, E9, E2 |
+| 3 | Pazarlama onayı | Ön-işaretli "Kampanya e-postaları almak istiyorum" | Boş gelen onay kutusu; kullanıcı açık eylemle işaretler | Ön-seçim | E29, E19 |
+| 4 | Abonelik iptali | "Aboneliği iptal et" yalnız çağrı merkezi numarasıyla | İptal, kayıtla aynı kanaldan ve en fazla kayıt kadar adım | Zor iptal (roach motel) | E29, E10 |
+| 5 | Sahte aciliyet | Her yüklemede sıfırlanan "Bu fiyat 09:59'da bitiyor" sayacı | Gerçek bitiş mutlak tarih-saatle ("15 Ekim 2026, 23:59") | Sahte aciliyet/kıtlık | E29, E11 |
+| 6 | Gizli maliyet | Ödeme anında ortaya çıkan hizmet/kargo bedeli | Toplam (kargo/vergi dahil) en baştan görünür | Gizli maliyet | E29, E11 |
+| 7 | Yeniden sorma | "Şimdi değil" sonrası her ekranda aynı pencere | Ret sonrası yeniden sorma için kullanıcı eylemi beklenir | Israr (nagging) | E29, E10 |
+| 8 | Çift olumsuz | "Devam etmemeyi seçmezseniz onaylamış sayılırsınız." | "Devam etmek için onaylayın." | Metin karıştırma | E29, H2 |

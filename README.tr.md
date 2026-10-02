@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/feza-co/FezaPlugin/actions/workflows/ci.yml/badge.svg)](https://github.com/feza-co/FezaPlugin/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.1.0-informational.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.2.0-informational.svg)](CHANGELOG.md)
 [![Platforms](https://img.shields.io/badge/platforms-Claude%20Code%20%7C%20Codex%20%7C%20Cursor%20%7C%20Gemini%20CLI-555.svg)](docs/installation.md)
 
 [English](README.md)
@@ -105,6 +105,79 @@ Komutlar Claude Code ad alanını kullanır: `/<paket>:<skill>`. Diğer istemcil
 | `/feza-hci:hci-execute` | Rapor yerine çalışan bir kullanıcı arayüzü tasarlar ve kodlar: kullanıcı ve görev modeli (ISO 9241-210), bilgi mimarisi ve ASCII wireframe'ler, token tabanlı tasarım sistemi (WCAG 2.1 AA kontrast, açık ve koyu tema, 4/8 pt ızgara), ardından tespit edilen stack'te (React, Next.js, Vue, Svelte, Tailwind, düz HTML) ya da bağımlılıksız HTML, CSS ve JS ile erişilebilir, responsive ekranlar. Teslimden önce kendi çıktısını Nielsen heuristikleri, Dix et al., WCAG 2.1 AA ve bilişsel yük açısından denetleyip bulduklarını düzeltir; önceki HCI denetimlerinin bulgularını da uygulayabilir. Node.js varsa üretilen arayüzü Playwright ile gerçek tarayıcıda 320/390/768/1280 px'de yükler; axe-core (WCAG 2.1/2.2 A/AA), yatay kaydırma, dokunma hedefi, klavye/odak, reduced-motion + koyu tema ve %200 metin büyütme kontrollerini çalıştırır ve `.feza/ui-check/` altına ekran görüntüleri ile `report.json` yazar. | Arayüz dosyaları ve `DESIGN_RATIONALE_<proje>.md` |
 
 > **Node.js 18+ isteğe bağlıdır.** Yalnızca `hci-execute`'un otomatik render doğrulaması ve fix modu için gerekir (Playwright ve axe-core ilk çalıştırmada kullanıcı önbelleğine kurulur). Node.js yoksa skill'ler statik kontrole düşer.
+
+#### HCI çıktısını ölçme ve doğrulama (v2.2.0)
+
+HCI değerlendirme skill'leri tek bir sayısal kabul setini paylaşır: **E1-E29**. Set
+`shared/packages/feza-hci/thresholds.md` içinde yaşar ve her skill'e `references/thresholds.md`
+olarak kopyalanır; `scripts/verify-ui.mjs` aynı sayıları kendi `THRESHOLDS` bloğunda tekrarlar ve
+`scripts/validate.py` ikisi ayrılırsa derlemeyi düşürür. Her sonuç `report.json` içinde
+`results.E<kod>` olarak `{ ok, value, threshold, method }` biçiminde yazılır; `method` değeri
+`otomatik`, `karma` ya da `statik`tir. `ok: null` bir kriterin otomatik ölçülemediğini ve elle
+incelenmesi gerektiğini gösterir (çıkış kodunu değiştirmez).
+
+Bu sürümde eklenen **E14-E29** kriterleri:
+
+| Kod | Kriter | Ölçüm |
+|-----|--------|-------|
+| E14 | Odak tamamen örtülmüyor (minimum) | otomatik |
+| E15 | Hedef aralığı istisnası (24 px) | otomatik |
+| E16 | Metin aralığı (satır 1.5, paragraf 2×, harf 0.12em, kelime 0.16em) | otomatik |
+| E17 | Erişilebilir kimlik doğrulama (yapıştırma, autocomplete, "göster") | karma |
+| E18 | Sürüklemeye alternatif | karma |
+| E19 | Tekrar giriş | statik |
+| E20 | Tutarlı yardım | statik |
+| E21 | `forced-colors: active` sınır ve odak | otomatik |
+| E22 | `prefers-contrast: more` (metin ≥ 7:1, kenarlık ≥ 4.5:1) | otomatik |
+| E23 | Saydam yüzey ve opak yedek | karma |
+| E24 | RTL taşması ve fiziksel yön özellikleri | otomatik |
+| E25 | Metin genişlemesi (%30 uzatılmış, aksanlı) | otomatik |
+| E26 | Türkçe harf dönüşümü (`uppercase` / `toUpperCase()`) | statik |
+| E27 | Yerel biçim (elle biçim yerine `Intl.*`) | statik |
+| E28 | Başlık/bölge yapısı (`ariaSnapshot()`) | otomatik |
+| E29 | Aldatıcı tasarım: kabul/ret eşit belirginliği | karma |
+
+> **Not (E29).** Yukarıdaki ölçüm türü tek kaynak `shared/packages/feza-hci/thresholds.md` dosyasını
+> izler. Bu sürümde `verify-ui.mjs` E29'u otomatik ölçmez: `ok: null` olarak raporlanır. Kabul/ret
+> eşit belirginliği ve ön-işaretli onay kutuları `deceptive-patterns.md` kontrol listesiyle elle
+> incelenir.
+
+`scripts/verify-ui.mjs` bir E kodunu şu bayraklarla doğrular (`--help`):
+
+- `--profile wcag22aa|en301549` axe kural etiketlerini seçer; kurulu axe sürümünde `EN-301-549`
+  etiketi yoksa profil `wcag22aa`ya düşer ve bunu `report.json.profile` içinde bildirir.
+- `--static <dizin>` tarayıcı açmadan kaynak tarar (E23, E24 fiziksel yön, E26, E27).
+- `--engines axe,ibm` IBM Equal Access'i ikinci, yalnız uyarı katmanı olarak çalıştırır (E1 axe'ta kalır).
+- `--visual <baseline-dizin>` ve `--visual-max-diff N` ekran görüntülerini baseline ile karşılaştırır.
+- `--aria-baseline <dosya>` E28 erişilebilirlik ağacı snapshot'ını kaydeder ya da farkını raporlar.
+- `--fix` modu (dört değerlendirme skill'inde) bulguları arayüz dosyalarına uygular, doğrular ve
+  **ihlal sayısını kesin azaltmayan ya da yeni bir ihlal türü doğuran değişikliği reddeder**; rapora
+  `Önce | Sonra | Karar` sütunlu uygulanan düzeltmeler tablosu eklenir.
+
+İlgili araçlar ve referanslar:
+
+- `contrast.py --tokens <dosya.tokens.json> [--tokens-dark <dosya>]` DTCG tasarım token'larını okur
+  (desteklenen alt küme: color, dimension, duration, cubicBezier, shadow, typography), alias'ları
+  çözer ve eşdeğer `--css` dosyasıyla aynı oranları verir; `--apca` bağlayıcı olmayan APCA Lc sütunu ekler.
+- `scripts/measure-vitals.mjs <URL | dosya.html>` isteğe bağlı lab INP (Interaction to Next Paint)
+  ölçümü: ≤ 200 ms iyi, > 500 ms kritik. Bu bir lab tahminidir, alan INP'sinin yerine geçmez.
+- Değerlendirme skill'leri bir **kanıt rubriği** (`references/evidence-rubric.md`) taşır: her bulgu
+  bir kanıt türü taşır (ekran görüntüsü, DOM seçici, erişilebilirlik ağacı, verify-ui çıktısı);
+  severity 3-4 için DOM seçici ya da verify-ui kanıtı zorunludur ve yalnız görsel tahmin en fazla
+  severity 2 alır. Severity ≥ 3 bulgular bağımsız yeniden puanlanır; manuel kontrol listesi
+  işaretlenmeden rapor "teslim edilebilir" sayılmaz. "0 ihlal = erişilebilir" iddiası yasaktır:
+  otomatik araçlar WCAG'nin yalnız bir kısmını ölçer.
+- Bir **aldatıcı tasarım sözlüğü** (`references/deceptive-patterns.md`) kalıpları (utançla ikna,
+  engelleme, ön-seçim, ısrar, gizli maliyet, zor iptal, sahte aciliyet, metin karıştırma) tanım,
+  örnek, düzeltme ve ilgili E koduyla verir.
+- `usability-eval-plan` SEQ, UMUX-Lite, SUS yüzdelik/sıfat tablosu, HEART hedef-sinyal-metrik
+  tablosu ve koşullu NASA-TLX ekler; `persona` zorunlu veri dayanağı etiketi ve JTBD cümleli
+  proto-persona modu ekler; `cognitive-load` Hick-Hyman, Fitts ve ekran başına rakip öğe/renk
+  sayılarını ekler.
+
+> **Sınırlar.** Otomatik araçlar WCAG'nin yalnız bir kısmını ölçer; temiz bir çalıştırma
+> erişilebilirliğin kanıtı değildir. Statik kriterler (E9-E11, E19, E20, E26, E27) `ok: null` ile
+> raporlanır ve elle okunmalıdır.
 
 ### feza-sqa
 

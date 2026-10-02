@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E23 PASS — opaque rgb() is not a transparent surface</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Son kanalı 0 olan opak rgb() renkler yarı saydam SAYILMAZ. */
+  .alert { background: rgb(255, 0, 0); color: #FFFFFF; padding: 8px; border-radius: 8px; }
+  .panel { background: rgb(10, 20, 0); color: #FFFFFF; padding: 8px; border-radius: 8px; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Opaque surfaces</h1>
+  <div class="alert">
+    <p>Opaque red surface.</p>
+  </div>
+  <div class="panel">
+    <p>Opaque dark surface.</p>
+  </div>
+</main>
+</body>
+</html>

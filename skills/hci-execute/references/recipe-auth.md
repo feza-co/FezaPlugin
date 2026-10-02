@@ -162,6 +162,9 @@ Masaüstünde form en fazla 400-440 px genişlikte ortalanır; satır uzunluğu 
 
 `references/thresholds.md` içindeki E1-E13 eşiklerine ek olarak bu ekrana özel kontroller:
 
+- [ ] **E17:** Parola ve OTP alanlarına yapıştırma engellenmiyor (`onpaste`/`preventDefault` yok); parola yöneticisi çalışıyor (SC 3.3.8).
+- [ ] **E17:** "Şifreyi göster" düğmesi metinle ve `aria-pressed` ile sunuluyor; varsayılan gizli.
+- [ ] **E17:** Kimlik bilgisi girişi bilişsel test gerektirmiyor (ezber/hesaplama yok).
 - [ ] Alt akışların her birinde ekran başına tek `h1` var ve başlık sırası atlanmıyor.
 - [ ] Şifre alanı hariç tüm alanlar hata sonrası değerini koruyor; şifre alanı boşaltılıp odağa alınıyor.
 - [ ] E-posta ve şifre alanlarında uygun `autocomplete` değeri tanımlı (`email`, `current-password`, `new-password`, `one-time-code`).

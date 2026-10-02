@@ -35,6 +35,13 @@ FezaPlugin/
 │           ├── SKILL.md
 │           └── references/             Skill references plus generated copies
 ├── skills/                             Generated flat mirror of every skill
+├── tests/
+│   └── hci/                            HCI fixture suite (not mirrored into skills/)
+│       ├── fixtures/                   `<E-code>-fail.html` / `-pass.html` pairs
+│       ├── fixtures/static/            browserless `--static` fixtures
+│       ├── expected.json               expected exit code and FAIL/null codes
+│       ├── run.mjs                     fixture runner
+│       └── tokens/                     DTCG token fixtures for contrast.py
 ├── scripts/
 │   ├── sync.py                         Generates copies, mirror and versions
 │   └── validate.py                     Static checks
@@ -84,9 +91,12 @@ authoritative.
 3. **Cross-skill scripts.** Helper scripts under a skill's `scripts/` folder are copied to other
    skills with the `CROSS_SKILL_SCRIPTS` list, so a shared script has a single source and is never
    copied by hand. Package-scoped shared files are limited to their recipients by the
-   `PACKAGE_SHARED_SCOPE` map, which distributes each file to exactly the named skills (for
-   example `shared/packages/feza-hci/fix-mode.md` reaches the four evaluation skills as
-   `references/fix-mode.md`).
+   `PACKAGE_SHARED_SCOPE` map, which distributes each file to exactly the named skills:
+   `shared/packages/feza-hci/fix-mode.md` reaches the four evaluation skills as
+   `references/fix-mode.md`, `evidence-rubric.md` reaches `heuristic-eval`, `hci-review`,
+   `color-audit` and `cognitive-load`, `deceptive-patterns.md` reaches `heuristic-eval`,
+   `hci-review` and `hci-execute`, and `thresholds.md` reaches the five HCI skills that measure
+   or apply the E1-E29 set.
 4. **Root mirror.** Every `plugins/<package>/skills/<skill>/` folder is copied to `skills/<skill>/`,
    and `skills/README.md` marks the directory as generated. Stale files are removed.
 5. **Versions.** The `version` field of every plugin manifest and of `gemini-extension.json`, and
@@ -115,7 +125,12 @@ VERSION ──> plugin.json x 18, gemini-extension.json, README badges
 - cross-links: every `/feza-<package>:<skill>` command names an existing skill in that package;
 - manifests: valid JSON, consistent names, versions, licence and marketplace entries;
 - generated files: every `references/` copy and every file in the `skills/` mirror matches its source;
-- banned terms: legacy names that must not appear anywhere in the repository.
+- thresholds: the machine-readable thresholds in `shared/packages/feza-hci/thresholds.md`, the
+  `THRESHOLDS` block in `verify-ui.mjs` and the E1-E29 rows in `shared/quality-gate.md` stay in sync;
+- banned terms: legacy names that must not appear anywhere in the repository, including `tests/`.
+
+The `tests/hci/` fixture suite is not a skill and is not mirrored into `skills/`; it is run
+separately by `node tests/hci/run.mjs` and in CI's `hci-fixtures` job.
 
 The script uses relative paths from the repository root and only the Python standard library.
 

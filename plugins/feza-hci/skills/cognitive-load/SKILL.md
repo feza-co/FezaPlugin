@@ -4,8 +4,9 @@ description: >
   Cognitive Complexity Theory (CCT) ile bir ekran/akışın bilişsel yükünü
   değerlendirir. Kieras & Polson (1985) ve Sweller'in bilişsel yük kuramına
   dayalı 6 ana terim: Cognitive Load, Information Processing, Perceptual Organization (Gestalt),
-  Affordances, Feedback & Feedforward, Skeuomorphism vs Flat Design. Her ekran
-  için yük skoru + azaltma önerileri.
+  Affordances, Feedback & Feedforward, Skeuomorphism vs Flat Design. Hick-Hyman ve Fitts ile
+  etkileşim maliyeti, ekran başına eşzamanlı rakip öğe/renk sayısı, Türkçe okunabilirlik sözel
+  kontrolü (skor hesaplanmaz). Her ekran için yük skoru + azaltma önerileri.
   Tetikleyici: "cognitive load", "bilişsel yük", "complexity theory",
   "/feza-hci:cognitive-load".
   Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
@@ -40,6 +41,7 @@ Expert + günlük → tolerans **YÜKSEK** (efficiency tercih edilebilir).
 
 ## Adım 2 — Bilgi Tabanı
 - `references/cct-terms.md` — 6 terim + Gestalt prensipleri + uygulama örnekleri.
+- `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -48,14 +50,67 @@ Expert + günlük → tolerans **YÜKSEK** (efficiency tercih edilebilir).
 
 Her terim için: **Tespit + Skor (1-5) + Öneri**.
 
-| # | Terim | Tespit | Skor | Öneri |
-|---|-------|--------|------|-------|
-| 1 | Cognitive Load | Ekranda 18 ayrı interaktif öğe — Miller's 7±2 ihlali | 4 | Gruplama (Gestalt) ile 5 bölüme ayır |
-| 2 | Information Processing | Form alanları sıralaması iş akışıyla uyumsuz | 3 | Sıralamayı user journey'e göre yeniden düzenle |
-| 3 | Perceptual Organization (Gestalt) | Yakınlık (proximity) prensibi ihlali — ilgili öğeler dağınık | 3 | İlgili kontroller fiziksel olarak yakınlaştır |
-| 4 | Affordances | "Sepete ekle" butonu link gibi görünüyor (underline) | 3 | Buton stilinde yap (background, border, padding) |
-| 5 | Feedback | Kayıt sonrası ekran sessiz | 4 | Toast notification + redirect sonrası onay |
-| 6 | Feedforward | Disabled butonun NEDEN disabled olduğu görünmez | 2 | Tooltip ile sebep göster |
+| # | Terim | Tespit | Skor | Kanıt türü | Kanıt | Öneri |
+|---|-------|--------|------|------------|-------|-------|
+| 1 | Cognitive Load | Ekranda 18 ayrı interaktif öğe — Miller's 7±2 ihlali | 4 | DOM seçici | `main form` — 18 `input, button, select` | Gruplama (Gestalt) ile 5 bölüme ayır |
+| 2 | Information Processing | Form alanları sıralaması iş akışıyla uyumsuz | 3 | erişilebilirlik ağacı | `ariaSnapshot()` — alan sırası görev sırasıyla uyuşmuyor | Sıralamayı user journey'e göre yeniden düzenle |
+| 3 | Perceptual Organization (Gestalt) | Yakınlık (proximity) prensibi ihlali — ilgili öğeler dağınık | 3 | ekran görüntüsü | `screens/form-1280.png` — ilgili kontroller arasında geniş boşluk | İlgili kontroller fiziksel olarak yakınlaştır |
+| 4 | Affordances | "Sepete ekle" butonu link gibi görünüyor (underline) | 3 | DOM seçici | `button.add-to-cart` — arka plan/kenarlık yok | Buton stilinde yap (background, border, padding) |
+| 5 | Feedback | Kayıt sonrası ekran sessiz | 4 | verify-ui kodu | `E11 FAIL` — başarı durumu yok | Toast notification + redirect sonrası onay |
+| 6 | Feedforward | Disabled butonun NEDEN disabled olduğu görünmez | 2 | DOM seçici | `button[disabled]` — açıklama öğesi yok | Tooltip ile sebep göster |
+
+### Ekran Ölçüm Sütunları (her ekran/akış için zorunlu)
+
+Her ekran için ayrıca iki sayısal ölçüm tabloya eklenir (kaynak: Miller 1956; Hick-Hyman ve
+Fitts ile ilgili ayrıntı `references/cct-terms.md` §7-§8):
+
+| Ekran | Eşzamanlı rakip öğe sayısı | Anlam taşıyan renk sayısı | Not |
+|-------|----------------------------|---------------------------|-----|
+| `<ekran adı>` | <n> | <n> | <7±2 karşılaştırması; renk körlüğü riski> |
+
+- **Eşzamanlı rakip öğe sayısı:** aynı anda dikkat çeken (vurgulu buton, rozet, uyarı, animasyon
+  dâhil) öğeler sayılır; Miller'ın 7±2 aralığı çerçevesinde yorumlanır (Miller 1956). Ham DOM öğe
+  sayısı değil, dikkat için yarışan öğeler sayılır.
+- **Anlam taşıyan renk sayısı:** yalnız dekoratif değil, anlam kodlayan (durum/öncelik/kategori)
+  renkler sayılır; sayı ve ayırt edicilik (renk körlüğü) birlikte not edilir. Anlam yalnız renkle
+  veriliyorsa bu bir bulgudur.
+
+### Hick–Hyman ve Fitts (etkileşim maliyeti)
+
+Karar/konum süreleri ekran karmaşıklığını somutlar; formüller ve istisnalar `references/cct-terms.md`
+§7-§8'dedir.
+
+- **Hick–Hyman:** seçenek sayısı arttıkça karar süresi `RT = a + b·log2(n+1)` ile artar. Katsayılar
+  (a, b) bağlama özgüdür; **sayı uydurulmaz**, plana sabit değer yazılmaz. İstisna: alfabetik,
+  aranabilir ya da çok tanıdık listelerde (menü arama, kısayol) bu model uygulanmaz.
+- **Fitts:** hedefe ulaşma süresi `MT = a + b·log2(D/W + 1)` (Shannon formu); hedef boyutu ve
+  mesafesi belirleyicidir. Küçük/uzak hedefler E4 dokunma hedefi eşiğiyle (`references/thresholds.md`)
+  birlikte değerlendirilir; a, b bağlama özgüdür ve uydurulmaz.
+
+### Türkçe Okunabilirlik — Sözel Kontrol
+
+Türkçe okunabilirlik formülleri (ör. Ateşman, Bezirci–Yılmaz) birincil kaynaktan doğrulanmadığı
+için **otomatik skor hesaplanmaz** ve katsayı yazılmaz. Bunun yerine sözel kontrol yapılır:
+
+- Cümleler kısa ve tek fikirli mi? (Uzun, iç içe cümleler işaretlenir.)
+- Yaygın/gündelik kelimeler mi kullanılıyor; gereksiz teknik terim var mı?
+- Edilgen yapı ve isimleştirme az mı? (Edilgen, özneyi gizleyip yükü artırır.)
+- Aynı kavram için tek terim mi kullanılıyor (tutarlı terminoloji)?
+- Liste/tablo ile parçalama mümkün mü?
+
+> **Not:** Türkçe okunabilirlik formülleri birincil kaynaktan doğrulanmadığı için skor hesaplanmaz;
+> bu bölüm nitel bir kontrol listesidir.
+
+Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. CCT skoru (1-5),
+`references/fix-mode.md` eşleme tablosuyla Nielsen 0-4 ölçeğine çevrilir; Nielsen ölçeğinin somut
+ankrajları `references/evidence-rubric.md` §2'dedir. Nielsen eşdeğeri ≥ 3 (CCT 4-5) bulgular için DOM
+seçici veya verify-ui kodu zorunludur; yalnız görsel tahmine dayalı bulgu en fazla CCT 3'tür.
+
+### İkinci Geçiş
+
+Nielsen eşdeğeri ≥ 3 (CCT 4-5) bulgular `references/evidence-rubric.md` §4'e göre bağımsız bir ikinci
+geçişte, ilk puan gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan farklıysa bulgu
+"elle doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai puan iki puanın büyüğü olur.
 
 ### Yük Skoru Toplam
 
@@ -84,9 +139,16 @@ Tek bir "Aksiyon Listesi" çıkar:
 ## Adım 4 — Self-Check
 - [ ] 6 CCT terimin her biri tarandı mı?
 - [ ] Her birine skor verildi mi?
+- [ ] Ekran başına "eşzamanlı rakip öğe sayısı" ve "anlam taşıyan renk sayısı" sütunları dolduruldu mu?
+- [ ] Hick–Hyman uygulandıysa istisna (alfabetik/aranabilir/çok tanıdık liste) kontrol edildi mi ve katsayı uydurulmadı mı?
+- [ ] Fitts değerlendirmesi hedef boyut/mesafe üzerinden yapıldı mı ve E4 eşiğine bağlandı mı?
+- [ ] Türkçe okunabilirlik sözel kontrolle mi yapıldı; "formüller doğrulanmadığı için skor hesaplanmaz" notu var mı?
 - [ ] Toplam skor hesaplandı mı?
 - [ ] Skeuomorphism/Flat değerlendirmesi var mı?
 - [ ] Azaltma önerileri sıralı mı?
+- [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
+- [ ] Nielsen eşdeğeri ≥ 3 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?
+- [ ] Nielsen eşdeğeri ≥ 3 bulgular ikinci geçişte yeniden puanlandı mı; farklı puanlar "Elle doğrulanmalı" listesinde mi ve "Otomatik doğrulanamayanlar" manuel kontrol listesi işaretlendi mi?
 - [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
@@ -101,6 +163,15 @@ Tek bir "Aksiyon Listesi" çıkar:
 
 ## Adım 5 — Yaz
 - Dosya: `COGNITIVE_LOAD_<proje>.md`
+
+### Rapor Şablonu Ekleri (zorunlu)
+
+- **Elle doğrulanmalı** — ikinci geçişte puanı farklı çıkan (Nielsen eşdeğeri ≥ 3) bulguların listesi
+  (`references/evidence-rubric.md` §4).
+- **Otomatik doğrulanamayanlar** — `references/evidence-rubric.md` §5'teki zorunlu manuel kontrol
+  listesi (`- [ ]` biçiminde): okuma sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen
+  klavye akışı, ekran okuyucuyla deneme, hata mesajlarının anlamı. Manuel maddeler işaretlenmeden
+  rapor "teslim edilebilir" sayılmaz; "0 ihlal = erişilebilir" gibi ifadeler kullanılmaz.
 
 ## Adım 6 — Rapor
 1. Dosya yolu.
@@ -117,6 +188,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
 CCT terim skoru (1-5), `references/fix-mode.md` eşleme tablosuyla Nielsen 0-4 ölçeğine çevrilir; eşik uygulanır.
 Yapısal yeniden tasarım (ekran bölme, akış değiştirme) fix modu kapsamı dışıdır: "Elle düzeltilmeli" yazılır ve `/feza-hci:hci-execute` önerilir.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar

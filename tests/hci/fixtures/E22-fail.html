@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E22 FAIL — prefers-contrast: more altında metin kontrastı yetersiz</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #6E6E6E; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; color: #6E6E6E; }
+  p { color: #6E6E6E; max-width: 60ch; }
+  /* E3'ü tetiklememek için kenarlık yeterli; amaç yalnız E22 metin kontrastı. */
+  input { font: inherit; height: 44px; padding: 8px; border: 1px solid #767676; border-radius: 8px; }
+  /* Kural tanımlı ama renkler hâlâ 7:1 eşiğinin altında (yaklaşık 5:1). */
+  @media (prefers-contrast: more) {
+    body { color: #6E6E6E; }
+    p { color: #6E6E6E; }
+  }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sipariş özeti</h1>
+  <p>Yüksek karşıtlık tercihinde bu metin hâlâ 7:1 eşiğinin altındadır.</p>
+  <label for="email">E-posta</label>
+  <input id="email" type="email" autocomplete="email">
+</main>
+</body>
+</html>

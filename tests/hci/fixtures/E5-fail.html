@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E5 FAIL — 320 px'de yatay kaydırma</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* 480 px sabit genişlik: 320 px viewport'ta yatay kaydırma yaratır. */
+  .panel { width: 480px; padding: 8px; border: 1px solid #79808C; border-radius: 8px; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Ayarlar</h1>
+  <div class="panel">
+    <p>Bu panel sabit 480 px genişliktedir ve 320 px ekranda taşar.</p>
+  </div>
+</main>
+</body>
+</html>

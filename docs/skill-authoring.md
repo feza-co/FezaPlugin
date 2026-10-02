@@ -129,6 +129,29 @@ scope, then add a "Fix Modu" step to its `SKILL.md` and the trigger phrases to i
 Fix mode applies findings to UI files only, defaults to severity ≥ 2, accepts `--fix=all`, verifies
 the result with `verify-ui` and adds an applied-fixes table to the report.
 
+## Adding an acceptance criterion (E code)
+
+The HCI acceptance criteria are one numbered set, **E1-E29**, defined in the feza-hci package. To
+add or change a criterion, keep all four definitions in step in a single change:
+
+1. **`shared/packages/feza-hci/thresholds.md`** — the human-readable row in the E table and, when
+   the criterion has a numeric threshold, the machine-readable value in the `json` block. This file
+   is the single source; every feza-hci skill receives it as `references/thresholds.md`.
+2. **`plugins/feza-hci/skills/hci-execute/scripts/verify-ui.mjs`** — the same numeric value inside
+   the `// THRESHOLDS-BEGIN` … `// THRESHOLDS-END` block, plus the measurement code that writes
+   `results.E<code>` as `{ ok, value, threshold, method }`.
+3. **`shared/quality-gate.md`** — the matching row in the "feza-hci engelleyicileri" table, and the
+   `E1-E29` reference in the blockers list. `scripts/validate.py` compares the thresholds file, the
+   `THRESHOLDS` block and the quality-gate rows and fails on any drift.
+4. **The fixture pair** — `tests/hci/fixtures/<code>-fail.html` and `<code>-pass.html` (or a
+   `tests/hci/fixtures/static/<code>-fail|pass/` directory for a `--static` criterion), with the
+   expected exit code and FAIL/null codes added to `tests/hci/expected.json`. Run
+   `node tests/hci/run.mjs` and confirm the pair behaves as expected.
+
+Do not invent new numbers: code numbers are fixed by the table in `thresholds.md`. State the
+measurement mode (`otomatik`, `karma` or `statik`) honestly; a criterion that cannot be measured
+automatically is reported with `ok: null` and checked by hand.
+
 ## Cross-links between skills
 
 Refer to other skills with their full command, `/feza-<package>:<skill>`, for example "Next:

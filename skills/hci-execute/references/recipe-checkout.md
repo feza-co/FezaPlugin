@@ -121,6 +121,10 @@ Masaüstünde form solda, sipariş özeti sağda sabit sütunda; özet adımlar 
 
 `references/thresholds.md` içindeki E1-E13 eşiklerine ek olarak bu ekrana özel kontroller:
 
+- [ ] **E19:** Fatura ve teslimat adresi adımlarında daha önce girilen adres yeniden boş istenmiyor; "teslimatla aynı" seçeneği ya da önceden doldurulmuş değer sunuluyor (SC 3.3.7).
+- [ ] Toplam tutar (kargo/vergi dahil) ödeme öncesi her adımda görünür; sonradan ortaya çıkan gizli maliyet yok (E29, E11; `references/deceptive-patterns.md` §2.5).
+- [ ] Sahte aciliyet/kıtlık yok; varsa geri sayım gerçek ve mutlak bitiş tarih-saatiyle veriliyor (E29, E11; §2.7).
+- [ ] Ek ürün/hizmet (kefalet, sigorta, hediye paketi) ön-işaretli gelmiyor; kullanıcı açık eylemle ekliyor (E29, E19; §2.3).
 - [ ] Adım göstergesi tüm adımlarda görünür, metin içeriyor ve aktif adım `aria-current="step"` taşıyor.
 - [ ] Adımlar arası geri dönüşte adres ve ödeme bilgileri korunuyor.
 - [ ] Sipariş özeti (ürün, adet, ara toplam, kargo, toplam) her adımda görünüyor.

@@ -1,6 +1,6 @@
 # Cognitive Complexity Theory — 6 Terim
 
-Kaynaklar: Kieras & Polson 1985 (Cognitive Complexity Theory), Sweller 1988 (Cognitive Load Theory), Miller 1956, Norman "The Design of Everyday Things", Wertheimer/Koffka (Gestalt).
+Kaynaklar: Kieras & Polson 1985 (Cognitive Complexity Theory), Sweller 1988 (Cognitive Load Theory), Miller 1956, Norman "The Design of Everyday Things", Wertheimer/Koffka (Gestalt), Hick 1952 ve Hyman 1953 (seçenek sayısı–karar süresi), Fitts 1954 ve MacKenzie 1992 (hedef boyutu/mesafe–hedefleme süresi).
 
 ## 1. Cognitive Load
 
@@ -77,6 +77,54 @@ Ayrım (Norman; Djajadiningrat et al.): feedforward kullanıcıya gelecekteki ak
 
 CCT açısından: **kullanıcı seviyesi düşük + ekran karmaşık → Skeuomorphic ipuçları yardımcı.** Expert + sık kullanım → flat verimlilik kazandırır.
 
+## 7. Hick–Hyman Yasası (seçenek sayısı → karar süresi)
+
+Kaynak: Hick 1952; Hyman 1953.
+
+- Model: `RT = a + b · log2(n + 1)` — RT karar süresi, n eşit olasılıklı seçenek sayısı.
+- a ve b **bağlama özgüdür** (cihaz, görev, kullanıcı); bu dosyada ya da planda sabit katsayı
+  verilmez, **sayı uydurulmaz**. Yalnız ilişki (logaritmik artış) kullanılır.
+- Tasarım çıkarımı: seçenek sayısını azalt, seçenekleri grupla/kademelendir (progressive disclosure),
+  sık seçileni öne çıkar.
+- **Uygulanmayacağı durumlar (istisna):** alfabetik sıralı listeler, aranabilir listeler (arama
+  kutusu olan menü) ve çok tanıdık/ezberlenmiş menüler (klavye kısayolları, sık kullanılan komutlar).
+  Bu durumlarda seçenek sayısı artışı karar süresini bu modelle açıklanacak ölçüde artırmaz.
+
+## 8. Fitts Yasası (hedef boyutu/mesafe → hedefleme süresi)
+
+Kaynak: Fitts 1954; Shannon formu (MacKenzie 1992).
+
+- Model: `MT = a + b · log2(D/W + 1)` — MT hedefleme süresi, D hedefe uzaklık, W hedef boyutu.
+- İlişki: hedef küçüldükçe ya da uzaklaştıkça hedefleme süresi artar. a ve b bağlama özgüdür;
+  **sayı uydurulmaz**.
+- Tasarım çıkarımı: kritik hedefleri büyüt, ekran kenarı/köşesi gibi "sonsuz" hedeflerden yararlan,
+  hedefi ilgili eylemin yakınına koy, aralarındaki mesafeyi azalt.
+- Dokunma hedefi eşiğiyle bağ: boyut kuralı `references/thresholds.md` **E4** (≥ 44×44 birincil,
+  en az 24×24 her yerde) ve **E15** (24 px aralık istisnası) ile birlikte değerlendirilir.
+
+## 9. Ekran Karmaşıklığı Sütunları
+
+Her ekran için iki sayı raporlanır:
+
+| Sütun | Tanım | Değerlendirme |
+|-------|-------|---------------|
+| Eşzamanlı rakip öğe sayısı | Aynı anda dikkat çeken öğeler (vurgulu buton, rozet, uyarı, animasyon) | Miller 7±2 aralığına göre yorumla |
+| Anlam taşıyan renk sayısı | Dekoratif değil, anlam kodlayan (durum/öncelik/kategori) renkler | Sayı + renk körlüğü ayırt ediciliği; anlam yalnız renkle veriliyorsa bulgu |
+
+## 10. Türkçe Okunabilirlik — Sözel Kontrol
+
+Türkçe okunabilirlik formülleri (Ateşman, Bezirci–Yılmaz vb.) birincil kaynaktan doğrulanmadığı için
+**otomatik skor hesaplanmaz** ve katsayı yazılmaz. Bunun yerine sözel kontrol listesi uygulanır:
+
+- Cümleler kısa ve tek fikirli mi?
+- Yaygın/gündelik kelimeler mi; gereksiz teknik terim var mı?
+- Edilgen yapı ve isimleştirme az mı? (Edilgen özneyi gizleyip yükü artırır.)
+- Aynı kavram için tek terim mi kullanılıyor?
+- Liste/tablo ile parçalama mümkün mü?
+
+> **Not:** Türkçe okunabilirlik formülleri birincil kaynaktan doğrulanmadığı için skor hesaplanmaz;
+> bu bölüm nitel bir kontrol listesidir.
+
 ## Reduce Cognitive Overload — Eylem Listesi
 
 1. **Gruplama** (Gestalt prensipleriyle)
@@ -101,3 +149,7 @@ Toplam (6 terim × 5 max = 30):
 - 6-12: Düşük yük
 - 13-20: Orta yük
 - 21-30: Yüksek yük (acil revize)
+
+CCT skoru Nielsen 0-4 ölçeğine `references/fix-mode.md` eşleme tablosuyla çevrilir. Nielsen ölçeğinin
+somut ankrajları, kanıt türleri ve severity 3-4 için kanıt zorunluluğu `references/evidence-rubric.md`
+§1-§3'tedir; burada ayrı bir severity rubriği tanımlanmaz.

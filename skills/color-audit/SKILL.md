@@ -24,11 +24,18 @@ Renk paletini renk teorisi prensipleri + WCAG 2.1 AA'ya göre denetler.
 
 ## Adım 0 — Bağlamı Topla
 1. **Tasarım token dosyaları:** `tokens.json`, `*.tokens.*`, `figma-tokens.json`
-2. **CSS değişkenleri:** `:root` blokları içinde `--color-*`, `--primary`
-3. **Tailwind config:** `tailwind.config.js`/`.ts` `theme.colors`
-4. **CSS dosyaları:** hex (`#abcdef`), `rgb()`, `hsl()` Grep ile çıkar
-5. `BRIEF.md`/`SCOPE_*.md` — marka ipuçları
-6. Hiç yoksa **TEK** soru: "Mevcut paleti listeler misin? (en az primary, secondary, background, text)"
+2. **DTCG token dosyası:** `*.tokens.json` (`$value`/`$type`/`$description`/`$deprecated`,
+   alias `{color.primary}`). Kontrast çiftlerini bu dosyadan çözmek için
+   `python scripts/contrast.py --tokens <file.tokens.json> --pairs pairs.json --json`
+   kullan (`{color.text}` / `color.text` / `--color-text` biçimleri kabul edilir; açık+koyu
+   tema için `--tokens <light> --tokens-dark <dark>`). Alias döngüsü ya da desteklenmeyen
+   renk değeri çıkış kodu 2 verir; desteklenen alt küme `--help`'te listelenir (color,
+   dimension, duration, cubicBezier, shadow, typography).
+3. **CSS değişkenleri:** `:root` blokları içinde `--color-*`, `--primary`
+4. **Tailwind config:** `tailwind.config.js`/`.ts` `theme.colors`
+5. **CSS dosyaları:** hex (`#abcdef`), `rgb()`, `hsl()` Grep ile çıkar
+6. `BRIEF.md`/`SCOPE_*.md` — marka ipuçları
+7. Hiç yoksa **TEK** soru: "Mevcut paleti listeler misin? (en az primary, secondary, background, text)"
 
 ## Adım 1 — Gri Nokta (max 3)
 
@@ -40,6 +47,7 @@ Renk paletini renk teorisi prensipleri + WCAG 2.1 AA'ya göre denetler.
 
 ## Adım 2 — Bilgi Tabanı
 - `references/color-rules.md` — color wheel, harmonies, kontrast formülü, color blindness tipleri.
+- `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -82,6 +90,39 @@ Her metin × arka plan kombinasyonu için:
 
 **FAIL olan her çift için somut alternatif öner** (hex değer dahil).
 
+### 4b. Bulgular Tablosu (kanıt ve severity)
+
+Kontrast dışı bulgular (harmony, 60-30-10, color coding, dark mode) `references/evidence-rubric.md`
+§2'deki severity ankrajlarıyla puanlanır ve kanıt türü ile yazılır:
+
+| # | Bulgu | Konum | Severity | Kanıt türü | Kanıt | Önerilen Düzeltme |
+|---|-------|-------|----------|------------|-------|-------------------|
+| C1 | Muted text kontrastı 3.9:1 (AA normal fail) | `tokens.json` `--color-muted` | 3 | verify-ui kodu | `E2 FAIL, oran 3.9:1` | `--color-muted` → `#5f6368` (4.6:1) |
+| C2 | Error durumu yalnız kırmızı ile iletiliyor | `components/Alert.tsx` | 2 | DOM seçici | `.alert-error` — ikon/etiket yok | İkon + "Hata:" prefix ekle |
+
+Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. Severity 3-4 için DOM seçici
+veya verify-ui kodu zorunludur; yalnız görsel tahmine dayalı bulgu en fazla severity 2'dir.
+
+### 4c. İkinci Geçiş
+
+Severity ≥ 3 bulgular `references/evidence-rubric.md` §4'e göre bağımsız bir ikinci geçişte, ilk puan
+gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan farklıysa bulgu "elle
+doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai severity iki puanın büyüğü olur.
+
+### 4d. Tercih Modları ve Saydam Yüzeyler (E21–E23)
+
+Standart AA kontrastının yanında sistem tercihleri ayrı denetlenir:
+
+| Kontrol | Ne aranır | E |
+|---------|-----------|---|
+| `forced-colors: active` | Etkileşimli öğe sınırı ve odak göstergesi görünür kalıyor mu? Sınır yalnız `background-color` ile mi çizilmiş (yüksek karşıtlıkta kaybolur)? | E21 |
+| `prefers-contrast: more` | Tercih kuralı varsa metin ≥ 7:1, UI kenarlığı ≥ 4.5:1 mi? Yalnız açık tema değeri tekrar edilip eşik altında kalıyor mu? | E22 |
+| Saydam/blur yüzey | `rgba`/`backdrop-filter` yüzey yalnız geçici katmanda mı; `@media (prefers-reduced-transparency: reduce)` altında opak yedek var mı; üstündeki metin en kötü zeminde ≥ 4.5:1 mi? | E23 |
+
+`background-color` ile çizilen sınıra güvenmek yüksek karşıtlık modunda sınırı kaybettirir; sınır `border`/`outline`
+ile de verilmeli ya da sistem renk anahtarlarına (`ButtonText`, `Highlight`) bağlanmalıdır. Saydam yüzeyler
+kalıcı içerik zemininde kullanılmaz.
+
 ### 5. Color Blindness Simülasyonu
 
 3 tip için zihinde simüle et:
@@ -110,12 +151,27 @@ Kontrol et: sadece renk kullanılan yer var mı?
 
 FAIL'ları düzelten yeni tablo + gerekçe.
 
+### 9. Elle doğrulanmalı
+
+İkinci geçişte puanı farklı çıkan (severity ≥ 3) bulguların listesi (`references/evidence-rubric.md` §4).
+
+### 10. Otomatik doğrulanamayanlar
+
+`references/evidence-rubric.md` §5'teki zorunlu manuel kontrol listesi (`- [ ]` biçiminde): okuma
+sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı, ekran okuyucuyla deneme,
+hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edilebilir" sayılmaz; "0 ihlal
+= erişilebilir" gibi ifadeler kullanılmaz.
+
 ## Adım 4 — Self-Check
 - [ ] Tüm metinler için kontrast hesaplandı mı?
 - [ ] Color harmony tespit edildi mi?
 - [ ] 60-30-10 kontrol edildi mi?
 - [ ] Color blindness 3 tip için yorumlandı mı?
+- [ ] forced-colors, `prefers-contrast: more` ve saydam/blur yüzey yedekleri (E21–E23) denetlendi mi?
 - [ ] FAIL'lar için somut hex önerisi var mı?
+- [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
+- [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?
+- [ ] Severity ≥ 3 bulgular ikinci geçişte yeniden puanlandı mı; farklı puanlar "Elle doğrulanmalı" listesinde mi ve "Otomatik doğrulanamayanlar" manuel kontrol listesi işaretlendi mi?
 - [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
@@ -147,6 +203,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 Düzeltme **TOKEN seviyesinde** yapılır: değer tek yerde değişir, kullanım yerleri token'a bağlanır.
 Yeni renk değerleri `scripts/contrast.py` ile hesaplanır; elle tutulan oran kullanılmaz.
 Token katmanı yoksa önce bir katman oluşturulması önerilir ve onay alınır; onay yoksa renk yalnız raporlanır.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar
