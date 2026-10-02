@@ -131,8 +131,6 @@ En kritik 5 bulgu, oncelik sirali:
 
 - Bulgu sayisi azsa: kullanici elle duzeltir
 - Bulgu yogunsa: `/feza-requirements:srs-generate` yeniden calistirilarak temiz baslangic
-- 25010 etiketleme icin: `/feza-iso:iso25010-quality` ile sub-char detay
-- Layering icin: `/feza-iso:iso29148-req` ile BRS/StRS/SyRS/SRS ayrımı
 
 ## Adim 4 — Self-Check
 - [ ] 29148 outline tamlik tablosu var mi?

@@ -9,7 +9,7 @@ description: >
 
 # FezaPlugin Help
 
-FezaPlugin'de mevcut 45 skill'i, 6 paket altında kategorize biçimde sunar.
+FezaPlugin'de mevcut 39 skill'i, 5 paket altında kategorize biçimde sunar.
 
 ## Ne zaman tetiklenir
 - "feza ne yapabilir / ne yapıyor"
@@ -22,20 +22,19 @@ FezaPlugin'de mevcut 45 skill'i, 6 paket altında kategorize biçimde sunar.
 3. Tek cümlelik adım önerisiyle bitir.
 
 ## Paketler
-FezaPlugin 6 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `full-package` gibi paketler arası çalışan skill'ler için ilgili diğer paketlerin de kurulu olması gerekir.
+FezaPlugin 5 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `full-package` gibi paketler arası çalışan skill'ler için ilgili diğer paketlerin de kurulu olması gerekir.
 
-> **Not:** `/feza-toolkit:full-package` diğer paketlerin skill'lerini çağırır; tam paket üretimi için altı paketin tamamını kurun (`feza-requirements`, `feza-pm`, `feza-iso`, `feza-hci`, `feza-sqa`, `feza-toolkit`).
+> **Not:** `/feza-toolkit:full-package` diğer paketlerin skill'lerini çağırır; tam paket üretimi için beş paketin tamamını kurun (`feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa`, `feza-toolkit`).
 
 | Paket | Skill sayısı | Alan |
 |-------|--------------|------|
 | `feza-requirements` | 6 | Gereksinim mühendisliği |
 | `feza-pm` | 12 | Proje yönetimi |
-| `feza-iso` | 6 | ISO/IEC standartları |
 | `feza-hci` | 9 | İnsan-bilgisayar etkileşimi / UX, arayüz tasarımı ve kodlaması |
 | `feza-sqa` | 7 | Yazılım kalite güvencesi |
 | `feza-toolkit` | 5 | Yardımcı araçlar ve orkestrasyon |
 
-## Mevcut Skill Tablosu (45 skill / 6 paket)
+## Mevcut Skill Tablosu (39 skill / 5 paket)
 
 > Her doküman üretiminde kalite kapısı (`references/quality-gate.md`) otomatik çalışır; çıktılar `references/output-conventions.md` uyarınca kapak, özet, içindekiler ve kaynakça ile teslim formatında üretilir.
 
@@ -76,16 +75,6 @@ FezaPlugin 6 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `f
 | `/feza-pm:comm-plan` | İletişim planı matrisi (kim, ne, ne zaman, hangi kanal) | PMBOK 7 (Communications) |
 | `/feza-pm:conflict-resolve` | Çatışma tipi tespiti + 5 çözüm stratejisi (Avoid / Smooth / Compromise / Force / Collaborate) | Thomas-Kilmann, PMBOK 7 |
 | `/feza-pm:competitor-analysis` | Rakip analizi tablosu (özellik, fiyat, konumlandırma) | Porter's Five Forces, pazar analizi pratiği |
-
-### feza-iso — ISO/IEC Standartları
-| Komut | Ne yapar | Dayanak |
-|-------|----------|---------|
-| `/feza-iso:iso12207-audit` | Projeyi 30 process'lik kataloğa göre denetler (4 grup). | ISO/IEC/IEEE 12207:2017 |
-| `/feza-iso:iso29110-vse` | Çok küçük kuruluşlar için Entry Profile uygulanabilirlik ve gap analizi. | ISO/IEC 29110 |
-| `/feza-iso:iso25010-quality` | Ürünü 9 kalite karakteristiğine göre puanlar. | ISO/IEC 25010:2023 |
-| `/feza-iso:iso15939-measure` | Bilgi ihtiyacından karar ölçütüne ölçüm planı (Commitment / Plan / Perform / Evaluate; measurement construct). | ISO/IEC/IEEE 15939:2017 |
-| `/feza-iso:iso29148-req` | Gereksinimleri BRS/StRS/SyRS/SRS hiyerarşisine göre yeniden yapılandırır. | ISO/IEC/IEEE 29148:2018 |
-| `/feza-iso:complaints-to-compliance` | Gerçek ekip şikayetlerini 12207 6.3 Technical Management process'lerine eşler. | ISO/IEC/IEEE 12207:2017 §6.3 |
 
 ### feza-hci — İnsan-Bilgisayar Etkileşimi
 | Komut | Ne yapar | Dayanak |

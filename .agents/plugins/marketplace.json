@@ -29,18 +29,6 @@
       "category": "Productivity"
     },
     {
-      "name": "feza-iso",
-      "source": {
-        "source": "local",
-        "path": "./plugins/feza-iso"
-      },
-      "policy": {
-        "installation": "AVAILABLE",
-        "authentication": "ON_INSTALL"
-      },
-      "category": "Productivity"
-    },
-    {
       "name": "feza-hci",
       "source": {
         "source": "local",

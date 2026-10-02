@@ -42,8 +42,6 @@ CROSS_SKILL_REFERENCES: list[tuple[str, str, str]] = [
     ("srs-generate", "language-guidelines.md", "srs-review"),
     ("srs-generate", "well-formed-requirements.md", "req-classify"),
     ("srs-generate", "language-guidelines.md", "req-classify"),
-    ("srs-generate", "well-formed-requirements.md", "iso29148-req"),
-    ("iso12207-audit", "12207-processes.md", "complaints-to-compliance"),
     ("hci-execute", "ux-writing.md", "heuristic-eval"),
     ("hci-execute", "ux-writing.md", "hci-review"),
 ]

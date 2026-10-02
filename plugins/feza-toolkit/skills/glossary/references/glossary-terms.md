@@ -27,7 +27,7 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Audit
 **Tanım:** Bir bagimsiz ekibin yazilim urun ve sureclerinin standartlara uyumunu degerlendirmesi.
 **Kaynak:** IEEE 1028-2008 §8; ISO/IEC/IEEE 12207:2017
-**Skill:** `/feza-iso:iso12207-audit`, `/feza-sqa:inspection`
+**Skill:** `/feza-sqa:inspection`
 **Note:** Inspection ile karistirma — Audit external team yapar.
 
 ## B
@@ -35,7 +35,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### BRS (Business Requirements Specification)
 **Tanım:** 29148'in 4 dokuman tipinden biri; organizasyonel motivasyon, is sürecleri ve hedefleri yonetim perspektifinden tanimlar.
 **Kaynak:** ISO/IEC/IEEE 29148:2018 §9.3
-**Skill:** `/feza-iso:iso29148-req`
 
 ### Bug
 **Tanım:** Defect'in informal terimi; yazilimda istenmeyen davranis.
@@ -62,7 +61,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Compatibility (Uyumluluk)
 **Tanım:** ISO 25010 9 karakteristikten biri; co-existence + interoperability alt-karakterli.
 **Kaynak:** ISO/IEC 25010:2023 §4.2.3
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### Configuration Management (Konfigurasyon Yönetimi)
 **Tanım:** Versiyon, degisiklik ve sürüm kontrolüyle takimin her zaman dogru urunde calistigini saglayan process.
@@ -158,12 +156,10 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Flexibility (ISO/IEC 25010:2023)
 **Tanım:** Eski Portability karakteristiginin 2023'te yeniden adlandirilmis ve genisletilmis hali — urunun degisen baglam ve yuklere uyum kapasitesi (Adaptability, Scalability, Installability, Replaceability).
 **Kaynak:** ISO/IEC 25010:2023
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### Functional Suitability
 **Tanım:** ISO 25010 ana karakteristik — sistem fonksiyonlarinin specified gereksinimleri karsilamasi.
 **Kaynak:** ISO/IEC 25010:2023 §4.2.1
-**Skill:** `/feza-iso:iso25010-quality`
 
 ## G
 
@@ -204,7 +200,7 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Interaction Capability (önceden Usability)
 **Tanım:** ISO 25010:2023'te yeniden adlandirilan karakteristik — kullanicinin urunu kullanma capacity'si. 8 sub-char.
 **Kaynak:** ISO/IEC 25010:2023 §4.2.4
-**Skill:** `/feza-iso:iso25010-quality`, `/feza-hci:hci-review`
+**Skill:** `/feza-hci:hci-review`
 
 ### INVEST
 **Tanım:** Iyi user story kriterleri: Independent / Negotiable / Valuable / Estimable / Small / Testable.
@@ -219,27 +215,23 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### ISO/IEC 25010:2023
 **Tanım:** Software Product Quality Model — 9 karakteristik.
 **Kaynak:** ISO/IEC 25010:2023
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### ISO/IEC 29110
 **Tanım:** Very Small Entities (≤25 kisi) icin yazilim muhendisligi rehberi. Entry / Basic / Intermediate / Advanced profilleri.
 **Kaynak:** ISO/IEC 29110-4-1; 29110-5-1-2
-**Skill:** `/feza-iso:iso29110-vse`
 
 ### ISO/IEC/IEEE 12207
 **Tanım:** Software Lifecycle Processes standardi — 30 process (4 grup).
 **Kaynak:** ISO/IEC/IEEE 12207:2017
-**Skill:** `/feza-iso:iso12207-audit`
 
 ### ISO/IEC/IEEE 15939
 **Tanım:** Measurement Process standardi — 4 etkinlik (Establish and sustain commitment / Plan / Perform / Evaluate) ve olcum bilgi modeli (information need → base/derived measure → indicator).
 **Kaynak:** ISO/IEC/IEEE 15939:2017
-**Skill:** `/feza-iso:iso15939-measure`
 
 ### ISO/IEC/IEEE 29148
 **Tanım:** Requirements Engineering standardi — 4 doküman tipi (BRS/StRS/SyRS/SRS) + bi-directional traceability.
 **Kaynak:** ISO/IEC/IEEE 29148:2018
-**Skill:** `/feza-requirements:srs-generate`, `/feza-iso:iso29148-req`
+**Skill:** `/feza-requirements:srs-generate`
 
 ## K
 
@@ -260,7 +252,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Maintainability
 **Tanım:** ISO 25010 karakteristik — yazilimin degisiklik, hata duzeltme, iyilestirmelere ne kadar uyum sagladigi.
 **Kaynak:** ISO/IEC 25010:2023 §4.2.7
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### MoSCoW
 **Tanım:** Onceliklendirme metodu: Must have / Should have / Could have / Won't have.
@@ -321,7 +312,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Reliability
 **Tanım:** ISO 25010 karakteristik — sistemin belirli kosullarda calismaya devam etme yetenegi.
 **Kaynak:** ISO/IEC 25010:2023 §4.2.5
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### Risk Register
 **Tanım:** Riskleri tablo halinde yonetme dosyasi: ID / Kategori / Aciklama / Olasilik / Etki / Skor / Response / Owner.
@@ -333,7 +323,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### Safety (ISO/IEC 25010:2023)
 **Tanım:** 2023'te eklenen yeni urun kalite karakteristigi — tanimli kosullarda insan hayati, saglik, mulk veya cevre icin kabul edilemez risk olusturmama (Operational Constraint, Risk Identification, Fail Safe, Hazard Warning, Safe Integration).
 **Kaynak:** ISO/IEC 25010:2023
-**Skill:** `/feza-iso:iso25010-quality`
 
 ### SCOPE
 **Tanım:** Project Scope Statement — proje neyi içerir / icermez tanimi.
@@ -458,7 +447,6 @@ FezaPlugin'in kapsadigi alanlar (gereksinim, proje yonetimi, ISO/IEC standartlar
 ### VSE (Very Small Entity)
 **Tanım:** ISO 29110 tanimi — ≤25 kisilik organizasyon/proje.
 **Kaynak:** ISO/IEC 29110-1
-**Skill:** `/feza-iso:iso29110-vse`
 
 ## W
 

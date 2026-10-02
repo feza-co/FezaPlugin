@@ -4,7 +4,7 @@
     "name": "Feza"
   },
   "metadata": {
-    "description": "FezaPlugin: 45 documentation and design skills for software teams across requirements, project management, ISO compliance, HCI/UX, software quality assurance and a cross-package toolkit.",
+    "description": "FezaPlugin: 39 documentation and design skills for software teams across requirements, project management, HCI/UX, software quality assurance and a cross-package toolkit.",
     "pluginRoot": "plugins"
   },
   "plugins": [
@@ -17,11 +17,6 @@
       "name": "feza-pm",
       "source": "feza-pm",
       "description": "Project management skills: scope statement, WBS, PERT estimation, budget, CPM scheduling, risk register, RACI, SWOT, stakeholder and communication planning."
-    },
-    {
-      "name": "feza-iso",
-      "source": "feza-iso",
-      "description": "ISO/IEC standards skills: 12207 process audit, 29110 VSE profile, 25010 product quality, 15939 measurement plan, 29148 layered requirements and complaint-to-process mapping."
     },
     {
       "name": "feza-hci",

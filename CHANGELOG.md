@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Removed
+
+- The `feza-iso` package and its six skills (`iso12207-audit`, `iso29110-vse`, `iso25010-quality`,
+  `iso15939-measure`, `iso29148-req`, `complaints-to-compliance`) are no longer shipped.
+
 ## [2.2.0] - 2026-10-02
 
 ### Added
