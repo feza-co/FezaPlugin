@@ -11,9 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-- **BREAKING:** feza-iso kaldırıldı; /feza-iso:* komutları artık yok. The `feza-iso` package and
-  its six skills (`iso12207-audit`, `iso29110-vse`, `iso25010-quality`, `iso15939-measure`,
-  `iso29148-req`, `complaints-to-compliance`) are no longer shipped.
+- **BREAKING:** The `feza-iso` package and its six skills (`iso12207-audit`, `iso29110-vse`,
+  `iso25010-quality`, `iso15939-measure`, `iso29148-req`, `complaints-to-compliance`) are no
+  longer shipped; the `/feza-iso:*` commands no longer exist.
 
 ### Added
 
