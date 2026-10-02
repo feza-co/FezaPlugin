@@ -2,7 +2,7 @@
 name: full-package
 description: >
   Tek bir komutla tum FezaPlugin dokuman iskeletini sirayla ureten ORCHESTRATOR skill.
-  Brief'ten baslayip feza-requirements + feza-pm + feza-hci + feza-sqa (+ feza-iso)
+  Brief'ten baslayip feza-requirements + feza-pm + feza-hci + feza-sqa
   paketlerinin cekirdek skill'lerini mantikli sira ile calistirir, her birinin
   ciktisini bir sonrakinin input'u yapar. Tek tikla tum kurumsal doküman seti.
   Diger paketlerin kurulu olmasi gerekir.
@@ -21,7 +21,7 @@ Brief → komple proje paketi (15+ dosya) tek komutla.
 - "kurumsal teslim paketi"
 
 ## Adim 0 — Bagilami Topla
-1. **`BRIEF.md`/`IDEA.md`/`README.md`** — proje fikri zorunlu
+1. **`BRIEF.md`/`IDEA.md`/`README.md`** — proje fikri zorunlu. Brief belirsizse önce `/feza-toolkit:brief-grill` önerilir.
 2. Onceki FezaPlugin ciktilari varsa not et (overwrite uyarisi)
 3. Yoksa **TEK** soru: "Brief yok. Kisa proje fikrini paylas (proje adi + 2-3 cumle + 5-10 ana feature)"
 
@@ -29,7 +29,7 @@ Brief → komple proje paketi (15+ dosya) tek komutla.
 
 | # | Gri nokta |
 |---|-----------|
-| 1 | **Paket boyutu** (Mini = 8 skill / Standard = 15 skill / Full = 28 skill) |
+| 1 | **Paket boyutu** (Mini = 8 skill / Standard = 15 skill / Full = 24 skill) |
 | 2 | **Lifecycle modeli** (Waterfall = full doc / Agile = story-heavy / Hybrid) |
 | 3 | **Hedef kitle** (yonetim kurulu / startup MVP / kurumsal musteri) |
 | 4 | **Dil** (Turkish / English) |
@@ -37,7 +37,7 @@ Brief → komple proje paketi (15+ dosya) tek komutla.
 ## Adim 2 — Bilgi Tabani
 - `references/orchestration-pipelines.md` — 3 paket tipinin skill sirasi + bagimliliklar.
 
-> **Onkosul:** Bu orkestrasyon birden fazla paketin skill'lerini kullanir. `feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa` (Full pakette `feza-iso`) ve `feza-toolkit` kurulu olmalidir; eksik paket varsa kullaniciya hangi paketin gerektigini soyle ve o adimi TBD olarak isaretle.
+> **Onkosul:** Bu orkestrasyon birden fazla paketin skill'lerini kullanir. `feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa` ve `feza-toolkit` kurulu olmalidir; eksik paket varsa kullaniciya hangi paketin gerektigini soyle ve o adimi TBD olarak isaretle.
 
 > **Kalite ve teslim formati:** Her dokuman kurumsal teslim formatinda (`references/output-conventions.md`: kapak, ozet, icindekiler, kaynakca; sablon `references/delivery-format.md`) uretilir ve yazilmadan once gizli kalite kapisindan (`references/quality-gate.md`) gecer: taslak → uretici paketin kriter setiyle gizli puanlama (puan kullaniciya gosterilmez) → gerekirse en fazla 2 tur revizyon → teslim. `PACKAGE_<proje>.md` manifesti **Butunlesik paket raporu** kriter setiyle kontrol edilir.
 - Skip varsayilani: tum paket Standard.
@@ -64,7 +64,7 @@ Skill cagri sirasi (Standard pipeline):
 15. /feza-sqa:test-plan           → TEST_PLAN_*.md
 ```
 
-Full paket (28+) ek olarak: /feza-hci:hci-review, /feza-hci:heuristic-eval, /feza-hci:color-audit, /feza-hci:design-thinking, /feza-hci:prototype-plan, /feza-iso:iso25010-quality, /feza-iso:iso15939-measure, /feza-sqa:traceability-matrix, /feza-sqa:sqa-plan, /feza-sqa:defect-report.
+Full paket (24+) ek olarak: /feza-hci:hci-review, /feza-hci:heuristic-eval, /feza-hci:color-audit, /feza-hci:design-thinking, /feza-hci:prototype-plan, /feza-sqa:traceability-matrix, /feza-sqa:sqa-plan, /feza-sqa:defect-report.
 
 Mini paket (8): /feza-toolkit:lifecycle-pick, /feza-pm:scope-statement, /feza-requirements:srs-generate, /feza-pm:wbs, /feza-pm:estimate, /feza-pm:swot, /feza-pm:risk-register, /feza-sqa:test-plan.
 
@@ -108,8 +108,8 @@ Adim adim:
 #### Standard Paket (15 dosya)
 Yukarisi + STAKEHOLDERS + PERSONAS + USER_STORIES + ACTIVITIES + BUDGET + RACI + COMM_PLAN
 
-#### Full Paket (28+ dosya)
-Yukarisi + HCI_REVIEW + HEURISTIC_EVAL + COLOR_AUDIT + DESIGN_THINKING + PROTOTYPE_PLAN + ISO25010_QUALITY + ISO15939_MEASURE + TRACEABILITY + SQA_PLAN + INSPECTION_PLAN + DEFECT_REPORT_TEMPLATE + REQ_LAYERED + ISO12207_AUDIT
+#### Full Paket (24+ dosya)
+Yukarisi + HCI_REVIEW + HEURISTIC_EVAL + COLOR_AUDIT + DESIGN_THINKING + PROTOTYPE_PLAN + TRACEABILITY + SQA_PLAN + INSPECTION_PLAN + DEFECT_REPORT_TEMPLATE
 
 ### Pipeline Yurutme
 
@@ -170,7 +170,7 @@ Her adimda:
 2. Paket tipi + dosya sayisi.
 3. Toplam karakter / KB.
 4. TBD sayisi (skill bazinda dagilim).
-5. Kapsanan paketler (feza-requirements / feza-pm / feza-hci / feza-sqa / feza-iso sayisi).
+5. Kapsanan paketler (feza-requirements / feza-pm / feza-hci / feza-sqa sayisi).
 6. Kacinda standart/kaynak referansi var.
 7. Onerilen sonraki adim listesi.
 8. Calistirma sure tahmini (gercek kullaniciya).

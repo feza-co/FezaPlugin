@@ -1,18 +1,17 @@
 # Installation
 
-FezaPlugin ships six packages from one repository:
+FezaPlugin ships five packages from one repository:
 
 | Package | Skills |
 |---------|-------:|
 | `feza-requirements` | 6 |
 | `feza-pm` | 12 |
-| `feza-iso` | 6 |
 | `feza-hci` | 9 |
 | `feza-sqa` | 7 |
-| `feza-toolkit` | 5 |
+| `feza-toolkit` | 6 |
 
 Install only what you need. `/feza-toolkit:full-package` calls skills from the other packages,
-so install all six packages if you plan to use it.
+so install all five packages if you plan to use it.
 
 - [Claude Code](#claude-code)
 - [Codex](#codex)
@@ -31,7 +30,6 @@ The repository is a Claude Code plugin marketplace named `feza`
 /plugin marketplace add feza-co/FezaPlugin
 /plugin install feza-requirements@feza
 /plugin install feza-pm@feza
-/plugin install feza-iso@feza
 /plugin install feza-hci@feza
 /plugin install feza-sqa@feza
 /plugin install feza-toolkit@feza
@@ -96,7 +94,7 @@ repository has a Cursor marketplace file at `.cursor-plugin/marketplace.json`
 ## Gemini CLI
 
 The repository root is a Gemini CLI extension (`gemini-extension.json`). Its skills come from the
-generated root `skills/` directory, which contains all 45 skills.
+generated root `skills/` directory, which contains all 40 skills.
 
 ```bash
 gemini extensions install https://github.com/feza-co/FezaPlugin
@@ -146,6 +144,6 @@ Always copy the whole skill folder, including `references/`.
 
 - **A skill cannot find `references/...`:** make sure the whole skill folder was copied,
   including `references/`. Every skill is self-contained.
-- **`full-package` reports a missing package:** install all six packages.
+- **`full-package` reports a missing package:** install all five packages.
 - **Commands do not appear in Claude Code:** run `/plugin` to confirm the plugins are enabled, then
   restart the session.

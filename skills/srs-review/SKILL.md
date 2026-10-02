@@ -22,9 +22,8 @@ Mevcut SRS'i 29148 + 25010 lensiyle puanlar.
 
 ## Adim 0 — Bagilami Topla
 1. **`SRS_*.md`** zorunlu — Glob ile bul; birden fazlaysa en yenisini sec.
-2. Mevcut **`ISO25010_QUALITY_*.md`** (varsa) — onceki kalite skoru ile karsilastir.
-3. **`SCOPE_*.md`** — kapsam ile uyum kontrolu.
-4. SRS yoksa **TEK** soru: "Mevcut SRS yok. Once `/feza-requirements:srs-generate` calistirmami mi istersin?"
+2. **`SCOPE_*.md`** — kapsam ile uyum kontrolu.
+3. SRS yoksa **TEK** soru: "Mevcut SRS yok. Once `/feza-requirements:srs-generate` calistirmami mi istersin?"
 
 ## Adim 1 — Gri Nokta (max 2)
 
@@ -131,8 +130,6 @@ En kritik 5 bulgu, oncelik sirali:
 
 - Bulgu sayisi azsa: kullanici elle duzeltir
 - Bulgu yogunsa: `/feza-requirements:srs-generate` yeniden calistirilarak temiz baslangic
-- 25010 etiketleme icin: `/feza-iso:iso25010-quality` ile sub-char detay
-- Layering icin: `/feza-iso:iso29148-req` ile BRS/StRS/SyRS/SRS ayrımı
 
 ## Adim 4 — Self-Check
 - [ ] 29148 outline tamlik tablosu var mi?

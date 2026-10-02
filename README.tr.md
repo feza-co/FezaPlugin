@@ -8,8 +8,8 @@
 [English](README.md)
 
 FezaPlugin, bir proje özetini (brief) ya da mevcut bir kod tabanını standartlara uygun yazılım
-mühendisliği dokümanlarına dönüştüren 45 ajan skill'inden oluşan bir settir: gereksinim
-spesifikasyonları, proje planları, ISO uyum değerlendirmeleri, UX değerlendirmeleri ve kalite
+mühendisliği dokümanlarına dönüştüren 40 ajan skill'inden oluşan bir settir: gereksinim
+spesifikasyonları, proje planları, UX değerlendirmeleri ve kalite
 güvence planları; ayrıca HCI ilkelerinden tasarlanmış, erişilebilirliği denetlenmiş, çalışan
 kullanıcı arayüzleri. Her skill deponuzda mevcut olanı okur, en fazla birkaç hedefli soru sorar ve
 projenize eksiksiz, incelemeye hazır bir Markdown dokümanı yazar.
@@ -36,13 +36,12 @@ projenize eksiksiz, incelemeye hazır bir Markdown dokümanı yazar.
 |-------|------:|------|
 | [`feza-requirements`](plugins/feza-requirements) | 6 | Gereksinim mühendisliği: SRS üretimi ve incelemesi, elicitation, sınıflandırma, çakışmalar, kullanıcı hikâyeleri |
 | [`feza-pm`](plugins/feza-pm) | 12 | Proje yönetimi: kapsam, WBS, tahmin, bütçe, takvim, risk, RACI, paydaşlar, iletişim |
-| [`feza-iso`](plugins/feza-iso) | 6 | ISO/IEC uyumu: 12207, 29110, 25010, 15939, 29148 |
 | [`feza-hci`](plugins/feza-hci) | 9 | HCI ve UX: değerlendirmeler, heuristik denetim, kullanılabilirlik testi, erişilebilirlik, personalar, arayüz tasarımı ve kodlaması |
 | [`feza-sqa`](plugins/feza-sqa) | 7 | Yazılım kalite güvencesi: SQA planı, test planı, metrikler, inceleme, izlenebilirlik, değişiklik ve kusur kontrolü |
-| [`feza-toolkit`](plugins/feza-toolkit) | 5 | Paketler arası araçlar: menü, yaşam döngüsü seçimi, tam paket orkestrasyonu, demo senaryosu, sözlük |
+| [`feza-toolkit`](plugins/feza-toolkit) | 6 | Paketler arası araçlar: brief netleştirme mülakatı, menü, yaşam döngüsü seçimi, tam paket orkestrasyonu, demo senaryosu, sözlük |
 
 > **Not:** `/feza-toolkit:full-package` diğer paketlerin skill'lerini çağırır. Eksiksiz bir doküman
-> seti üretmek için altı paketin tamamını kurun.
+> seti üretmek için beş paketin tamamını kurun.
 
 ## Skill'ler
 
@@ -78,17 +77,6 @@ Komutlar Claude Code ad alanını kullanır: `/<paket>:<skill>`. Diğer istemcil
 | `/feza-pm:comm-plan` | PMBOK iletişim yönetimine göre iletişim planı matrisi kurar: hangi paydaşın hangi bilgiyi, ne sıklıkla, hangi kanaldan ve kimden alacağı; ayrıca çatışma çıkması muhtemel noktalar. `STAKEHOLDERS_*.md` dosyasını kullanır. | `COMM_PLAN_<proje>.md` |
 | `/feza-pm:conflict-resolve` | Bir ekip çatışması senaryosunu alır, çatışmanın türünü belirler ve beş Thomas-Kilmann / PMBOK stratejisiyle (kaçınma, yatıştırma, uzlaşma, zorlama, iş birliği) nasıl çözüleceğini önerir. Yanıt sohbette verilir ve isteğe bağlı olarak `CONFLICT_LOG.md` dosyasına eklenir. | Sohbet; isteğe bağlı `CONFLICT_LOG.md` |
 | `/feza-pm:competitor-analysis` | Ürünü rakipleri ya da alternatifleriyle Porter'ın rekabet stratejisi çerçevesinde karşılaştırır: fiyat, hedef segment, çekirdek özellikler, teknoloji yığını, artı ve eksi yönleri kapsayan bir tablo, farklılaşma önerisi ve pazar boşluğu tablosu. | `COMPETITORS_<proje>.md` |
-
-### feza-iso
-
-| Komut | Ne yapar | Çıktı |
-|-------|----------|-------|
-| `/feza-iso:iso12207-audit` | ISO/IEC/IEEE 12207, yazılım yaşam döngüsünün süreçlerini kataloglayan uluslararası standarttır. Bu skill projenizi standardın dört gruptaki (anlaşma, kurumsal proje destek, teknik yönetim, teknik) 30 sürecine göre denetler ve her süreci depodaki (README, CI iş akışları, testler, dokümanlar, yapılandırma) ve önceki FezaPlugin çıktılarındaki kanıtlara dayanarak uygulanıyor, kısmen ya da yok olarak derecelendirir. En büyük beş boşluk ve bunları kapatacak bir yol haritasıyla biter. | `ISO12207_AUDIT_<proje>.md` |
-| `/feza-iso:iso29110-vse` | ISO/IEC 29110, çok küçük işletmeler (VSE, en fazla 25 kişilik ekipler) için yaşam döngüsü standardıdır; Entry Profile altı kişi-aydan küçük projeleri hedefler. Skill ekibinizin ve projenizin bu profile uyup uymadığını (git geçmişinden katkıcı sayısı, tahmini efor) kontrol eder, ardından iki çekirdek süreci, Proje Yönetimi ve Yazılım Gerçekleştirme'yi denetleyerek eksik aktiviteleri, rolleri ve temel iş ürünlerini listeler ve sonucu ISO/IEC/IEEE 12207 ile karşılaştırır. | `ISO29110_VSE_<proje>.md` |
-| `/feza-iso:iso25010-quality` | ISO/IEC 25010, yazılım ürün kalitesi modelidir. Skill ürününüzü ya da SRS'inizi modelin dokuz karakteristiği (fonksiyonel uygunluk, performans verimliliği, uyumluluk, etkileşim yeteneği, güvenilirlik, güvenlik, bakım yapılabilirlik, esneklik, emniyet) ve alt karakteristikleri üzerinden 1-5 arası puanlar; kanıtları `SRS_*.md`'den, kaynak kod sinyallerinden (kimlik doğrulama, önbellek, loglama, erişilebilirlik öznitelikleri, testler, CI), test sonuçlarından ve önceki UX denetimlerinden toplar. Önerilerle birlikte ilk üç risk ve ilk üç güçlü yönü raporlar. | `ISO25010_QUALITY_<proje>.md` |
-| `/feza-iso:iso15939-measure` | ISO/IEC/IEEE 15939, bir yazılım ölçüm sürecinin nasıl yürütüleceğini tanımlar. Skill bilgi ihtiyaçlarından (ölçümlerin hangi kararları desteklemesi gerektiği) başlayan bir ölçüm planı kurar, her ihtiyacı ISO/IEC 25010 alt karakteristiği gibi ölçülebilir bir kavrama bağlar ve temel ölçüleri, türetilmiş ölçüleri, göstergeleri ve karar kriterlerini tanımlar. Plan standardın dört etkinliğini (taahhüt, planlama, uygulama, değerlendirme) izler ve her metrik bir uygunluk kontrol listesinden geçer. Girdiler `SRS_*.md`, `ISO25010_QUALITY_*.md`, paydaşlar, kapsam ve risklerdir. | `MEASUREMENT_PLAN_<proje>.md` |
-| `/feza-iso:iso29148-req` | ISO/IEC/IEEE 29148 gereksinim mühendisliği standardıdır; gereksinimleri dört dokümana ayırır: iş (BRS), paydaş (StRS), sistem (SyRS) ve yazılım (SRS). Skill mevcut `SRS_*.md` dosyanızı (kapsam, paydaş ve persona dosyalarıyla birlikte) alır, her gereksinimi doğru katmana yerleştirir, katmanlar arasında çift yönlü izlenebilirlik bağları kurar ve her gereksinimi iyi-form kriterlerine göre kontrol eder. srs-generate'ten farkı, sıfırdan yazmak yerine mevcut seti yeniden yapılandırmasıdır. | `REQ_LAYERED_<proje>.md` |
-| `/feza-iso:complaints-to-compliance` | Ekip şikâyetlerini belirti olarak ele alır ve her birini, açığa çıkardığı ISO/IEC/IEEE 12207 teknik yönetim sürecine (planlama, değerlendirme ve kontrol, karar, risk, konfigürasyon, bilgi, ölçüm, kalite güvencesi) eşler. Şikâyetler komut argümanından, `CONFLICT_LOG.md`'den ya da iletişim planından alınır. Çıktı her şikâyet için rol, süreç ve düzeltici aksiyonu, üç ana yapısal sorunu ve 30/60/90 günlük aksiyon planını verir. | `COMPLAINTS_TO_COMPLIANCE_<proje>.md` |
 
 ### feza-hci
 
@@ -187,7 +175,7 @@ Bu sürümde eklenen **E14-E29** kriterleri:
 | `/feza-sqa:test-plan` | ISO/IEC/IEEE 29119-3 ve IEEE 829'a göre test planı ve test senaryoları yazar; senaryoları `SRS_*.md` içindeki fonksiyonel ve fonksiyonel olmayan gereksinimlerden ve varsa kullanıcı hikâyelerinin kabul kriterlerinden türetir. Test seviyelerini, yaklaşımı, geçti/kaldı kriterlerini, takvimi, ortamı, araçları ve riskleri kapsar; her test senaryosunun kimliği, gereksinim bağı, önceliği, türü (pozitif, negatif, sınır, NFR) ve beklenen sonucu vardır. | `TEST_PLAN_<proje>.md` |
 | `/feza-sqa:metrics-plan` | Yazılım kalite metriklerini üç grupta planlar: süreç öncesi (efor ve kusur tahminleri, inceleme kararları), süreç içi (kusur bulma oranı, geliştirme sırasındaki kalite) ve süreç sonu (Kusur Giderme Verimliliği, DRE, ve süreç iyileştirme). ISO/IEC/IEEE 15939 ve IEEE 1028 ile uyumlu sayısal hedefler, toplama planı ve gösterge paneli belirler; proje boyutu SRS'ten ve tahminlerden alınır. | `METRICS_PLAN_<proje>.md` |
 | `/feza-sqa:inspection` | İnceleme (inspection), bir iş ürününün en resmi akran gözden geçirme biçimidir. Skill Fagan yöntemine dayalı IEEE 1028 inceleme prosedürü yazar: altı adım (planlama, genel bakış, hazırlık, toplantı, yeniden çalışma, rapor), roller (moderatör, yazar, okuyucu, kayıtçı, inceleyiciler), dokuz boyutlu kontrol listesi, Critical/Major/Minor şiddet, çıkış kriterleri ve kullanıma hazır formlar (inceleme planı, kusur kaydı, özet). Walkthrough ya da denetimin ne zaman daha uygun olduğunu da açıklar; gereksinimler, tasarım, kod ya da test planları için kullanılabilir. | `INSPECTION_PLAN_<proje>.md` |
-| `/feza-sqa:traceability-matrix` | Her paydaş ihtiyacını iş, paydaş, sistem ve yazılım gereksinimleri üzerinden tasarıma, koda, test senaryolarına ve kusurlara ileri, geri ve yatay yönde bağlayan bir gereksinim izlenebilirlik matrisi (RTM) kurar. Mevcut FezaPlugin çıktılarını (SCOPE, SRS, REQ_LAYERED, USER_STORIES, TEST_PLAN) birbirine bağlar, aşama bazında kapsama oranını hesaplar ve önerilen aksiyonlarla boşlukları listeler. | `TRACEABILITY_<proje>.md` |
+| `/feza-sqa:traceability-matrix` | Her paydaş ihtiyacını iş, paydaş, sistem ve yazılım gereksinimleri üzerinden tasarıma, koda, test senaryolarına ve kusurlara ileri, geri ve yatay yönde bağlayan bir gereksinim izlenebilirlik matrisi (RTM) kurar. Mevcut FezaPlugin çıktılarını (SCOPE, SRS, USER_STORIES, TEST_PLAN) birbirine bağlar, aşama bazında kapsama oranını hesaplar ve önerilen aksiyonlarla boşlukları listeler. | `TRACEABILITY_<proje>.md` |
 | `/feza-sqa:change-control` | IEEE 730, PMBOK bütünleşik değişiklik kontrolü ve ISO/IEC/IEEE 12207 konfigürasyon yönetimiyle uyumlu bir değişiklik kontrol düzeni kurar: Değişiklik Kontrol Kurulu (CCB) yapısı, Proposed'dan Closed'a değişiklik talebi (CR) durumları, CR formu, etki analizi çalışma sayfası (kapsam, takvim, maliyet, kalite, paydaşlar, bağımlılıklar, risk), oylama protokolü, küçük değişiklikler için hızlı yol ve denetim izi. İstenirse yalnızca tek bir değişiklik talebi üretir. | `CHANGE_CONTROL_<proje>.md` ya da `CR_<id>_<proje>.md` |
 | `/feza-sqa:defect-report` | IEEE 1044 terminolojisini (fault, failure, anomaly vb.) ve ISO/IEC/IEEE 29119-3 olay raporu yapısını kullanarak bir kusur raporu şablonu üretir ya da açıklamanızdan tek bir kusur raporu doldurur: önem derecesi ve öncelik (farkı açıklayan matrisle), yeniden üretme adımları, beklenen ve gerçek sonuç, ortam, test senaryosu ve gereksinime izlenebilirlik, kök neden kategorisi ve kusur yaşam döngüsü. Triyaj kuralları ve Jira / GitHub Issues alan eşlemesini de içerir. | `DEFECT_REPORT_TEMPLATE_<proje>.md` ya da `DR_<id>_<proje>.md` |
 
@@ -195,11 +183,14 @@ Bu sürümde eklenen **E14-E29** kriterleri:
 
 | Komut | Ne yapar | Çıktı |
 |-------|----------|-------|
+| `/feza-toolkit:brief-grill` | Bir brief'i karar ağacı mülakatıyla sabitler: seferde tek çoktan seçmeli soru sorar (problem ve kimin problemi, hedef kullanıcı, çözümün ne olduğu ve ne olmadığı, temel özellikler, kısıtlar, başarı ölçütleri, riskler, teslim biçimi) ve ağacın her dalı kapanana kadar sürer; ardından kararları ve açık varsayımları brief sonuna ekler. Soru sınırı yoktur; dosyadan okunabilecek hiçbir şey sorulmaz. | Güncellenmiş `BRIEF.md` (karar tablosu) |
 | `/feza-toolkit:help` | FezaPlugin menüsünü gösterir: paketler, her skill'in dayandığı standart ya da yöntem, nasıl çağrılacağı ve önerilen ilk adım. Dosya yazmaz. | Sohbet |
 | `/feza-toolkit:lifecycle-pick` | Bir yazılım geliştirme yaşam döngüsü (SDLC) modeli önerir. Projeyi gereksinim netliği, ekip deneyimi, müşteri katılımı, zaman baskısı ve teknoloji riski açısından puanlar; Waterfall, Incremental ve Iterative ile Agile/Scrum, Kanban, V-Model, Spiral ve Hybrid'i karşılaştırır; seçilen modelin artı ve eksilerini ve ayrıntılı planını (fazlar ya da sprintler, roller, artefaktlar, kadans, riskler) verir. Varsa kapsam, SRS, paydaş, risk ve tahmin dosyalarını okur. | `LIFECYCLE_PICK_<proje>.md` |
-| `/feza-toolkit:full-package` | Tek bir proje brief'inden yola çıkarak diğer paketlerin çekirdek skill'lerini mantıklı bir sırayla çalıştıran ve her çıktıyı bir sonrakine girdi yapan orkestratör. Mini (8 dosya), Standard (15 dosya) ya da Full (28+ dosya) paket seçilir; çalışma, üretilen dosyaları, önerilen sonraki adımları ve bilinen boşlukları listeleyen bir `PACKAGE_<proje>.md` manifestiyle biter. Diğer tüm paketlerin kurulu olması gerekir. | Doküman seti ve `PACKAGE_<proje>.md` |
+| `/feza-toolkit:full-package` | Tek bir proje brief'inden yola çıkarak diğer paketlerin çekirdek skill'lerini mantıklı bir sırayla çalıştıran ve her çıktıyı bir sonrakine girdi yapan orkestratör. Mini (8 dosya), Standard (15 dosya) ya da Full (24+ dosya) paket seçilir; çalışma, üretilen dosyaları, önerilen sonraki adımları ve bilinen boşlukları listeleyen bir `PACKAGE_<proje>.md` manifestiyle biter. Diğer tüm paketlerin kurulu olması gerekir. | Doküman seti ve `PACKAGE_<proje>.md` |
 | `/feza-toolkit:demo-script` | Paydaşlar, yatırımcılar, müşteriler ya da yönetim kurulu için 10-15 dakikalık bir sunum hazırlar: zamanlanmış akış (açılış, problem, çözüm, canlı demo, mimari, PERT tahminleri, DRE ve risk skorları gibi sayısal kanıtlar, standart uyumu, kapanış) ve ROI, takvim, risk, güvenlik, ölçeklenebilirlik, rekabet ve benimseme konularında hazır cevaplı soru-cevap bankası. Rakamları mevcut FezaPlugin çıktılarından alır. | `DEMO_SCRIPT_<proje>.md` |
 | `/feza-toolkit:glossary` | Gereksinim, proje yönetimi, ISO/IEC standartları, HCI ve SQA terimlerinden oluşan, alfabetik ve kategorize edilmiş iki dilli Türkçe-İngilizce sözlük üretir. Her madde karşılığı, tanımı, kaynak standart referansını, ilgili FezaPlugin skill'ini ve bir kullanım örneğini verir. Girdi gerektirmez; alana ya da terime göre filtrelenebilir. | `GLOSSARY_<lang>.md` |
+
+> `brief-grill`, [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) yaklaşımından uyarlanmıştır.
 
 ## Hızlı Başlangıç
 
@@ -213,7 +204,7 @@ Tüm platformlar için ayrıntılı talimatlar [docs/installation.md](docs/insta
 /plugin install feza-pm@feza
 ```
 
-`feza-requirements`, `feza-pm`, `feza-iso`, `feza-hci`, `feza-sqa` ve `feza-toolkit` paketlerinden
+`feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa` ve `feza-toolkit` paketlerinden
 istediğinizi aynı şekilde kurun.
 
 ### Codex

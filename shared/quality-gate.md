@@ -35,7 +35,6 @@ Taslak v1 (bellekte) → Puanla (100 üzerinden) → Eşik ≥ 85 ve engelleyici
 |------|---------------------------|
 | feza-requirements — Gereksinim | `SRS_`, `SRS_REVIEW_`, `USER_STORIES_`, `REQ_`, `ELICITATION_KIT_` ile başlayanlar |
 | feza-pm — Proje Yönetimi | `LIFECYCLE_PICK_`, `SCOPE_`, `WBS_`, `ESTIMATES_`, `BUDGET_`, `ACTIVITIES_`, `RISK_REGISTER_`, `SWOT_`, `RACI_`, `STAKEHOLDERS_`, `COMM_PLAN_`, `COMPETITORS_` |
-| feza-iso — ISO Uyumu | `ISO12207_`, `ISO29110_`, `ISO25010_`, `MEASUREMENT_PLAN_`, `REQ_LAYERED_`, `COMPLAINTS_TO_COMPLIANCE_` |
 | feza-hci — HCI | `HCI_REVIEW_`, `HEURISTIC_`, `USABILITY_`, `COGNITIVE_`, `COLOR_AUDIT_`, `PERSONAS_`, `PROTOTYPE_`, `DESIGN_THINKING_`, `DESIGN_RATIONALE_` |
 | feza-sqa — SQA | `SQA_PLAN_`, `TEST_PLAN_`, `METRICS_`, `INSPECTION_`, `TRACEABILITY_`, `CHANGE_`, `CR_`, `DEFECT_`, `DR_` |
 | Bütünleşik paket raporu | Birden fazla çıktıyı tek dokümanda birleştiren raporlar (ör. `PACKAGE_`) |
@@ -67,17 +66,6 @@ Eşleşme yoksa en yakın kriter seti seçilir; emin olunamıyorsa paket kriter 
 | Kanıt ve varsayım etiketleme | %10 | Kaynaksız iddialar | Kısmen etiketli | Her satır brief/kod/"Varsayım:" ile |
 | Bilinen Boşluklar | %10 | Bölüm yok | Etiketli | Gerekçeli + önerilen çözümlü |
 | Bağımlı çıktılarla tutarlılık (SCOPE → WBS → ESTIMATES → BUDGET) | %10 | Çelişkili | Kısmen | Tam tutarlı |
-| Teslim formatı | %10 | Eksik | Kısmen | Tam |
-
-### feza-iso — ISO Uyumu (12207, 29110, 25010, 15939, 29148 vb.)
-
-| Kriter | Ağırlık | 1 | 3 | 5 |
-|--------|---------|---|---|---|
-| Standart madde referansı | %25 | Yok | Kısmen | Her süreç/karakteristik madde numarasıyla etiketli |
-| Kanıt eşlemesi | %20 | Yok | Yarısında | Her süreçte somut kanıt (dosya, kayıt, kod yolu) |
-| Olgunluk/uyum yüzdesi | %15 | Yok | Hesaplanmış | Hesap + yöntem açıklaması |
-| Önceliklendirilmiş boşluklar (Top-N gap) | %15 | Yok | Sıralı | Etki × olasılığa göre önceliklendirilmiş |
-| Aksiyon önerisi | %15 | Genel | Spesifik | Somut + sorumlu + hedef tarih |
 | Teslim formatı | %10 | Eksik | Kısmen | Tam |
 
 ### feza-hci — HCI (değerlendirme, heuristik, renk, persona vb.)

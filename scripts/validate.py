@@ -31,13 +31,11 @@ PACKAGES: dict[str, list[str]] = {
     "feza-requirements": ["srs-generate", "srs-review", "req-elicit", "req-classify", "req-conflict-check", "user-story"],
     "feza-pm": ["scope-statement", "wbs", "estimate", "swot", "raci", "budget", "activity-sequence",
                 "risk-register", "stakeholder-map", "comm-plan", "conflict-resolve", "competitor-analysis"],
-    "feza-iso": ["iso12207-audit", "iso29110-vse", "iso25010-quality", "iso15939-measure", "iso29148-req",
-                 "complaints-to-compliance"],
     "feza-hci": ["hci-review", "heuristic-eval", "usability-eval-plan", "cognitive-load", "color-audit",
                  "design-thinking", "prototype-plan", "persona", "hci-execute"],
     "feza-sqa": ["sqa-plan", "test-plan", "metrics-plan", "inspection", "traceability-matrix", "change-control",
                  "defect-report"],
-    "feza-toolkit": ["help", "lifecycle-pick", "full-package", "demo-script", "glossary"],
+    "feza-toolkit": ["help", "lifecycle-pick", "full-package", "demo-script", "glossary", "brief-grill"],
 }
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

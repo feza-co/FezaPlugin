@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `brief-grill` skill in `feza-toolkit`: pins down a brief through a decision-tree interview. It
+  asks one multiple-choice question at a time (never plain text) using the question tool, with
+  2-4 concrete options plus a free-text escape, and keeps going until every branch of the tree is
+  resolved (no total question limit). It discovers an existing `BRIEF.md`/`IDEA.md`/`docs/brief.md`
+  or asks for the idea once, records each decision, treats "I don't know" as a labelled assumption
+  and surfaces contradictions as a single question. Decisions and open assumptions are appended to
+  the brief as a "Netleştirilmiş Kararlar" table and an "Açık Varsayımlar" list without rewriting
+  the existing text. Adapted from the [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) approach.
+  `feza-toolkit` now ships 6 skills (40 in total).
+
+### Removed
+
+- The `feza-iso` package and its six skills (`iso12207-audit`, `iso29110-vse`, `iso25010-quality`,
+  `iso15939-measure`, `iso29148-req`, `complaints-to-compliance`) are no longer shipped.
+
 ## [2.2.0] - 2026-10-02
 
 ### Added

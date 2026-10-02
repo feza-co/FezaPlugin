@@ -14,7 +14,6 @@ body:
       options:
         - feza-requirements
         - feza-pm
-        - feza-iso
         - feza-hci
         - feza-sqa
         - feza-toolkit

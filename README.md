@@ -7,9 +7,9 @@
 
 [Türkçe](README.tr.md)
 
-FezaPlugin is a set of 45 agent skills that turn a project brief or an existing codebase into
+FezaPlugin is a set of 40 agent skills that turn a project brief or an existing codebase into
 standards-aligned software engineering documents: requirements specifications, project plans,
-ISO compliance assessments, UX evaluations and quality assurance plans, plus working,
+UX evaluations and quality assurance plans, plus working,
 accessibility-checked user interfaces designed from HCI principles. Each skill reads what is
 already in your repository, asks at most a few targeted questions, and writes a complete,
 review-ready Markdown document to your project.
@@ -34,12 +34,11 @@ review-ready Markdown document to your project.
 |---------|-------:|-------|
 | [`feza-requirements`](plugins/feza-requirements) | 6 | Requirements engineering: SRS generation and review, elicitation, classification, conflicts, user stories |
 | [`feza-pm`](plugins/feza-pm) | 12 | Project management: scope, WBS, estimation, budget, schedule, risk, RACI, stakeholders, communication |
-| [`feza-iso`](plugins/feza-iso) | 6 | ISO/IEC compliance: 12207, 29110, 25010, 15939, 29148 |
 | [`feza-hci`](plugins/feza-hci) | 9 | HCI and UX: reviews, heuristic evaluation, usability testing, accessibility, personas, UI design and build |
 | [`feza-sqa`](plugins/feza-sqa) | 7 | Software quality assurance: SQA plan, test plan, metrics, inspection, traceability, change and defect control |
-| [`feza-toolkit`](plugins/feza-toolkit) | 5 | Cross-package utilities: menu, lifecycle selection, full package orchestration, demo script, glossary |
+| [`feza-toolkit`](plugins/feza-toolkit) | 6 | Cross-package utilities: brief clarification interview, menu, lifecycle selection, full package orchestration, demo script, glossary |
 
-> **Note:** `/feza-toolkit:full-package` calls skills from the other packages. Install all six
+> **Note:** `/feza-toolkit:full-package` calls skills from the other packages. Install all five
 > packages to generate a complete documentation set.
 
 ## Skills
@@ -76,17 +75,6 @@ name (for example `$srs-generate` in Codex) or pick it automatically from the re
 | `/feza-pm:comm-plan` | Builds a communication plan matrix following PMBOK communications management: which stakeholder receives what information, how often, through which channel and from whom, plus the points where conflict is likely. Uses `STAKEHOLDERS_*.md`. | `COMM_PLAN_<project>.md` |
 | `/feza-pm:conflict-resolve` | Takes a team conflict scenario, identifies the type of conflict and recommends how to resolve it with the five Thomas-Kilmann / PMBOK strategies: avoiding, smoothing, compromising, forcing and collaborating. The answer is given in chat and can optionally be appended to `CONFLICT_LOG.md`. | In chat; optional `CONFLICT_LOG.md` |
 | `/feza-pm:competitor-analysis` | Compares the product with its competitors or alternatives using Porter's competitive strategy framework: a table across price, target segment, core features, technology stack, strengths and weaknesses, a differentiation proposal and a market gap table. | `COMPETITORS_<project>.md` |
-
-### feza-iso
-
-| Command | What it does | Output |
-|---------|--------------|--------|
-| `/feza-iso:iso12207-audit` | ISO/IEC/IEEE 12207 is the international standard that catalogues the processes of the software life cycle. This skill audits your project against its 30 processes in four groups (agreement, organizational project-enabling, technical management, technical) and rates each one as implemented, partial or missing, citing evidence from the repository (README, CI workflows, tests, docs, configuration) and earlier FezaPlugin outputs. Ends with the five biggest gaps and a roadmap to close them. | `ISO12207_AUDIT_<project>.md` |
-| `/feza-iso:iso29110-vse` | ISO/IEC 29110 is the life cycle standard for very small entities (VSEs, teams of up to 25 people); its Entry Profile targets projects of under six person-months. The skill checks whether your team and project fit that profile (contributor count from git history, estimated effort), then audits the two core processes, Project Management and Software Implementation, listing missing activities, roles and essential work products, and compares the result with ISO/IEC/IEEE 12207. | `ISO29110_VSE_<project>.md` |
-| `/feza-iso:iso25010-quality` | ISO/IEC 25010 is the software product quality model. The skill scores your product or SRS from 1 to 5 on each of its nine characteristics (functional suitability, performance efficiency, compatibility, interaction capability, reliability, security, maintainability, flexibility, safety) and their sub-characteristics, using evidence from `SRS_*.md`, source-code signals (authentication, caching, logging, accessibility attributes, tests, CI), test results and earlier UX audits. Reports the top three risks and strengths with recommendations. | `ISO25010_QUALITY_<project>.md` |
-| `/feza-iso:iso15939-measure` | ISO/IEC/IEEE 15939 defines how to run a software measurement process. The skill builds a measurement plan that starts from information needs (which decisions the measurements must support), links each to a measurable concept such as an ISO/IEC 25010 sub-characteristic, and defines base measures, derived measures, indicators and decision criteria. The plan follows the standard's four activities (commit, plan, perform, evaluate) and every metric passes a suitability checklist. Inputs are `SRS_*.md`, `ISO25010_QUALITY_*.md`, stakeholders, scope and risks. | `MEASUREMENT_PLAN_<project>.md` |
-| `/feza-iso:iso29148-req` | ISO/IEC/IEEE 29148 is the requirements engineering standard; it separates requirements into four documents: business (BRS), stakeholder (StRS), system (SyRS) and software (SRS). The skill takes your existing `SRS_*.md` (plus scope, stakeholder and persona files), places every requirement in the right layer, builds bidirectional traceability links between the layers and checks each requirement against the well-formed criteria. Unlike srs-generate, it restructures an existing set instead of writing one from scratch. | `REQ_LAYERED_<project>.md` |
-| `/feza-iso:complaints-to-compliance` | Treats team complaints as symptoms and maps each one to the ISO/IEC/IEEE 12207 technical management process it exposes a gap in (planning, assessment and control, decision, risk, configuration, information, measurement, quality assurance). Complaints come from the command argument, `CONFLICT_LOG.md` or the communication plan. The output gives a role, process and corrective action for each complaint, the three main structural problems and a 30/60/90-day action plan. | `COMPLAINTS_TO_COMPLIANCE_<project>.md` |
 
 ### feza-hci
 
@@ -185,7 +173,7 @@ Related tools and references:
 | `/feza-sqa:test-plan` | Writes a test plan and test cases following ISO/IEC/IEEE 29119-3 and IEEE 829, deriving test cases from the functional and non-functional requirements in `SRS_*.md` and from user story acceptance criteria when present. Covers test levels, approach, pass/fail criteria, schedule, environment, tools and risks; each test case has an ID, a requirement link, a priority, a type (positive, negative, boundary, NFR) and an expected result. | `TEST_PLAN_<project>.md` |
 | `/feza-sqa:metrics-plan` | Plans software quality metrics in three groups: pre-process (effort and defect estimates, inspection decisions), in-process (defect discovery rate, quality during development) and end-process (Defect Removal Efficiency, DRE, and process improvement). Sets numeric targets, a collection plan and a dashboard, aligned with ISO/IEC/IEEE 15939 and IEEE 1028; project size comes from the SRS and estimates. | `METRICS_PLAN_<project>.md` |
 | `/feza-sqa:inspection` | An inspection is the most formal kind of peer review of a work product. The skill writes an IEEE 1028 inspection procedure based on Fagan's method: six steps (plan, overview, prepare, meeting, rework, report), roles (moderator, author, reader, recorder, inspectors), a nine-dimension checklist, Critical/Major/Minor severity, exit criteria and ready-to-use forms (inspection plan, defect log, summary). It also explains when a walkthrough or audit fits better, and can target requirements, design, code or test plans. | `INSPECTION_PLAN_<project>.md` |
-| `/feza-sqa:traceability-matrix` | Builds a requirements traceability matrix (RTM) that links each stakeholder need through business, stakeholder, system and software requirements to design, code, test cases and defects, in forward, backward and horizontal directions. Connects existing FezaPlugin outputs (SCOPE, SRS, REQ_LAYERED, USER_STORIES, TEST_PLAN), computes coverage per stage and lists gaps with suggested actions. | `TRACEABILITY_<project>.md` |
+| `/feza-sqa:traceability-matrix` | Builds a requirements traceability matrix (RTM) that links each stakeholder need through business, stakeholder, system and software requirements to design, code, test cases and defects, in forward, backward and horizontal directions. Connects existing FezaPlugin outputs (SCOPE, SRS, USER_STORIES, TEST_PLAN), computes coverage per stage and lists gaps with suggested actions. | `TRACEABILITY_<project>.md` |
 | `/feza-sqa:change-control` | Sets up change control, aligned with IEEE 730, PMBOK integrated change control and ISO/IEC/IEEE 12207 configuration management: Change Control Board (CCB) structure, change request (CR) states from Proposed to Closed, a CR form, an impact analysis worksheet (scope, schedule, cost, quality, stakeholders, dependencies, risk), voting protocol, an express track for small changes and an audit trail. Can instead produce a single change request. | `CHANGE_CONTROL_<project>.md` or `CR_<id>_<project>.md` |
 | `/feza-sqa:defect-report` | Produces a defect report template, or fills in a single defect report from your description, using IEEE 1044 terminology (fault, failure, anomaly and so on) and the ISO/IEC/IEEE 29119-3 incident report structure: severity and priority (with a matrix explaining the difference), reproduction steps, expected versus actual result, environment, traceability to test case and requirement, root cause category and defect lifecycle. Includes triage rules and Jira / GitHub Issues field mapping. | `DEFECT_REPORT_TEMPLATE_<project>.md` or `DR_<id>_<project>.md` |
 
@@ -193,11 +181,14 @@ Related tools and references:
 
 | Command | What it does | Output |
 |---------|--------------|--------|
+| `/feza-toolkit:brief-grill` | Pins down a brief through a decision-tree interview: asks one multiple-choice question at a time (problem and whose problem, target user, what the solution is and is not, key features, constraints, success criteria, risks, delivery) until every branch of the tree is resolved, then appends the decisions and open assumptions to the brief. No total question limit; asks nothing that can be read from files. | Updated `BRIEF.md` (decisions table) |
 | `/feza-toolkit:help` | Shows the FezaPlugin menu: the packages, every skill with the standard or method it is based on, how to call it and a suggested first step. Writes no file. | In chat |
 | `/feza-toolkit:lifecycle-pick` | Recommends a software development life cycle (SDLC) model. Scores the project on requirement clarity, team experience, customer involvement, time pressure and technology risk; compares Waterfall, Incremental and Iterative plus Agile/Scrum, Kanban, V-Model, Spiral and Hybrid; and gives the chosen model's pros and cons and a detailed plan (phases or sprints, roles, artefacts, cadence, risks). Reads scope, SRS, stakeholder, risk and estimate files when available. | `LIFECYCLE_PICK_<project>.md` |
-| `/feza-toolkit:full-package` | Orchestrator that runs the core skills of the other packages in a sensible order from a single project brief, feeding each output into the next. Choose a Mini (8 files), Standard (15 files) or Full (28+ files) package; the run ends with a `PACKAGE_<project>.md` manifest listing the generated files, suggested next steps and known gaps. All other packages must be installed. | Many documents plus `PACKAGE_<project>.md` |
+| `/feza-toolkit:full-package` | Orchestrator that runs the core skills of the other packages in a sensible order from a single project brief, feeding each output into the next. Choose a Mini (8 files), Standard (15 files) or Full (24+ files) package; the run ends with a `PACKAGE_<project>.md` manifest listing the generated files, suggested next steps and known gaps. All other packages must be installed. | Many documents plus `PACKAGE_<project>.md` |
 | `/feza-toolkit:demo-script` | Prepares a 10-15 minute presentation for stakeholders, investors, customers or a board: a timed flow (opening hook, problem, solution, live demo, architecture, numeric evidence such as PERT estimates, DRE and risk scores, standards compliance, closing) and a Q&A bank with prepared answers on ROI, schedule, risk, security, scalability, competition and adoption. Pulls its figures from existing FezaPlugin outputs. | `DEMO_SCRIPT_<project>.md` |
 | `/feza-toolkit:glossary` | Generates a bilingual Turkish-English glossary of requirements, project management, ISO/IEC standards, HCI and SQA terms, sorted alphabetically and by category. Each entry gives the translation, a definition, the source standard reference, the related FezaPlugin skill and a usage example. Needs no input, but can be filtered by area or term. | `GLOSSARY_<lang>.md` |
+
+> `brief-grill` is adapted from the [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) approach.
 
 ## Quick Start
 
@@ -211,7 +202,7 @@ Full instructions for every platform are in [docs/installation.md](docs/installa
 /plugin install feza-pm@feza
 ```
 
-Install any of `feza-requirements`, `feza-pm`, `feza-iso`, `feza-hci`, `feza-sqa` and
+Install any of `feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa` and
 `feza-toolkit` the same way.
 
 ### Codex
