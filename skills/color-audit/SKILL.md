@@ -40,6 +40,7 @@ Renk paletini renk teorisi prensipleri + WCAG 2.1 AA'ya göre denetler.
 
 ## Adım 2 — Bilgi Tabanı
 - `references/color-rules.md` — color wheel, harmonies, kontrast formülü, color blindness tipleri.
+- `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -82,6 +83,25 @@ Her metin × arka plan kombinasyonu için:
 
 **FAIL olan her çift için somut alternatif öner** (hex değer dahil).
 
+### 4b. Bulgular Tablosu (kanıt ve severity)
+
+Kontrast dışı bulgular (harmony, 60-30-10, color coding, dark mode) `references/evidence-rubric.md`
+§2'deki severity ankrajlarıyla puanlanır ve kanıt türü ile yazılır:
+
+| # | Bulgu | Konum | Severity | Kanıt türü | Kanıt | Önerilen Düzeltme |
+|---|-------|-------|----------|------------|-------|-------------------|
+| C1 | Muted text kontrastı 3.9:1 (AA normal fail) | `tokens.json` `--color-muted` | 3 | verify-ui kodu | `E2 FAIL, oran 3.9:1` | `--color-muted` → `#5f6368` (4.6:1) |
+| C2 | Error durumu yalnız kırmızı ile iletiliyor | `components/Alert.tsx` | 2 | DOM seçici | `.alert-error` — ikon/etiket yok | İkon + "Hata:" prefix ekle |
+
+Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. Severity 3-4 için DOM seçici
+veya verify-ui kodu zorunludur; yalnız görsel tahmine dayalı bulgu en fazla severity 2'dir.
+
+### 4c. İkinci Geçiş
+
+Severity ≥ 3 bulgular `references/evidence-rubric.md` §4'e göre bağımsız bir ikinci geçişte, ilk puan
+gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan farklıysa bulgu "elle
+doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai severity iki puanın büyüğü olur.
+
 ### 5. Color Blindness Simülasyonu
 
 3 tip için zihinde simüle et:
@@ -110,12 +130,26 @@ Kontrol et: sadece renk kullanılan yer var mı?
 
 FAIL'ları düzelten yeni tablo + gerekçe.
 
+### 9. Elle doğrulanmalı
+
+İkinci geçişte puanı farklı çıkan (severity ≥ 3) bulguların listesi (`references/evidence-rubric.md` §4).
+
+### 10. Otomatik doğrulanamayanlar
+
+`references/evidence-rubric.md` §5'teki zorunlu manuel kontrol listesi (`- [ ]` biçiminde): okuma
+sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı, ekran okuyucuyla deneme,
+hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edilebilir" sayılmaz; "0 ihlal
+= erişilebilir" gibi ifadeler kullanılmaz.
+
 ## Adım 4 — Self-Check
 - [ ] Tüm metinler için kontrast hesaplandı mı?
 - [ ] Color harmony tespit edildi mi?
 - [ ] 60-30-10 kontrol edildi mi?
 - [ ] Color blindness 3 tip için yorumlandı mı?
 - [ ] FAIL'lar için somut hex önerisi var mı?
+- [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
+- [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?
+- [ ] Severity ≥ 3 bulgular ikinci geçişte yeniden puanlandı mı; farklı puanlar "Elle doğrulanmalı" listesinde mi ve "Otomatik doğrulanamayanlar" manuel kontrol listesi işaretlendi mi?
 - [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)

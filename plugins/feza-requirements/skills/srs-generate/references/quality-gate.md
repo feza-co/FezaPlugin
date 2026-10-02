@@ -95,7 +95,7 @@ Eşleşme yoksa en yakın kriter seti seçilir; emin olunamıyorsa paket kriter 
 
 #### feza-hci engelleyicileri (arayüz üreten çıktılar)
 
-`hci-execute` ve fix modu uygulanan değerlendirmelerde aşağıdaki eşiklerin hepsi sağlanmadan puan ne olursa olsun teslim yapılmaz; ağırlıklı puanlama korunur.
+`hci-execute` ve fix modu uygulanan değerlendirmelerde aşağıdaki eşiklerin hepsi sağlanmadan puan ne olursa olsun teslim yapılmaz; ağırlıklı puanlama korunur. Değerlendirme raporlarında manuel kontrol listesi işaretlenmeden teslim edilebilir denmez ve "0 ihlal = erişilebilir" ifadesi kullanılmaz.
 
 | # | Kriter | Eşik | Ölçüm |
 |---|---|---|---|

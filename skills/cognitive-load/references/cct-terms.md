@@ -101,3 +101,7 @@ Toplam (6 terim × 5 max = 30):
 - 6-12: Düşük yük
 - 13-20: Orta yük
 - 21-30: Yüksek yük (acil revize)
+
+CCT skoru Nielsen 0-4 ölçeğine `references/fix-mode.md` eşleme tablosuyla çevrilir. Nielsen ölçeğinin
+somut ankrajları, kanıt türleri ve severity 3-4 için kanıt zorunluluğu `references/evidence-rubric.md`
+§1-§3'tedir; burada ayrı bir severity rubriği tanımlanmaz.

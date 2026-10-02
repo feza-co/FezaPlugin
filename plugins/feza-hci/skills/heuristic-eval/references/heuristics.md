@@ -48,13 +48,10 @@
 
 ## Severity Skalası (Nielsen)
 
-| Skor | Etiket | Aksiyon |
-|------|--------|---------|
-| 0 | Sorun değil | – |
-| 1 | Cosmetic | Sürüm 2'ye ertelenir |
-| 2 | Minor | Backlog |
-| 3 | Major | Mevcut sürüm önce |
-| 4 | Catastrophic | Hemen düzelt — sürüm engeli |
+Severity ölçeği (0-4) ve somut ankrajları `references/evidence-rubric.md` §2'de tanımlıdır; burada
+tekrar edilmez. Özet: 4 = görev tamamlanamıyor / WCAG A-AA erişim engeli; 3 = ciddi gecikme veya
+birden çok grubu etkileme; 2 = sürtünme; 1 = kozmetik; 0 = sorun değil. Kanıt türleri ve severity
+3-4 için kanıt zorunluluğu aynı dosyadadır.
 
 ## Bulgu Cümle Şablonu
 

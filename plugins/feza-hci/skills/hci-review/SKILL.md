@@ -51,6 +51,7 @@ EN FAZLA 3 SORU:
 ## Adım 2 — Bilgi Tabanı
 
 - `references/hci-principles.md` — ISO 9241-210 + Dix et al. prensipleri + sezgisel kontrol listesi.
+- `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
 - `references/output-conventions.md`.
 
@@ -66,14 +67,28 @@ EN FAZLA 3 SORU:
    - **Robustness** (observability, recoverability, responsiveness, task conformance)
 4. **Bulgular Tablosu** (öncelik sıralı):
 
-| # | Bulgu | Etki | Önerilen Aksiyon | Referans |
-|---|-------|------|------------------|-----------------|
-| F1 | Login butonu görünür değil — kontrast 2.1 (WCAG AA fail) | Yüksek (erişilebilirlik) | Daha koyu primary kullan | WCAG 2.1 SC 1.4.3 |
-| F2 | Sepet ikonu sayısal badge yok | Orta (visibility of system status) | Badge ekle | Nielsen H1 |
+| # | Bulgu | Etki | Önerilen Aksiyon | Kanıt türü | Kanıt | Referans |
+|---|-------|------|------------------|------------|-------|----------|
+| F1 | Login butonu görünür değil — kontrast 2.1 (WCAG AA fail) | Yüksek (erişilebilirlik) | Daha koyu primary kullan | verify-ui kodu | `E2 FAIL, oran 2.1:1` | WCAG 2.1 SC 1.4.3 |
+| F2 | Sepet ikonu sayısal badge yok | Orta (visibility of system status) | Badge ekle | DOM seçici | `.cart-icon` — çocuk öğe yok | Nielsen H1 |
 | ... |
 
+Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. Etki seviyesi
+(Critical/High/Medium/Low) `references/evidence-rubric.md` §2'deki severity ankrajlarına göre verilir
+(Critical/High → 4/3, Medium/Low → 2/1); severity 3-4 için DOM seçici veya verify-ui kodu zorunludur,
+yalnız görsel tahmine dayalı bulgu en fazla Medium'dur.
+
+### İkinci Geçiş
+
+Etki seviyesi Critical/High (severity ≥ 3) bulgular `references/evidence-rubric.md` §4'e göre bağımsız
+bir ikinci geçişte, ilk puan gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan
+farklıysa bulgu "elle doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai severity iki puanın
+büyüğü olur.
+
 5. **Olumlu noktalar** — Doğru yapılan 3-5 şey
-6. **Sonraki adım önerileri** — `/feza-hci:heuristic-eval` (detay), `/feza-hci:usability-eval-plan` (test), `/feza-hci:color-audit`, `/feza-hci:hci-execute` (bulguları uygula)
+6. **Elle doğrulanmalı** — ikinci geçişte puanı farklı çıkan (severity ≥ 3) bulgular
+7. **Otomatik doğrulanamayanlar** — `references/evidence-rubric.md` §5'teki zorunlu manuel kontrol listesi (`- [ ]` biçiminde): okuma sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı, ekran okuyucuyla deneme, hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edilebilir" sayılmaz; "0 ihlal = erişilebilir" gibi ifadeler kullanılmaz.
+8. **Sonraki adım önerileri** — `/feza-hci:heuristic-eval` (detay), `/feza-hci:usability-eval-plan` (test), `/feza-hci:color-audit`, `/feza-hci:hci-execute` (bulguları uygula)
 
 ### Kurallar
 
@@ -88,6 +103,9 @@ EN FAZLA 3 SORU:
 
 - [ ] Bulgu sayısı ≥ 8 mi?
 - [ ] Her bulguda etki + aksiyon var mı?
+- [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
+- [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?
+- [ ] Severity ≥ 3 bulgular ikinci geçişte yeniden puanlandı mı; farklı puanlar "Elle doğrulanmalı" listesinde mi ve "Otomatik doğrulanamayanlar" manuel kontrol listesi işaretlendi mi?
 - [ ] Olumlu noktalar var mı?
 - [ ] Bulgular kullanıcı sınıfına özelleştirildi mi (junior bir kullanıcıya farklı, expert'e farklı)?
 - [ ] Yasak terimler yok mu?

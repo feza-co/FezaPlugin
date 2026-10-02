@@ -37,28 +37,35 @@ allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 
 ## Adım 2 — Bilgi Tabanı
 - `references/heuristics.md` — Nielsen 10 + Dix et al. mapping + severity rubric.
+- `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/ux-writing.md` — H2 (gerçek dünya ile eşleşme) ve H9 (hata kurtarma) bulgularında mikro-metin ölçütü olarak kullanılır.
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
 
-### Severity Skalası (Nielsen)
+### Severity Skalası
 
-| Skor | Etiket | Anlamı |
-|------|--------|--------|
-| 0 | Cosmetic | Sorun değil |
-| 1 | Cosmetic | Düşük öncelik, görsel |
-| 2 | Minor | Düşük öncelik, küçük frustration |
-| 3 | Major | Yüksek öncelik, ciddi frustration |
-| 4 | Catastrophic | Kullanım önleyici, derhal düzelt |
+Severity ölçeği (Nielsen 1994, 0-4) ve somut ankrajları `references/evidence-rubric.md` §2'dedir;
+ölçek burada tekrar edilmez, dosyaya atıf verilir. Özet: 4 = görev tamamlanamıyor / WCAG A-AA erişim
+engeli, 3 = ciddi gecikme veya birden çok grubu etkileme, 2 = sürtünme, 1 = kozmetik, 0 = sorun değil.
 
 ### Bulgu Tablosu (zorunlu format)
 
-| # | Heuristic | Bulgu | Konum (dosya/ekran) | Severity | Önerilen Düzeltme | Kanıt |
-|---|-----------|-------|---------------------|----------|-------------------|-------|
-| H1 | H1: Visibility of system status | Form kaydedilirken yükleme göstergesi yok | `pages/profile.tsx` | 3 | Spinner + "Kaydediliyor..." metni ekle | Nielsen H1 |
-| H2 | H2: Match real world | "Cancel" yerine "Abort" kullanılmış | `components/Modal.tsx` | 2 | "Vazgeç" / "Cancel" yap | Nielsen H2 |
+| # | Heuristic | Bulgu | Konum (dosya/ekran) | Severity | Önerilen Düzeltme | Kanıt türü | Kanıt |
+|---|-----------|-------|---------------------|----------|-------------------|------------|-------|
+| H1 | H1: Visibility of system status | Form kaydedilirken yükleme göstergesi yok | `pages/profile.tsx` | 3 | Spinner + "Kaydediliyor..." metni ekle | DOM seçici | `#profile form button[type="submit"]` — tıklama sonrası durum değişmiyor |
+| H2 | H2: Match real world | "Cancel" yerine "Abort" kullanılmış | `components/Modal.tsx` | 2 | "Vazgeç" / "Cancel" yap | ekran görüntüsü | `screens/modal.png` — buton metni "Abort" |
 | ... |
+
+Kanıt türü, `references/evidence-rubric.md` §1'deki dört değerden biri olmalıdır: ekran görüntüsü |
+DOM seçici | erişilebilirlik ağacı | verify-ui kodu. Severity 3-4 bulgular için DOM seçici veya
+verify-ui kodu zorunludur; yalnız görsel tahmine dayalı bulgu en fazla severity 2 alır.
+
+### İkinci Geçiş
+
+Severity ≥ 3 bulgular `references/evidence-rubric.md` §4'e göre bağımsız bir ikinci geçişte, ilk puan
+gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan farklıysa bulgu "elle
+doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai severity iki puanın büyüğü olur.
 
 H2 ve H9 mikro-metin bulguları yazılırken `references/ux-writing.md` §5 tablosundaki kötü→iyi örneğe benzer somut **"önerilen metin"** verilir (TR, gerekiyorsa EN karşılığıyla); "daha net yaz" gibi soyut öneri kabul edilmez. Örnek: butondaki "Tamam" → "Değişiklikleri kaydet" (H2); "Yanlış şifre girdiniz." → "Şifre eşleşmedi. Yeniden deneyin ya da şifrenizi sıfırlayın." (H9).
 
@@ -76,9 +83,21 @@ Minor (2): Z
 Cosmetic (0-1): W
 ```
 
+### Rapor Şablonu Ekleri (zorunlu)
+
+- **Elle doğrulanmalı** — ikinci geçişte puanı farklı çıkan (severity ≥ 3) bulguların listesi
+  (`references/evidence-rubric.md` §4).
+- **Otomatik doğrulanamayanlar** — zorunlu manuel kontrol listesi (`references/evidence-rubric.md` §5),
+  `- [ ]` biçiminde: okuma sırasının anlamı, alternatif metin kalitesi, karmaşık bileşen klavye akışı,
+  ekran okuyucuyla deneme, hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim
+  edilebilir" sayılmaz; "0 ihlal = erişilebilir" gibi ifadeler kullanılmaz.
+
 ## Adım 4 — Self-Check
 - [ ] 10 heuristic'in her biri tarandı mı?
 - [ ] Her bulgu severity skorlu mu?
+- [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
+- [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?
+- [ ] Severity ≥ 3 bulgular ikinci geçişte yeniden puanlandı mı; farklı puanlar "Elle doğrulanmalı" listesinde mi ve "Otomatik doğrulanamayanlar" manuel kontrol listesi işaretlendi mi?
 - [ ] Her bulgu somut konum belirtiyor mu (dosya/ekran)?
 - [ ] Düzeltme önerisi spesifik mi (genel "iyileştir" değil)?
 - [ ] Toplam ≥ 15 bulgu mu?

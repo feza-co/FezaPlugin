@@ -66,6 +66,7 @@ CROSS_SKILL_SCRIPTS: list[tuple[str, str, str]] = [
 # Shared dependency files copied only into the listed skills instead of every skill
 # of the package. Files absent from this map keep the package-wide behaviour.
 PACKAGE_SHARED_SCOPE: dict[str, set[str]] = {
+    "evidence-rubric.md": {"heuristic-eval", "hci-review", "color-audit", "cognitive-load"},
     "fix-mode.md": {"heuristic-eval", "color-audit", "cognitive-load", "hci-review"},
     "thresholds.md": {"hci-execute", "heuristic-eval", "color-audit", "cognitive-load", "hci-review"},
 }
