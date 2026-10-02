@@ -57,6 +57,7 @@ EN FAZLA 3 SORU:
 - `references/deceptive-patterns.md` — aldatıcı tasarım kalıpları (tek kaynak): tanım, TR örnek, düzeltme, ilgili E kodu.
 - `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
 - `references/conformance-report.md` — ACR şablonu (VPAT 2.5 INT/EU yapısı, WCAG 2.2 A/AA tam liste, terimler, kanıt kuralları).
+- `references/screen-reader.md` — Guidepup ile NVDA/VoiceOver smoke test tarifi (headed, CI dışı, elle tetiklenir; isteğe bağlı).
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -178,6 +179,34 @@ Tetikleyici: `--acr`, "uyum raporu", "ACR", "erişilebilirlik uyum beyanı". Tet
 5. **Dosyaya yaz:** `ACR_<ürün>_<tarih>.md` (ör. `ACR_myapp_2026-10-02.md`) — değerlendirme raporunun
    yanına, cwd'ye. Rapor adı ürün ve ISO tarih içerir.
 6. **Not:** "Bu rapor hukuki uyum beyanı değildir" ifadesi rapora konur; "0 ihlal = erişilebilir" yazılmaz.
+
+## Adım 9 — İsteğe bağlı: Performans (INP) ve WCAG 3 etiketi
+
+Bu bölüm **isteğe bağlıdır**, varsayılan kapalıdır; tetiklenmezse atlanır ve kalite kapısını/çıkış kodunu bozmaz.
+
+### Performans (INP)
+
+Tetikleyici: kullanıcı "INP", "performans", "etkileşim gecikmesi" isterse ya da verilen sayfa yoğun istemci tarafı JS içeriyorsa.
+
+`node <skill-klasörü>/scripts/measure-vitals.mjs <sayfa.html | URL> [--json]` — lab INP ölçümü:
+sayfa Playwright ile yüklenir, tanımlı etkileşimler (tıklama + Tab/Enter/Space) yapılır ve
+`PerformanceObserver` `event` girdilerinden **en kötü** etkileşim süresi alınır. Eşikler
+(web.dev/articles/inp): ≤ 200 ms **iyi**, 200–500 ms **iyileştirme gerekli**, > 500 ms **kritik**.
+Bu bir lab tahminidir; alan INP'sinin yerine geçmez. Araç yoksa ya da ölçüm yapılamazsa script
+çıkış 2 değil, `na` gerekçeli JSON ve çıkış 0 döner. Sonuç bulgu tablosuna eklenirse kanıt türü
+"verify-ui kodu" yerine "INP ölçümü" olarak yazılır ve ilgili bulgu en fazla severity 3 alır
+(alanda doğrulanmadan 4 verilmez).
+
+### WCAG 3 etiketi (taslak standart, bağlayıcı değil)
+
+İstenirse her bulguya **isteğe bağlı** bir WCAG 3 sonuç etiketi eklenir: **Physical harm / Risk /
+Barrier / Friction** (W3C WCAG 3.0 Working Draft, 10 September 2026, §4.1.1). Bu etiketler
+**taslak standarttır ve bağlayıcı değildir**; uyum beyanında kullanılmaz, yalnız bulgunun
+kullanıcı etkisini sınıflandırmaya yardımcı olur. Etiket verilmezse bulgu tablosunda "-" yazılır.
+Eşleme örnekleri: fiziksel erişimi engelleyen şey (Physical harm), A/AA ihlaliyle erişim engeli
+(Barrier), görevi zorlaştıran sürtünme (Friction), hataya açık/kayıp riski (Risk).
+
+Bulgular tablosuna istenirse iki isteğe bağlı sütun eklenebilir: **INP (ms)** ve **WCAG 3 etiketi**.
 
 ## Sınırlar
 - Max 4 soru.

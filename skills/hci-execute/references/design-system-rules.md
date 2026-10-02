@@ -347,3 +347,66 @@ Aşağıdakilerden biri varsa tasarım **kalıplaşmış** demektir; gerekçesiz
 - [ ] **Dolu/boş durum** aynı iskeletle mi? (Boş durumun kendi yönlendirmesi olmalı — §2.1 `--color-text-muted`, `implementation-checklist.md` boş durum.)
 
 Bir öğe birden çok bölümde tekrarlanıyorsa gerekçesi `DESIGN_RATIONALE_<proje>.md` §5 tasarım kararları tablosuna yazılır.
+
+## 11. ARIA 1.3 Notları
+
+Bölüm ARIA 1.3 Working Draft'a (W3C WD, 04 June 2026 — https://www.w3.org/TR/wai-aria-1.3/)
+dayanır. Bu maddeler **ek/tavsiye** niteliğindedir; WCAG 2.2 A/AA gereksinimlerinin yerine
+geçmez. ARIA 1.3 henüz Working Draft olduğundan tarayıcı/AT desteği değişkendir: kritik
+işlevselliği ARIA 1.3'e tek başına bağlama, işlevsiz bir yedek bırak.
+
+### 11.1 Belge kökünde `aria-hidden` yasağı
+
+ARIA 1.3, `aria-hidden="true"`ın **belge kök öğelerinde** (ör. `html`, `body`) kullanılmasını
+engeller (değişiklik kaydı: "prevent use of aria-hidden=true on document root elements").
+Kök öğeyi gizlemek tüm erişilebilirlik ağacını bozar. Bunun yerine gizlenecek öğeyi hedefle:
+
+```html
+<!-- YANLIŞ -->
+<html aria-hidden="true">
+
+<!-- DOĞRU: yalnız süs/dekoratif alt ağacı hedefle -->
+<div class="decor" aria-hidden="true">…</div>
+```
+
+- Modal/dialog açıkken arka planı gizlemek için kökü değil, uygulama kapsayıcısını hedefle.
+- `aria-hidden="true"` taşıyan öğe odaklanabilir içermemelidir (aksi hâlde `inert` kullan).
+
+### 11.2 `role="tooltip"` adlandırılamaz
+
+ARIA 1.3'te `tooltip`, **"Name prohibited"** roller listesine eklendi (değişiklik kaydı:
+"Change tooltip to name prohibited"; §5.2.8.3). Yani `tooltip` rolü `aria-label` /
+`aria-labelledby` ile adlandırılmamalıdır:
+
+```html
+<!-- YANLIŞ -->
+<span role="tooltip" aria-label="Kaydet">…</span>
+
+<!-- DOĞRU: adlandırma tetikleyici öğede; tooltip içeriği metindir -->
+<button aria-describedby="tip-1">Kaydet</button>
+<span role="tooltip" id="tip-1">Kaydı dosyaya yazar</span>
+```
+
+- Tooltip'i tetikleyiciyle `aria-describedby` ile bağla; erişilebilir adı tetikleyici taşır.
+- Tooltip gecikmesi ARIA 1.3'e göre 1–5 saniyedir; kalıcı gecikme ekleme.
+
+### 11.3 `ariaNotify()`
+
+ARIA 1.3, canlı bölge (`aria-live`) yönetimine alternatif programatik duyuru API'si ekler:
+`ARIANotifyMixin` (`ariaNotify(announcement, options)`), `Element` ve `Document` üzerinde
+bulunur. `options.priority` `"normal"` (varsayılan) ya da `"high"` olabilir. Tarayıcıda
+`"aria-notify"` izin politikası (default allowlist `*`) ile denetlenir.
+
+```js
+// Basit duyuru (canlı bölge DOM mutasyonu gerekmez)
+document.body.ariaNotify("3 sonuç bulundu");
+
+// Yüksek öncelik (ör. hata)
+document.body.ariaNotify("Form gönderilemedi: e-posta geçersiz", { priority: "high" });
+```
+
+- **Aşamalı geliştirme:** `ariaNotify` desteklenmiyorsa `aria-live` bölgesine geri düş
+  (feature detection: `typeof document.body.ariaNotify === "function"`).
+- `aria-live="off"` semantiği ARIA 1.3'te mevcut uygulamalarla hizalandı; sessiz canlı
+  bölge beklemeyip `ariaNotify`i açıkça çağır.
+- `ariaNotify` çağrısı gizli (erişilebilirlik ağacından hariç) düğümde çalışmaz.

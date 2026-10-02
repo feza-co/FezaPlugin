@@ -38,6 +38,15 @@ verilmişse token değeri CSS'ten çözülür. `--tokens` verilmişse `{color.te
 Renk biçimleri: #RGB, #RRGGBB, #RRGGBBAA. Alpha varsa önce zemin üzerine
 (alpha compositing) karıştırılır, sonra hesaplanır.
 
+APCA (isteğe bağlı `--apca`):
+    `--apca` verilirse her çifte APCA-W3 (SAPC-8, sürüm 0.0.98G-4g) uyumlu Lc
+    bilgi sütunu eklenir (`apca_lc`, tabloda "APCA Lc"). APCA **karşılaştırma
+    değil bilgi** amaçlıdır: eşik karşılaştırmasına girmez, çıkış kodunu
+    etkilemez ve işaret duyarlıdır (koyu metin/açık zemin pozitif, açık
+    metin/koyu zemin negatif Lc). Sabitler ve formül Myndex/apca-w3 deposundan
+    (SAPC-8 0.0.98G-4g) alınmıştır. Referans: #000/#fff ≈ +106, #fff/#000 ≈ −108.
+    `--apca` olmadan çıktı birebir eskisi gibidir (geriye uyumlu).
+
 DTCG desteği (Design Tokens Community Group, Format Module 2025.10):
     - Grup/token ayrımı: `$value` taşıyan düğüm token'dır.
     - `$type` gruptan kalıtılır; `$description` ve `$deprecated` okunur
@@ -138,6 +147,75 @@ def contrast_ratio(fg_value, bg_value):
     l2 = relative_luminance(bg_opaque)
     hi, lo = (l1, l2) if l1 >= l2 else (l2, l1)
     return (hi + 0.05) / (lo + 0.05)
+
+
+# --------------------------------------------------------------------------- #
+# APCA-W3 (SAPC-8, 0.0.98G-4g) — isteğe bağlı bilgi sütunu
+# --------------------------------------------------------------------------- #
+#
+# Kaynak: https://github.com/Myndex/apca-w3 (src/apca-w3.js), SAPC-8 0.0.98G-4g
+# sabitleri ve sRGBtoY/APCAcontrast formülü birebir uygulanır. Lc işaret
+# duyarlıdır: koyu metin / açık zemin pozitif, açık metin / koyu zemin negatif.
+# Bağlayıcı değildir; eşik karşılaştırmasına girmez.
+
+_APCA_MAIN_TRC = 2.4
+_APCA_SR = 0.2126729
+_APCA_SG = 0.7151522
+_APCA_SB = 0.0721750
+_APCA_NORM_BG = 0.56
+_APCA_NORM_TXT = 0.57
+_APCA_REV_TXT = 0.62
+_APCA_REV_BG = 0.65
+_APCA_BLK_THRS = 0.022
+_APCA_BLK_CLMP = 1.414
+_APCA_SCALE_BOW = 1.14
+_APCA_SCALE_WOB = 1.14
+_APCA_LO_BOW_OFFSET = 0.027
+_APCA_LO_WOB_OFFSET = 0.027
+_APCA_DELTA_Y_MIN = 0.0005
+_APCA_LO_CLIP = 0.1
+
+
+def apca_y(rgb):
+    """sRGB 0..1 kanallarından APCA parlaklığı (Y), 2.4 üs ile."""
+    r, g, b = rgb[0], rgb[1], rgb[2]
+    return (
+        _APCA_SR * (r ** _APCA_MAIN_TRC)
+        + _APCA_SG * (g ** _APCA_MAIN_TRC)
+        + _APCA_SB * (b ** _APCA_MAIN_TRC)
+    )
+
+
+def apca_contrast(txt_y, bg_y):
+    """APCA Lc (işaretli). Kaynak fonksiyonuyla aynı adımlar."""
+    txt_y = (
+        txt_y
+        if txt_y > _APCA_BLK_THRS
+        else txt_y + (_APCA_BLK_THRS - txt_y) ** _APCA_BLK_CLMP
+    )
+    bg_y = (
+        bg_y
+        if bg_y > _APCA_BLK_THRS
+        else bg_y + (_APCA_BLK_THRS - bg_y) ** _APCA_BLK_CLMP
+    )
+    if abs(bg_y - txt_y) < _APCA_DELTA_Y_MIN:
+        return 0.0
+    if bg_y > txt_y:  # normal polarite: koyu metin / açık zemin
+        sapc = (bg_y ** _APCA_NORM_BG - txt_y ** _APCA_NORM_TXT) * _APCA_SCALE_BOW
+        output = 0.0 if sapc < _APCA_LO_CLIP else sapc - _APCA_LO_BOW_OFFSET
+    else:  # ters polarite: açık metin / koyu zemin
+        sapc = (bg_y ** _APCA_REV_BG - txt_y ** _APCA_REV_TXT) * _APCA_SCALE_WOB
+        output = 0.0 if sapc > -_APCA_LO_CLIP else sapc + _APCA_LO_WOB_OFFSET
+    return output * 100.0
+
+
+def apca_lc(fg_value, bg_value):
+    """İki renk değeri (fg, bg) için APCA Lc bilgi değeri (işaretli)."""
+    fg = parse_color(fg_value)
+    bg = parse_color(bg_value)
+    bg_opaque = _opaque(bg)
+    fg_opaque = _over(fg, bg_opaque) if fg[3] < 1.0 else fg
+    return apca_contrast(apca_y(fg_opaque), apca_y(bg_opaque))
 
 
 # --------------------------------------------------------------------------- #
@@ -508,34 +586,50 @@ def _fmt_ratio(ratio):
     return "%.2f:1" % ratio
 
 
-def _print_table(rows, has_theme):
+def _print_table(rows, has_theme, has_apca=False):
     if has_theme:
         header = "%-28s %-6s %10s  %-4s  %s" % ("çift", "tema", "oran", "sonuç", "eşik")
     else:
         header = "%-28s %10s  %-4s  %s" % ("çift", "oran", "sonuç", "eşik")
+    if has_apca:
+        header += "  %10s" % "APCA Lc"
     print(header)
     print("-" * len(header))
     for row in rows:
         verdict = "OK" if row["ok"] else "FAIL"
         threshold = ">= %s" % row["min"] if row["min"] is not None else "-"
         if has_theme:
-            print(
-                "%-28s %-6s %10s  %-4s  %s"
-                % (row["name"], row["theme"] or "-", _fmt_ratio(row["ratio"]), verdict, threshold)
+            line = "%-28s %-6s %10s  %-4s  %s" % (
+                row["name"],
+                row["theme"] or "-",
+                _fmt_ratio(row["ratio"]),
+                verdict,
+                threshold,
             )
         else:
-            print(
-                "%-28s %10s  %-4s  %s"
-                % (row["name"], _fmt_ratio(row["ratio"]), verdict, threshold)
+            line = "%-28s %10s  %-4s  %s" % (
+                row["name"],
+                _fmt_ratio(row["ratio"]),
+                verdict,
+                threshold,
             )
+        if has_apca:
+            line += "  %10s" % _fmt_apca(row.get("apca_lc"))
+        print(line)
 
 
-def _build_row(name, fg, bg, minimum, theme, resolver):
+def _fmt_apca(lc):
+    if lc is None:
+        return "-"
+    return "%+.1f" % lc
+
+
+def _build_row(name, fg, bg, minimum, theme, resolver, with_apca=False):
     fg_val = resolver(fg) if resolver is not None else fg
     bg_val = resolver(bg) if resolver is not None else bg
     ratio = contrast_ratio(fg_val, bg_val)
     ok = True if minimum is None else ratio >= minimum
-    return {
+    row = {
         "name": name,
         "theme": theme,
         "fg": fg_val,
@@ -544,6 +638,10 @@ def _build_row(name, fg, bg, minimum, theme, resolver):
         "min": minimum,
         "ok": ok,
     }
+    if with_apca:
+        # JSON ile tablo aynı hassasiyette olsun: Lc bir ondalığa yuvarlanır.
+        row["apca_lc"] = round(apca_lc(fg_val, bg_val), 1)
+    return row
 
 
 def _load_pairs(path):
@@ -642,6 +740,11 @@ def main(argv=None):
         help="token teması (varsayılan: both)",
     )
     parser.add_argument("--min", type=float, default=None, help="tek çift için eşik")
+    parser.add_argument(
+        "--apca",
+        action="store_true",
+        help="APCA-W3 (0.0.98G-4g) Lc bilgi sütunu ekle (bağlayıcı değil, çıkış kodunu etkilemez)",
+    )
     parser.add_argument("--json", action="store_true", help="sonucu JSON olarak yazdır")
     args = parser.parse_args(argv)
 
@@ -668,6 +771,7 @@ def main(argv=None):
                             pair["min"],
                             theme,
                             resolver,
+                            args.apca,
                         )
                     )
         else:
@@ -686,6 +790,7 @@ def main(argv=None):
                         args.min,
                         theme,
                         resolver,
+                        args.apca,
                     )
                 )
     except ColorError as exc:
@@ -702,9 +807,11 @@ def main(argv=None):
             "results": rows,
             "ok": not any_fail,
         }
+        if args.apca:
+            payload["apca"] = True
         print(json.dumps(payload, ensure_ascii=False, indent=2))
     else:
-        _print_table(rows, has_theme)
+        _print_table(rows, has_theme, args.apca)
 
     return 1 if any_fail else 0
 
