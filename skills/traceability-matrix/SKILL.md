@@ -4,7 +4,7 @@ description: >
   Bi-directional traceability matrisi uretir: Stakeholder Need -> BR -> StR ->
   SyR -> SR -> Design -> Code -> Test Case -> Defect. ISO/IEC/IEEE 29148 ve
   IEEE 829 izlenebilirlik uygulamalarina uyumlu. Upward / downward / horizontal
-  3 yon. Mevcut FezaPlugin ciktilarini (SCOPE/SRS/REQ_LAYERED/USER_STORIES/
+  3 yon. Mevcut FezaPlugin ciktilarini (SCOPE/SRS/USER_STORIES/
   TEST_PLAN) baglar. Coverage hesabi (her phase'e atama yuzdesi). Tetikleyici:
   "traceability matrix", "izlenebilirlik matrisi", "/feza-sqa:traceability-matrix",
   "RTM".
@@ -24,7 +24,7 @@ Bi-directional + 3-yon (upward/downward/horizontal) izlenebilirlik.
 Tum ilgili FezaPlugin ciktilarini Glob ile bul:
 1. `SCOPE_*.md` — proje hedefleri (uppermost)
 2. `STAKEHOLDERS_*.md`, `PERSONAS_*.md` — needs
-3. `BRS_*.md`, `StRS_*.md`, `SyRS_*.md`, `SRS_*.md` veya `REQ_LAYERED_*.md` — req hierarchy
+3. `SRS_*.md` — req hierarchy
 4. `USER_STORIES_*.md` — story to req
 5. `WBS_*.md` — implementation
 6. `TEST_PLAN_*.md` — test cases

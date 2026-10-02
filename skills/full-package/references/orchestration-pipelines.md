@@ -26,7 +26,7 @@ Mini'nin tum ciktilari +
 15. comm-plan          → COMM_PLAN_*.md          (depends-on: STAKEHOLDERS)
 ```
 
-## Full Paket (24+ skill — kurumsal hazırlık)
+## Full Paket (24+ dosya — kurumsal hazırlık)
 
 ```
 Standard'in tum ciktilari +
@@ -41,7 +41,7 @@ feza-sqa paketi (7 skill):
   test-plan (zaten standard'da)
 ```
 
-Total Full ≈ 28 skill (bazilari ortak).
+Total Full ≈ 24+ dosya (persona ve test-plan Standard'da da oldugu icin bazi ciktilar ortaktir).
 
 ## Bagimlilik Grafigi
 

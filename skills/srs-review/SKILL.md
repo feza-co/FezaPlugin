@@ -22,9 +22,8 @@ Mevcut SRS'i 29148 + 25010 lensiyle puanlar.
 
 ## Adim 0 — Bagilami Topla
 1. **`SRS_*.md`** zorunlu — Glob ile bul; birden fazlaysa en yenisini sec.
-2. Mevcut **`ISO25010_QUALITY_*.md`** (varsa) — onceki kalite skoru ile karsilastir.
-3. **`SCOPE_*.md`** — kapsam ile uyum kontrolu.
-4. SRS yoksa **TEK** soru: "Mevcut SRS yok. Once `/feza-requirements:srs-generate` calistirmami mi istersin?"
+2. **`SCOPE_*.md`** — kapsam ile uyum kontrolu.
+3. SRS yoksa **TEK** soru: "Mevcut SRS yok. Once `/feza-requirements:srs-generate` calistirmami mi istersin?"
 
 ## Adim 1 — Gri Nokta (max 2)
 
