@@ -356,16 +356,9 @@ def to_color_value(raw, tokens):
 # DTCG tasarım token çözümleme (Design Tokens Community Group 2025.10)
 # --------------------------------------------------------------------------- #
 
-# Desteklenen DTCG $type alt kümesi. Renk dışı türler ayrıştırılır ama kontrast
-# hesabına girmez.
-DTCG_SUPPORTED_TYPES = (
-    "color",
-    "dimension",
-    "duration",
-    "cubicBezier",
-    "shadow",
-    "typography",
-)
+# Desteklenen DTCG $type alt kümesi (color, dimension, duration, cubicBezier,
+# shadow, typography) help metninde ve `tests/hci/tokens/README.md`'de listelenir.
+# Renk dışı türler ayrıştırılır ama kontrast hesabına girmez.
 
 MAX_ALIAS_DEPTH = 32
 
@@ -469,7 +462,7 @@ def _walk_dtcg(node, path_parts, inherited_type, out):
         _walk_dtcg(child, path_parts + [key], node_type, out)
 
 
-def _resolve_dtcg_alias(name, tokens, stack, warnings):
+def _resolve_dtcg_alias(name, tokens, stack):
     """Alias zincirini çözer; döngü ya da derinlik aşımında ColorError verir."""
     if len(stack) > MAX_ALIAS_DEPTH:
         raise ColorError("alias derinlik sınırı aşıldı (%d): %s" % (MAX_ALIAS_DEPTH, name))
@@ -483,7 +476,7 @@ def _resolve_dtcg_alias(name, tokens, stack, warnings):
     ref = _dtcg_brace_ref(val)
     if ref is not None:
         resolved, resolved_type = _resolve_dtcg_alias(
-            ref, tokens, stack + [name], warnings
+            ref, tokens, stack + [name]
         )
         return resolved, tok.get("type") or resolved_type
     return val, tok.get("type")
@@ -517,7 +510,7 @@ def load_dtcg_tokens(path):
             warnings.append("$deprecated: %s (%s)" % (name, tok["deprecated"]))
     for name, tok in raw.items():
         ref = _dtcg_brace_ref(tok["value"])
-        value, ttype = _resolve_dtcg_alias(name, raw, [], warnings)
+        value, ttype = _resolve_dtcg_alias(name, raw, [])
         if ttype is None:
             ttype = tok.get("type")
         if ref is not None and ttype is None:

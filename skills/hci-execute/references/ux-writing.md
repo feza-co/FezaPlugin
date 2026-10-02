@@ -309,7 +309,7 @@ Mikro metin, aldatıcı kalıbın taşıyıcısı olabilir; aşağıdaki metin k
 kapsamında engelleyici bulgudur. Kalıpların tam tanımı, düzeltmeleri ve ilgili E kodları için
 `references/deceptive-patterns.md` okunur.
 
-| # | Bağlam | Yasak (TR) | Doğru (TR) | Neden | E kodu |
+| # | Bağlam | Yasak (TR) | Doğru (TR) | Neden | E kodu / heuristik |
 |---|--------|------------|------------|-------|--------|
 | 1 | İzin/çerez ret metni | "Hayır, fırsatları kaçırıp geride kalmak istemiyorum." | "Şimdi değil" | Utançla ikna (confirmshaming) | E29, E2 |
 | 2 | İzin/çerez ret metni | "Kabul et" büyük düğme + 11 px soluk "Reddet" bağlantısı | Kabul ve ret aynı boyut sınıfı ve E2 kontrastında | Görsel karıştırma | E29, E9, E2 |

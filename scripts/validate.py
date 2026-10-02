@@ -11,7 +11,7 @@ Checks:
   7. Generated files  references copies, script copies and the root skills/ mirror match their sources
   8. Banned terms     legacy names and terms that must not appear anywhere in the repo
   9. Script refs      every `scripts/<file>.(mjs|js|py|sh)` a skill mentions exists in that skill
- 10. Thresholds       thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E13 tables stay in sync
+ 10. Thresholds       thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E29 tables stay in sync
 
 Paths are resolved relative to the repository root (the parent of scripts/).
 Only the Python standard library is used. Exit code 0 = no errors, 1 = errors.
@@ -272,7 +272,7 @@ def _e_rows(text: str) -> dict[str, str]:
 
 
 def check_thresholds(r: Report) -> None:
-    """thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E13 tables must agree."""
+    """thresholds.md, verify-ui.mjs THRESHOLDS and the E1-E29 tables must agree."""
     missing = [path for path in (THRESHOLDS_MD, VERIFY_UI_MJS, QUALITY_GATE_MD) if not path.is_file()]
     for path in missing:
         r.error("thresholds", f"{rel(path)} missing")

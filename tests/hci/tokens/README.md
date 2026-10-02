@@ -71,5 +71,4 @@ obje olması kuralıyla uyumludur).
 
 `contrast.py --help` çıktısında da yazılıdır: **color, dimension, duration,
 cubicBezier, shadow, typography**. Diğer türler (ör. `fontFamily`) kapsam
-dışıdır; ayrıştırılır ama kontrast hesabına girmez. Renk dışı türler token
-olarak tanınır, yalnız `ok:null` durumunda değil, hiç sonuç satırı üretmez.
+dışıdır; ayrıştırılır ama kontrast hesabına girmez ve sonuç satırı üretmez.

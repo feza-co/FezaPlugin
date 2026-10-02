@@ -167,7 +167,7 @@ Bütünleşik paket raporu setinde her kriter yine 1-5 puanlanır (1 = yok, 3 = 
 - Varsayılan teslim formatında kapak, özet veya içindekilerden birinin eksik olması (kullanıcı sade format istemediyse).
 - Yinelenen veya yeniden kullanılmış ID (FR-001 iki kez vb.).
 - Etiketsiz maliyet/ücret rakamı ("Varsayım: ..." etiketi olmadan).
-- feza-hci arayüz çıktılarında E1-E13 eşiklerinden birinin sağlanmaması (bkz. feza-hci engelleyicileri).
+- feza-hci arayüz çıktılarında E1-E29 eşiklerinden birinin sağlanmaması (bkz. feza-hci engelleyicileri).
 
 ## 5. Görünürlük Kuralları
 
