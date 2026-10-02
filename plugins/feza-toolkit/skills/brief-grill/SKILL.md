@@ -28,7 +28,7 @@ Bu bir **belge üretme** skill'i değil, bir **mülakat** skill'idir. Çıktı i
 skill'lerin (srs-generate, scope-statement, wbs ...) tahmin etmek zorunda kalmayacağı kadar
 fikrin sınırlarını çizmektir. Belirsizlik kaldıysa iş bitmemiştir.
 
-## Adım 0 — Bagilami Topla
+## Adım 0 — Bağlamı Topla
 
 Önce brief'i ara; **dosya/kod okunarak cevaplanabilecek hiçbir şey kullanıcıya sorulmaz** (Kural 5).
 

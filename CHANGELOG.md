@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.3.0] - 2026-10-02
+
+### Removed
+
+- **BREAKING:** feza-iso kaldırıldı; /feza-iso:* komutları artık yok. The `feza-iso` package and
+  its six skills (`iso12207-audit`, `iso29110-vse`, `iso25010-quality`, `iso15939-measure`,
+  `iso29148-req`, `complaints-to-compliance`) are no longer shipped.
+
 ### Added
 
 - `brief-grill` skill in `feza-toolkit`: pins down a brief through a decision-tree interview. It
@@ -18,11 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the brief as a "Netleştirilmiş Kararlar" table and an "Açık Varsayımlar" list without rewriting
   the existing text. Adapted from the [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) approach.
   `feza-toolkit` now ships 6 skills (40 in total).
-
-### Removed
-
-- The `feza-iso` package and its six skills (`iso12207-audit`, `iso29110-vse`, `iso25010-quality`,
-  `iso15939-measure`, `iso29148-req`, `complaints-to-compliance`) are no longer shipped.
 
 ## [2.2.0] - 2026-10-02
 
@@ -127,7 +130,8 @@ Initial public release of FezaPlugin.
 - `scripts/sync.py` to distribute shared references, mirror skills and keep versions aligned,
   and `scripts/validate.py` for static checks, both run in CI.
 
-[Unreleased]: https://github.com/feza-co/FezaPlugin/compare/v2.2.0...HEAD
+[Unreleased]: https://github.com/feza-co/FezaPlugin/compare/v2.3.0...HEAD
+[2.3.0]: https://github.com/feza-co/FezaPlugin/compare/v2.2.0...v2.3.0
 [2.2.0]: https://github.com/feza-co/FezaPlugin/compare/v2.1.0...v2.2.0
 [2.1.0]: https://github.com/feza-co/FezaPlugin/compare/v2.0.0...v2.1.0
 [2.0.0]: https://github.com/feza-co/FezaPlugin/releases/tag/v2.0.0

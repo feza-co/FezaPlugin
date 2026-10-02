@@ -1,6 +1,6 @@
 {
   "name": "feza-toolkit",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Cross-package utilities: brief clarification interview, skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
   "author": {
     "name": "Feza"
