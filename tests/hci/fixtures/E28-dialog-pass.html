@@ -9,7 +9,9 @@
   body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
   main { max-width: 100%; padding: 16px; }
   h1, h2 { margin: 8px 0; }
-  dialog { padding: 16px; }
+  /* Metin kapları içeriğe göre sarar: uzun/uzatılmış kelimeler taşmaz (E25 temiz). */
+  p, h1, h2, h3 { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  dialog { max-width: 100%; padding: 16px; }
   .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
   :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
 </style>

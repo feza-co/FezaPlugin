@@ -92,7 +92,8 @@
   },
   "E14-fail.html": {
     "exit": 1,
-    "fail": ["E14"]
+    "fail": ["E14"],
+    "note": "Odaklanan düğme sabit alt çubuk altında tamamen örtülür. Çubuk inset-inline, düğme inset-inline-start + width:auto ile RTL'de yatay taşmaz (E24 temiz); örtülme bağımsız olarak korunur."
   },
   "E14-pass.html": {
     "exit": 0,
@@ -170,7 +171,7 @@
   "E25-fail.html": {
     "exit": 1,
     "fail": ["E16", "E25"],
-    "note": "Sabit genişlik + overflow:hidden metin kabı hem metin aralığı (E16) hem genişleme (E25) altında kırpıyor (bilinçli çakışma)."
+    "note": "Eş genişlikli font + `ch` birimiyle kurulmuş sabit genişlik + overflow:hidden metin kabı; hem metin aralığı (E16) hem %30 genişleme (E25) altında kırpar (bilinçli çakışma). Geometri yazı tipinden bağımsızdır."
   },
   "E25-pass.html": {
     "exit": 0,
@@ -255,7 +256,7 @@
   "E28-dialog-pass.html": {
     "exit": 0,
     "fail": [],
-    "note": "Sayfa h1 + main; açık <dialog open> kendi h1/h3 hiyerarşisine sahip. Dialog alt ağacı sayfa h1 sayımına ve seviye-atlama kontrolüne katılmamalı."
+    "note": "Sayfa h1 + main; açık <dialog open> kendi h1/h3 hiyerarşisine sahip. Dialog alt ağacı sayfa h1 sayımına ve seviye-atlama kontrolüne katılmamalı. Metin kapları max-width:100% + overflow-wrap:anywhere ile sarar; uzatılmış metin diyalogda taşmaz (E25 temiz)."
   },
   "E28-pass.html": {
     "exit": 0,
