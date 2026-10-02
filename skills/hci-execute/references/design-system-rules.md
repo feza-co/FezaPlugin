@@ -193,8 +193,12 @@ Gölge tek başına sınır bilgisi taşımaz; etkileşimli öğenin sınırı `
 | Eğri | Giriş `ease-out`, çıkış `ease-in` |
 | Amaç | Yalnız durum değişimini ve uzamsal ilişkiyi anlatmak için (dekoratif hareket yok) |
 | Azaltılmış hareket | `@media (prefers-reduced-motion: reduce)` altında animasyon ve geçişler kapatılır ya da ≤ 1 ms'ye indirilir; kaydırma `scroll-behavior: auto` |
+| Azaltılmış harekette dönüşüm yasağı | `reduce` altında `transform: scale/translate` tabanlı animasyon ve kaydırmaya bağlı parallax (scroll'da `transform` değişimi) **kapatılır**; durum değişimi yalnız `opacity` ile anlatılır. Odak/konum için de transform animasyonu kullanılmaz |
 | Yanıp sönme | Saniyede 3'ten fazla yanıp sönme yok (SC 2.3.1) |
 | Otomatik hareket | 5 s'den uzun otomatik hareket durdurulabilir olmalı (SC 2.2.2) |
+
+`reduce` altında yalnız `transform`'u sıfırlamak yetmez; `transition-property` içinden `transform` çıkarılmalı,
+parallax üreten scroll dinleyicileri de tercih kontrolüyle kapatılmalıdır (E12 genişlemesi).
 
 ## 7. Odak Stili
 
@@ -208,8 +212,43 @@ Gölge tek başına sınır bilgisi taşımaz; etkileşimli öğenin sınırı `
 - Odak halkası hem zemine hem bileşenin kendisine karşı ≥ 3:1.
 - `outline: none` yalnız eşdeğer görünür stil sağlanırsa.
 - Odak, yapışkan başlık ya da alt çubuk altında gizlenmez (`scroll-margin-top`).
+- Yüksek karşıtlık (`forced-colors: active`) altında odak göstergesi **outline** tabanlı olmalıdır; `box-shadow` bu modda silinir, bu yüzden yalnız gölgeyle çizilen odak görünmez (E21).
+- `prefers-contrast: more` tercihinde odak halkası da daha belirgin (kalın/opak) sunulur (E22).
 
-## 8. Erişilebilir Kimlik Doğrulama ve İşaretçi Alternatifleri
+## 8. Yüzey ve Saydamlık
+
+| Kural | Değer / davranış |
+|-------|------------------|
+| Kullanım sınırı | Yarı saydam ve `backdrop-filter` yüzeyler yalnız **geçici katmanlarda** (menü, açılır liste, tooltip, diyalog perdesi) kullanılır; kalıcı içerik zemininde kullanılmaz |
+| Opak yedek | Her saydam/blur yüzey için `@media (prefers-reduced-transparency: reduce)` altında opak zemin (`background: <token>; backdrop-filter: none`) tanımlanır (E23) |
+| Metin kontrastı | Saydam yüzey üstündeki metin, altta kalabilecek **en kötü zemin** üzerine karıştırıldığında bile ≥ 4.5:1 olur; yalnız en iyi zemin varsayılmaz |
+| Sınır | Saydam yüzeyin sınırı kendi `border`'u ile de görünür olur; yalnız bulanıklık/arka plan farkına bırakılmaz |
+| Yedek geçiş | Azaltılmış saydamlıkta blur kapatılırken yüzeyin sınırı ve yükseltisi (gölge/kenarlık) korunur |
+
+`prefers-reduced-transparency` desteği olmayan tarayıcıda da metin okunabilir kalmalıdır; bu yüzden opak yedek
+"ek güvence" değil, temel tasarım kararıdır.
+
+## 9. Yön, Dil ve Uluslararasılaştırma (i18n)
+
+| Kural | Değer / davranış |
+|-------|------------------|
+| Mantıksal özellikler | Fiziksel yön özellikleri (`margin-left/right`, `padding-left/right`, `left`, `right`, `text-align: left|right`, `float`) yerine mantıksal karşılıkları kullanılır: `margin-inline`, `padding-inline`, `inset-inline-start/end`, `text-align: start|end`, `border-inline` (E24 statik) |
+| RTL dayanıklılığı | `<html dir="rtl">` uygulandığında 320/390/1280 px'de yatay kaydırma ya da taşma olmaz; genişlikler yön-bağımsız verilir (E24) |
+| Kullanıcı verisi | Kullanıcıdan gelen serbest metin (ad, adres, yorum) `dir="auto"` ya da `<bdi>` ile sarılır; böylece içerik yönü sayfa yönünü bozmaz |
+| İçerik dili | Sayfa kökünde doğru `lang`; içerik dili değişen bölümlerde `lang` değiştirilir (ör. İngilizce alıntı `<span lang="en">`) |
+| Metin genişlemesi | Düğme/etiket/metin kaplarında sabit genişlik kullanılmaz; metin %30 uzatıldığında kırpılmaz, üç noktayla kesilmez ve yatay kaydırma üretmez (E25) |
+| Esnek kaplar | Kaplar içeriğe göre büyür (`min-width`, `max-width: 100%`); `white-space: nowrap` + sabit genişlik kombinasyonundan kaçınılır |
+
+## 10. Kullanıcı Tercihleri (kontrast ve renk)
+
+| Kural | Değer / davranış |
+|-------|------------------|
+| forced-colors | `forced-colors: active` altında etkileşimli öğelerin sınırı (kenarlık>0 ya da `outline`) ve odak göstergesi görünür kalır; yalnız `background-color` ile çizilen sınır kaybolur, bu yüzden sınır `border`/`outline` ile de verilir (E21) |
+| prefers-contrast: more | `@media (prefers-contrast: more)` altında metin ≥ 7:1, UI kenarlığı ≥ 4.5:1 olacak daha koyu/belirgin token'lar tanımlanır; tercih tanımlıysa eşikler bağlayıcıdır (E22) |
+| Sistem renkleri | forced-colors altında `ButtonText`, `ButtonFace`, `Highlight` gibi sistem renk anahtarları kullanılabilir; sabit hex bazı modlarda düşük kontrast verir |
+| Tercih yokluğu | Sayfa `prefers-contrast`/`prefers-reduced-transparency` için hiç kural tanımlamıyorsa bu bir bilgi durumudur; ölçüm `ok: null` + gerekçe döner ve çıkış kodunu bozmaz |
+
+## 11. Erişilebilir Kimlik Doğrulama ve İşaretçi Alternatifleri
 
 | Kural | Değer / davranış |
 |-------|------------------|

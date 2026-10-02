@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E22 PASS — prefers-contrast: more altında metin ≥ 7:1, kenarlık ≥ 4.5:1</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  p { color: #1B2430; max-width: 60ch; }
+  input { font: inherit; height: 44px; padding: 8px; border: 1px solid #595959; border-radius: 8px; }
+  /* Yüksek karşıtlık: metin 7:1 üzerinde, kenarlık 4.5:1 üzerinde. */
+  @media (prefers-contrast: more) {
+    body { color: #000000; }
+    p { color: #000000; }
+    input { border-color: #333333; }
+  }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Order summary</h1>
+  <p>Under the high-contrast preference the text stays above 7:1 and the field border above 4.5:1.</p>
+  <label for="email">Email</label>
+  <input id="email" type="email" autocomplete="email">
+</main>
+</body>
+</html>

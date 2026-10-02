@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E21 PASS — forced-colors altında sınır ve odak göstergesi görünür</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Şeffaf kenarlık, forced-colors altında sistem renkli sınıra dönüşür. */
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
+  input { font: inherit; height: 44px; padding: 8px; border: 1px solid transparent; background: #FFFFFF; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Sign up</h1>
+  <p>Borders use transparent outlines so they remain visible in forced-colors mode, and focus draws a real outline.</p>
+  <form>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email">
+    <button class="btn" type="submit">Save</button>
+  </form>
+</main>
+</body>
+</html>

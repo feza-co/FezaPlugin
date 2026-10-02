@@ -45,7 +45,8 @@
   },
   "E6-fail.html": {
     "exit": 1,
-    "fail": ["E6"]
+    "fail": ["E6", "E21"],
+    "note": "Odak göstergesini tamamen gizlemek E6'yı ve forced-colors odak kontrolünü (E21) birlikte düşürür (bilinçli çakışma)."
   },
   "E6-pass.html": {
     "exit": 0,
@@ -76,6 +77,11 @@
     "exit": 0,
     "fail": []
   },
+  "E12-parallax-fail.html": {
+    "exit": 1,
+    "fail": ["E12"],
+    "note": "reduce altında kaydırmaya bağlı transform (parallax) sürüyor; E12'nin genişletilmiş transform/parallax kontrolünü tetikler."
+  },
   "E13-fail.html": {
     "exit": 1,
     "fail": ["E13"]
@@ -103,7 +109,8 @@
   },
   "E16-fail.html": {
     "exit": 1,
-    "fail": ["E16"]
+    "fail": ["E16", "E25"],
+    "note": "Sabit genişlik + overflow-x:hidden metin kabı hem metin aralığı (E16) hem sahte yerelleştirme genişlemesi (E25) sırasında kırpıyor (bilinçli çakışma)."
   },
   "E16-pass.html": {
     "exit": 0,
@@ -120,13 +127,105 @@
   "E18-fail.html": {
     "exit": 0,
     "fail": [],
-    "null": ["E18"],
-    "note": "Sürükleme adayı bulunduğu için E18 ok:null (karma; tek-işaretçi alternatifi elle doğrulanır) ve çıkış kodunu bozmaz."
+    "null": ["E9", "E10", "E11", "E17", "E18", "E19", "E20", "E22", "E23", "E26", "E27", "E28", "E29"],
+    "note": "Sürükleme adayı bulunduğu için E18 ok:null (karma; tek-işaretçi alternatifi elle doğrulanır) ve çıkış kodunu bozmaz. null beklentisi tam kümedir (her zaman ok:null dönen statik/ölçülemeyen kodlar dahil)."
   },
   "E18-pass.html": {
     "exit": 0,
     "fail": [],
-    "null": []
+    "null": ["E9", "E10", "E11", "E17", "E19", "E20", "E22", "E23", "E26", "E27", "E28", "E29"]
+  },
+  "E21-fail.html": {
+    "exit": 1,
+    "fail": ["E21"],
+    "note": "forced-colors altında düğme/alan sınırı (yalnız arka plan rengi) ve odak göstergesi (yalnız box-shadow) kaybolur."
+  },
+  "E21-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E22-fail.html": {
+    "exit": 1,
+    "fail": ["E22"],
+    "note": "prefers-contrast: more kuralı tanımlı ama metin kontrastı 7:1 eşiğinin altında (~5:1)."
+  },
+  "E22-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E24-fail.html": {
+    "exit": 1,
+    "fail": ["E24"],
+    "note": "position:absolute + right:0 geniş panel RTL'e geçince 390 px'de yatay taşar."
+  },
+  "E24-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E25-fail.html": {
+    "exit": 1,
+    "fail": ["E16", "E25"],
+    "note": "Sabit genişlik + overflow:hidden metin kabı hem metin aralığı (E16) hem genişleme (E25) altında kırpıyor (bilinçli çakışma)."
+  },
+  "E25-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "static/E23-fail": {
+    "mode": "static",
+    "exit": 1,
+    "fail": ["E23"],
+    "note": "Yarı saydam + blur menüde prefers-reduced-transparency: reduce opak yedeği yok."
+  },
+  "static/E23-pass": {
+    "mode": "static",
+    "exit": 0,
+    "fail": []
+  },
+  "static/E23-opaque-pass": {
+    "mode": "static",
+    "exit": 0,
+    "fail": [],
+    "note": "Son kanalı 0 olan opak rgb() renkler (rgb(255,0,0), rgb(10,20,0)) yarı saydam sayılmaz; yanlış FAIL üretilmez."
+  },
+  "static/E23-partial-fail": {
+    "mode": "static",
+    "exit": 1,
+    "fail": ["E23"],
+    "note": "İki saydam yüzeyden yalnız .menuA'nın opak yedeği var; .menuB yedeksiz olduğu için seçici bazında E23 düşer."
+  },
+  "static/E24-fail": {
+    "mode": "static",
+    "exit": 0,
+    "fail": [],
+    "note": "Fiziksel yön özellikleri (margin-left vb.) bulgu olarak warnings'e yazılır; statik mod FAIL değildir."
+  },
+  "static/E24-pass": {
+    "mode": "static",
+    "exit": 0,
+    "fail": []
+  },
+  "static/E26-fail": {
+    "mode": "static",
+    "exit": 1,
+    "fail": ["E26"],
+    "note": "text-transform: uppercase + .toUpperCase()/.toLowerCase() (yerel ayarsız)."
+  },
+  "static/E26-pass": {
+    "mode": "static",
+    "exit": 0,
+    "fail": []
+  },
+  "static/E27-fail": {
+    "mode": "static",
+    "exit": 1,
+    "fail": ["E27"],
+    "note": "toFixed(2) + ' TL' ve sabit 'dd/MM/yyyy' deseni."
+  },
+  "static/E27-pass": {
+    "mode": "static",
+    "exit": 0,
+    "fail": []
   },
   "E29-fail.html": {
     "exit": 0,

@@ -1,4 +1,4 @@
-# HCI fixture test seti (Faz 2)
+# HCI fixture test seti (Faz 2 + Faz 4)
 
 `plugins/feza-hci/skills/hci-execute/scripts/verify-ui.mjs` tarafından ölçülen E kodlarının
 her biri için bir **fail** ve bir **pass** örnek sayfası; ayrıca çoklu ihlal (`bad.html`) ve
@@ -30,35 +30,42 @@ dizininden çözer: Linux/macOS'ta `~/.cache/feza-ui-check`, Windows'ta
 {
   "static": ["E9", "E10", "E11", "E19", "E20"],
   "E3-fail.html": { "exit": 1, "fail": ["E3"] },
-  "E18-fail.html": { "exit": 0, "fail": [], "null": ["E18"], "note": "gerekçe" }
+  "E18-fail.html": { "exit": 0, "fail": [], "null": ["E9", "E10", "E11", "E17", "E18", "E19", "E20"], "note": "gerekçe" },
+  "static/E23-fail": { "mode": "static", "exit": 1, "fail": ["E23"] }
 }
 ```
 
-- Anahtar fixture dosyası adıdır; değer `{ exit, fail, null?, note? }`.
+- Anahtar fixture dosyası adıdır (`<ad>.html`) ya da statik fixture için `static/<ad>` dizinidir; değer
+  `{ exit, fail, null?, mode?, note? }`.
 - `fail` — `ok:false` olması beklenen E kodlarının **tam kümesi** (fazlası da eksiği de uyuşmazlık).
-- `null` — `ok:null` olması beklenen kodlar (çıkış kodunu bozmaz); ör. E17 alan yoksa, E18 karma.
+- `null` — `ok:null` olması beklenen kodlar (çıkış kodunu bozmaz); verildiğinde **tam küme** olarak
+  karşılaştırılır (her zaman `ok:null` dönen statik/ölçülemeyen kodlar da yazılır). Ör. E18 karma.
+- `mode: "static"` — fixture bir dizindir ve `verify-ui.mjs --static <dizin>` ile çalıştırılır; çıkış kodu
+  ve `ok:false`/`ok:null` davranışı aynıdır. Anahtar `static/` ile başlıyorsa `mode` yazılmasa da statik sayılır.
 - `note` — kaçınılmaz çakışmanın (ör. E2 axonun serious `color-contrast` kuralından E1 de düşer)
-  gerekçesi.
-- `static` — verify-ui'nin ölçmediği statik kodların listesi (E9, E10, E11, E19, E20); fixture yazılmaz.
-  E21–E29 sonraki fazlarda eklenecek; yapı yeni girdiye açıktır (yalnız yeni bir `"<kod>-fail.html"`
-  anahtarı ve dosyası eklenir).
+  gerekçesi. Faz 4'teki örnekler: E16↔E25, E6↔E21.
+- `static` — verify-ui'nin render modunda ölçmediği statik kodların listesi (E9, E10, E11, E19, E20);
+  fixture yazılmaz. E26/E27/E23/E24 statik taramada `--static` dizinleriyle temsil edilir.
 
-Koşucu, beklentide olup dosyası olmayan ya da dosyası olup beklentisi olmayan fixture'ı hata sayar.
+Koşucu, beklentide olup dosyası/dizini olmayan ya da tersine, dosyası/dizini olup beklentisi olmayan
+fixture'ı hata sayar.
 
 ## Yeni fixture nasıl eklenir
 
-1. `tests/hci/fixtures/` altına `<kod>-fail.html` ve `<kod>-pass.html` ekle. Sayfalar küçük,
-   kendi içinde (inline CSS/JS) ve mümkünse yalnız hedef kodu bozacak şekilde olsun. TR ve EN
-   metin karışık kullanılabilir.
-2. Fixture'ı verify-ui ile çalıştır ve **gerçek** sonucu gör:
+1. **Render fixture'ı:** `tests/hci/fixtures/` altına `<kod>-fail.html` ve `<kod>-pass.html` ekle. Sayfalar küçük,
+   kendi içinde (inline CSS/JS) ve mümkünse yalnız hedef kodu bozacak şekilde olsun. TR ve EN metin karışık kullanılabilir.
+2. **Statik fixture'ı:** `tests/hci/fixtures/static/<kod>-fail/` ve `-pass/` dizinleri aç; içine `index.html`
+   (ve gerekiyorsa `app.css`, `app.js`) koy. `expected.json` girdisinde `"mode": "static"` kullan.
+3. Fixture'ı verify-ui ile çalıştır ve **gerçek** sonucu gör:
 
    ```bash
    node plugins/feza-hci/skills/hci-execute/scripts/verify-ui.mjs tests/hci/fixtures/<kod>-fail.html --json --out /tmp/hci-probe
+   node plugins/feza-hci/skills/hci-execute/scripts/verify-ui.mjs --static tests/hci/fixtures/static/<kod>-fail --json --out /tmp/hci-probe
    ```
 
-3. `report.json` içindeki `results.<E>` alanlarına bakıp `ok:false` kodlarının tam kümesini
+4. `report.json` içindeki `results.<E>` alanlarına bakıp `ok:false` kodlarının tam kümesini
    `expected.json`'a yaz. Kaçınılmaz bir çakışma varsa `note` alanında gerekçelendir.
-4. `node tests/hci/run.mjs --only <kod>` ile doğrula; sonra tam seti çalıştır.
+5. `node tests/hci/run.mjs --only <kod>` ile doğrula; sonra tam seti çalıştır.
 
 ## Mutasyon kontrolü
 
@@ -80,7 +87,7 @@ olduğunda çıkış **0**'dır.
 `.github/workflows/ci.yml` içindeki `hci-fixtures` işi bu seti çalıştırır: checkout → `actions/setup-node@v4`
 (Node 20) → verify-ui önbellek dizinine (`$HOME/.cache/feza-ui-check`) playwright + @axe-core/playwright
 kurulumu ve `playwright install --with-deps chromium` → `node tests/hci/run.mjs`
-(`FEZA_UI_CHECK_NO_INSTALL=1`). Yerelde tam set ~3 dakikadır (`--jobs 2`); CI'da kurulum dahil tahmini
+(`FEZA_UI_CHECK_NO_INSTALL=1`). Yerelde tam set ~4-5 dakikadır (`--jobs 2`; yerel ölçüme dayalı tahmin); CI'da kurulum dahil tahmini
 süre 10 dakikanın altında kaldığı için iş ana `ci.yml`'e konmuştur, ayrı bir workflow'a taşınmamıştır.
 Süre büyürse iş `.github/workflows/hci-fixtures.yml` olarak `workflow_dispatch` + haftalık `schedule`
 ile ayrılabilir.

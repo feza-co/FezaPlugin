@@ -53,6 +53,13 @@ Sayısal eşikler: `references/thresholds.md` (E1-E29). Bu listedeki maddeler e�
 | W36 | 2.5.7 Dragging Movements | AA | Sürükleme ile yapılan işlem için tek işaretçi alternatifi (ok tuşu/düğme) var | `draggable`, `dragstart`/`pointerdown` işleyicileri | E18 |
 | W37 | 3.3.7 Redundant Entry | A | Aynı akışta daha önce verilen bilgi ikinci kez boş istenmez; otomatik doldur ya da seçtir | Adres/iletişim tekrarları | E19 |
 | W38 | 3.2.6 Consistent Help | A | Yardım mekanizması (iletişim/SSS) sayfalar arasında aynı göreli sırada | Sayfa alt bilgisi/başlık sırası | E20 |
+| W39 | forced-colors (yüksek karşıtlık) | — | Etkileşimli öğe sınırı ve odak göstergesi forced-colors altında görünür; sınır `border`/`outline` ile de verilir | Yalnız `background-color` ile çizilen sınır ve yalnız `box-shadow` odak | E21 |
+| W40 | prefers-contrast: more | — | Tercih tanımlıysa metin ≥ 7:1, UI kenarlığı ≥ 4.5:1 | `@media (prefers-contrast: more)` kuralı ve renkleri | E22 |
+| W41 | Saydam yüzey | — | Blur/yarı saydam yüzey yalnız geçici katmanda + `prefers-reduced-transparency` opak yedeği; metin en kötü zeminde ≥ 4.5:1 | `rgba`/`backdrop-filter` ve yedek araması | E23 |
+| W42 | RTL | — | `dir=rtl` geçişinde yatay taşma yok; mantıksal yön özellikleri kullanılır | `margin-left` vb. fiziksel özellik araması | E24 |
+| W43 | Metin genişlemesi | — | Metin %30 uzatılınca kırpılma/yatay kaydırma yok; kaplar içeriğe göre büyür | Sabit genişlik + `nowrap` kombinasyonu | E25 |
+| W44 | Türkçe büyük/küçük harf | — | Kullanıcıya görünen metinde `text-transform:` / `.toUpperCase()` yok; `toLocaleUpperCase(locale)` | `uppercase` ve yerel ayarsız dönüşüm araması | E26 |
+| W45 | Yerel biçim | — | Sayı/tarih/para `Intl.*` ile; elle `toFixed(2)+" TL"`, sabit `dd/MM/yyyy` yok | `toFixed`/para birleştirme/desen araması | E27 |
 
 ## 2. Heuristik Uygulama Listesi (Nielsen 1994 ↔ Dix et al. ↔ ISO 9241-110)
 
@@ -106,13 +113,13 @@ Sonuçlar kullanıcıya puan olarak gösterilmez; yalnız düzeltmeler uygulanı
 | Sıra | Ne yapılır | Araç |
 |------|-----------|------|
 | 1 | Otomatik doğrulamayı çalıştır: `node scripts/verify-ui.mjs <giriş sayfası>` | `scripts/verify-ui.mjs` |
-| 2 | `report.json` sonuçlarını E1-E18'e göre oku (`results.E1..E18`); OK/FAIL/`ok:null` ve ihlalleri not et | `report.json` |
+| 2 | `report.json` sonuçlarını E1-E29'a göre oku (`results.E1..E29`); OK/FAIL/`ok:null` ve ihlalleri not et | `report.json` |
 | 3 | Ekran görüntülerini Read ile aç; hizalama/taşma/hiyerarşi/boşluk tutarlılığını değerlendir | Read |
-| 4 | Statik kriterler E9-E11, E19, E20, E26, E27'yi incele (birincil eylem, görev derinliği, durum kapsaması, tekrar giriş, tutarlı yardım, harf/yerel biçim) | Kod okuma |
+| 4 | Statik kriterler E9-E11, E19, E20, E26, E27'yi incele (birincil eylem, görev derinliği, durum kapsaması, tekrar giriş, tutarlı yardım, harf/yerel biçim); kaynak taraması için `node scripts/verify-ui.mjs --static <dizin>` çalıştır | Kod okuma, `--static` |
 | 5 | İhlalleri düzelt ve yeniden çalıştır (en fazla 2 tur) | `scripts/verify-ui.mjs` |
 | 6 | Çıkış kodu 2 ise statik kontrol; "Bilinen Boşluklar"a "otomatik render doğrulaması yapılamadı" yaz | Kod okuma |
 
-Statik yardımcılar (düzeltme ve ek kontrol için): `outline: none`, `tabindex` > 0, `onclick` olan `div`/`span`, `label`'sız `input`, `alt`'sız `img` ve ham hex/px değerleri Grep ile taranır; heuristik listesi H1-H10, durum matrisi ve bilişsel yük C1-C10 kod okuma ile kontrol edilir; kontrast çiftleri `scripts/contrast.py` ile (açık ve koyu tema) doğrulanır.
+Statik yardımcılar (düzeltme ve ek kontrol için): `outline: none`, `tabindex` > 0, `onclick` olan `div`/`span`, `label`'sız `input`, `alt`'sız `img` ve ham hex/px değerleri Grep ile taranır; `margin-left`/`text-align: left` gibi fiziksel yön özellikleri, `backdrop-filter`/`rgba` saydam yüzeyler, `text-transform`/`.toUpperCase()` ve `toFixed`/sabit tarih desenleri `--static` taramasıyla bulunur; heuristik listesi H1-H10, durum matrisi ve bilişsel yük C1-C10 kod okuma ile kontrol edilir; kontrast çiftleri `scripts/contrast.py` ile (açık ve koyu tema) doğrulanır.
 
 ### Severity ölçeği (Nielsen)
 
@@ -140,3 +147,10 @@ Otomatik/karma ölçümün kapsamadığı ya da onay gerektiren maddeler kod oku
 - [ ] **E17 — erişilebilir kimlik doğrulama:** Parola/OTP yapıştırması engellenmiyor; `autocomplete` değerleri doğru; "göster" düğmesi metinle ve `aria-pressed` ile sunuluyor.
 - [ ] **E19 — tekrar giriş:** Aynı akışta daha önce girilen bilgi ikinci kez boş istenmiyor; mevcut değer otomatik dolduruluyor ya da seçtiriliyor.
 - [ ] **E20 — tutarlı yardım:** Yardım/iletişim mekanizması birden çok sayfada aynı göreli sırada (ör. her zaman alt bilgide) duruyor.
+- [ ] **E21 — forced-colors:** `forced-colors: active` altında her etkileşimli öğenin görünür sınırı (kenarlık>0 ya da `outline`) ve odak göstergesi (box-shadow değil, outline) var.
+- [ ] **E22 — prefers-contrast: more:** Kural tanımlıysa metin ≥ 7:1, UI kenarlığı ≥ 4.5:1; tanımlı değilse bu bilgidir (`ok:null`).
+- [ ] **E23 — saydam yüzey:** Blur/yarı saydam yüzey yalnız geçici katmanda (menü/tooltip); `@media (prefers-reduced-transparency: reduce)` altında opak yedek var; metin en kötü zeminde ≥ 4.5:1.
+- [ ] **E24 — RTL:** `dir=rtl` geçişinde 320/390/1280 px'de yatay taşma yok; `margin-left`/`right`/`left`/`text-align: left|right`/`float` yerine mantıksal karşılıkları kullanılmış; kullanıcı verisi `dir="auto"`/`<bdi>` ile sarılmış.
+- [ ] **E25 — metin genişlemesi:** Düğme/etiket/metin kaplarında sabit genişlik yok; metin %30 uzatılınca (aksanlı) kırpılmıyor ve yatay kaydırma üretmiyor.
+- [ ] **E26 — Türkçe büyük/küçük harf:** Kullanıcıya görünen metinde `text-transform: uppercase/lowercase` ve `.toUpperCase()/.toLowerCase()` yok; gerekliyse `toLocaleUpperCase('tr-TR')` kullanılmış.
+- [ ] **E27 — yerel biçim:** Sayı/tarih/para `Intl.NumberFormat`/`Intl.DateTimeFormat` ile biçimlenmiş; elle `toFixed(2)+" TL"`, `"₺"` birleştirme ya da sabit `dd/MM/yyyy` deseni yok.

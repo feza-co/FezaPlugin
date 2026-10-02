@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>E24 PASS — logical direction properties</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Mantıksal özellikler; RTL'de doğru yöne akar. */
+  .card { margin-inline-start: 16px; padding-inline-end: 8px; text-align: start; }
+  .badge { display: inline-block; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Card</h1>
+  <div class="card">
+    <p>Logical properties keep direction correct in RTL.</p>
+    <span class="badge">New</span>
+  </div>
+</main>
+</body>
+</html>

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * run.mjs — Faz 2 fixture koşucusu.
+ * run.mjs — Faz 2/4 fixture koşucusu.
  *
- * Her fixture'ı `verify-ui.mjs` ile çalıştırır, beklenen çıkış kodunu ve
- * `ok:false` olan E kodlarını `expected.json` ile karşılaştırır.
+ * Her fixture'ı `verify-ui.mjs` ile çalıştırır, beklenen çıkış kodunu,
+ * `ok:false` olan E kodlarını ve (beklenti verilmişse) `ok:null` kodlarını
+ * `expected.json` ile karşılaştırır.
  *
  * Kullanım:
  *   node tests/hci/run.mjs [--expected <dosya>] [--only <desen>] [--jobs N]
@@ -13,8 +14,10 @@
  *   --only <desen>      Yalnız adı desene uyan fixture'lar (alt dizge ya da regex).
  *   --jobs N            Eşzamanlı fixture sayısı (varsayılan 2).
  *
- * Fixture listesi expected.json'dan türetilir. Beklentide olup dosyası olmayan
- * ya da tersi (dosyası olup beklentisi olmayan) fixture hata sayılır.
+ * Fixture listesi expected.json'dan türetilir. `mode: "static"` olan girdiler
+ * `verify-ui.mjs --static <dizin>` ile çalıştırılır; diğerleri tek dosyadır.
+ * Beklentide olup dosyası olmayan ya da tersi (dosyası olup beklentisi olmayan)
+ * fixture hata sayılır.
  *
  * Çıkış kodları: 0 tümü uyumlu | 1 en az bir uyuşmazlık | 2 koşucu/girdi hatası
  * ya da verify-ui araç yok (çıkış 2) döndürdü.
@@ -31,6 +34,7 @@ import { fileURLToPath } from 'node:url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
 const FIXTURES_DIR = path.join(__dirname, 'fixtures');
+const STATIC_DIR = path.join(FIXTURES_DIR, 'static');
 const DEFAULT_EXPECTED = path.join(__dirname, 'expected.json');
 const VERIFY_UI = path.join(
   ROOT,
@@ -71,9 +75,14 @@ function parseArgs(argv) {
   return args;
 }
 
-// expected.json: { "static": [...], "<dosya>.html": { "exit", "fail", "null"? , "note"? } }
+// expected.json: { "static": [...], "<dosya>.html" | "static/<ad>": { "exit", "fail", "null"?, "mode"?, "note"? } }
 function isFixtureEntry(value) {
   return value && typeof value === 'object' && !Array.isArray(value) && 'exit' in value;
+}
+
+// Girdi anahtarı "static/<ad>" biçimindeyse ya da mode:"static" ise statik koşulur.
+function isStaticEntry(key, value) {
+  return value.mode === 'static' || key.startsWith('static/');
 }
 
 function loadExpected(file) {
@@ -97,12 +106,15 @@ function matchesOnly(file, only) {
   }
 }
 
-function runVerify(file) {
+function runVerify(target, isStatic) {
   return new Promise((resolve) => {
     const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'feza-hci-fixture-'));
+    const args = isStatic
+      ? [VERIFY_UI, '--static', target, '--json', '--out', outDir]
+      : [VERIFY_UI, target, '--json', '--out', outDir];
     const child = execFile(
       process.execPath,
-      [VERIFY_UI, file, '--json', '--out', outDir],
+      args,
       { cwd: ROOT, maxBuffer: 64 * 1024 * 1024 },
       (err, stdout, stderr) => {
         let exit = 0;
@@ -128,18 +140,47 @@ function runVerify(file) {
   });
 }
 
+function sortCodes(a, b) {
+  return Number(a.slice(1)) - Number(b.slice(1));
+}
+
 function actualFails(report) {
   if (!report || !report.results) return [];
   return Object.entries(report.results)
     .filter(([, r]) => r && r.ok === false)
     .map(([code]) => code)
-    .sort((a, b) => Number(a.slice(1)) - Number(b.slice(1)));
+    .sort(sortCodes);
+}
+
+function actualNulls(report) {
+  if (!report || !report.results) return [];
+  return Object.entries(report.results)
+    .filter(([, r]) => r && r.ok === null)
+    .map(([code]) => code)
+    .sort(sortCodes);
 }
 
 function eqSets(a, b) {
   const sa = [...a].sort();
   const sb = [...b].sort();
   return sa.length === sb.length && sa.every((x, i) => x === sb[i]);
+}
+
+// Beklenti ↔ dosya tutarlılığı: tek dosya fixture'ları ve statik dizinler.
+function collectPresent() {
+  const presentFiles = new Set();
+  for (const f of fs.readdirSync(FIXTURES_DIR)) {
+    if (f.toLowerCase().endsWith('.html')) presentFiles.add(f);
+  }
+  const presentStatic = new Set();
+  if (fs.existsSync(STATIC_DIR)) {
+    for (const name of fs.readdirSync(STATIC_DIR)) {
+      if (fs.statSync(path.join(STATIC_DIR, name)).isDirectory()) {
+        presentStatic.add('static/' + name);
+      }
+    }
+  }
+  return { presentFiles, presentStatic };
 }
 
 async function main() {
@@ -165,16 +206,25 @@ async function main() {
   }
 
   // Beklenti ↔ dosya tutarlılığı.
-  const expectedFiles = new Set(entries.map((e) => e.file));
-  const presentFiles = fs
-    .readdirSync(FIXTURES_DIR)
-    .filter((f) => f.toLowerCase().endsWith('.html'));
+  const { presentFiles, presentStatic } = collectPresent();
   const errors = [];
+  const expectedFiles = new Set();
+  const expectedStatic = new Set();
+  for (const e of entries) {
+    if (isStaticEntry(e.file, e.expect)) expectedStatic.add(e.file);
+    else expectedFiles.add(e.file);
+  }
   for (const f of expectedFiles) {
-    if (!presentFiles.includes(f)) errors.push('Beklentide var, dosyası yok: ' + f);
+    if (!presentFiles.has(f)) errors.push('Beklentide var, dosyası yok: ' + f);
   }
   for (const f of presentFiles) {
     if (!expectedFiles.has(f)) errors.push('Dosyası var, beklentisi yok: ' + f);
+  }
+  for (const d of expectedStatic) {
+    if (!presentStatic.has(d)) errors.push('Beklentide var, dizini yok: ' + d);
+  }
+  for (const d of presentStatic) {
+    if (!expectedStatic.has(d)) errors.push('Dizini var, beklentisi yok: ' + d);
   }
 
   const selected = entries
@@ -196,20 +246,30 @@ async function main() {
       const i = cursor++;
       if (i >= selected.length) return;
       const entry = selected[i];
-      const outcome = await runVerify(path.join(FIXTURES_DIR, entry.file));
+      const isStatic = isStaticEntry(entry.file, entry.expect);
+      const target = isStatic
+        ? path.join(FIXTURES_DIR, 'static', entry.file.slice('static/'.length))
+        : path.join(FIXTURES_DIR, entry.file);
+      const outcome = await runVerify(target, isStatic);
       if (outcome.exit === 2) sawToolMissing = true;
       const fails = actualFails(outcome.report);
+      const nulls = actualNulls(outcome.report);
+      const hasNullExpect = Object.prototype.hasOwnProperty.call(entry.expect, 'null');
       const exitOk = outcome.exit === entry.expect.exit;
       const failsOk = eqSets(fails, entry.expect.fail || []);
+      const nullsOk = hasNullExpect ? eqSets(nulls, entry.expect.null || []) : true;
       results[i] = {
         file: entry.file,
         expectExit: entry.expect.exit,
         actualExit: outcome.exit,
         expectFail: (entry.expect.fail || []).join(',') || '-',
         actualFail: fails.join(',') || '-',
+        expectNull: hasNullExpect ? (entry.expect.null || []).join(',') || '-' : '—',
+        actualNull: nulls.join(',') || '-',
         exitOk,
         failsOk,
-        ok: exitOk && failsOk,
+        nullsOk,
+        ok: exitOk && failsOk && nullsOk,
       };
     }
   }
@@ -220,13 +280,15 @@ async function main() {
   const durationMs = Date.now() - started;
 
   // Tablo
-  const headers = ['Fixture', 'Bekl.exit', 'Gerç.exit', 'Bekl.fail', 'Gerç.fail', 'Durum'];
+  const headers = ['Fixture', 'Bekl.exit', 'Gerç.exit', 'Bekl.fail', 'Gerç.fail', 'Bekl.null', 'Gerç.null', 'Durum'];
   const rows = results.map((r) => [
     r.file,
     String(r.expectExit),
     String(r.actualExit),
     r.expectFail,
     r.actualFail,
+    r.expectNull,
+    r.actualNull,
     r.ok ? 'OK' : 'UYUŞMAZLIK',
   ]);
   const widths = headers.map((h, c) =>

@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E23 FAIL — only one transparent surface has an opaque fallback</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  .menuA { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(8px); border: 1px solid #79808C; border-radius: 8px; padding: 8px; }
+  .menuB { background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(8px); border: 1px solid #79808C; border-radius: 8px; padding: 8px; }
+  /* Yalnız .menuA için opak yedek var; .menuB yedeksiz kalır. */
+  @media (prefers-reduced-transparency: reduce) {
+    .menuA { background: #FFFFFF; backdrop-filter: none; }
+  }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Transparent menus</h1>
+  <div class="menuA">
+    <p>Menu A with opaque fallback.</p>
+  </div>
+  <div class="menuB">
+    <p>Menu B without opaque fallback.</p>
+  </div>
+</main>
+</body>
+</html>

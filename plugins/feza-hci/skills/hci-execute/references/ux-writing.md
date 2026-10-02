@@ -261,6 +261,8 @@ edilebilirlik).
 | 20 | Jargon | "API çağrısı 429 döndü" | "Kısa sürede çok fazla istek geldi. Birkaç saniye bekleyip tekrar deneyin." | "API returned 429" | "Too many requests in a short time. Wait a few seconds and try again." | Teknik jargon; H2 |
 | 21 | Terim tutarsızlığı | Aynı ekranda "görev / iş / madde" | Her yerde "görev" | "task / item / todo" | "task" everywhere | Terim tutarsızlığı; H4 |
 | 22 | Yerel ayar | "10/01/2026" ve "$1,250.00" TR bağlamında | "1 Ekim 2026" ve "1.250,00 TL" | "01/10/2026" in EN context | "Oct 1, 2026" | Yerel biçim; ISO 9241-110 |
+| 23 | Büyük/küçük harf | CSS `text-transform: uppercase` ya da `metin.toUpperCase()` ("KAYDET") | Metni doğrudan "Kaydet" yaz; gerekirse `toLocaleUpperCase('tr-TR')` | CSS `text-transform: uppercase` or `text.toUpperCase()` ("SAVE") | Write "Save" directly; if needed `toLocaleUpperCase(locale)` | Türkçe i/İ: "i"→"İ", "ı"→"I"; yerel ayarsız dönüşüm yanlış harf üretir (E26, WCAG 3.1.1) |
+| 24 | Yerel biçim kodu | `price.toFixed(2) + " TL"`, `"₺" + n`, sabit `"dd/MM/yyyy"` | `Intl.NumberFormat('tr-TR', {style:'currency', currency:'TRY'})`, `Intl.DateTimeFormat('tr-TR', …)` | `"$" + n.toFixed(2)`, hardcoded `"MM/dd/yyyy"` | `Intl.NumberFormat(locale, …)`, `Intl.DateTimeFormat(locale, …)` | Grup/ondalık ayracı ve tarih sırası yerel ayara göre değişir; elle birleştirme yanlış (E27, ISO 9241-110) |
 
 ## 6. Mikro-Metin Kontrol Listesi
 
@@ -275,12 +277,14 @@ ilkeye bağlıdır.
 - [ ] Hiçbir yerde placeholder etiket yerine kullanılmıyor; görünür `<label>` var (WCAG 3.3.2, 1.3.1; Nielsen H6).
 - [ ] Alan yardımcı metinleri biçim örneği veriyor (ör. "GG.AA.YYYY") (WCAG 3.3.3).
 - [ ] Hata mesajları alanın yanında ve gönderimde özet olarak; düzeltme yönergesi var (WCAG 3.3.1, 3.3.3; Nielsen H9).
-- [ ] Sayı, tarih, saat ve para biçimleri yerel ayara uygun, `Intl` ile üretiliyor (ISO 9241-110 öz-betimleyicilik).
+- [ ] Sayı, tarih, saat ve para biçimleri `Intl` ile üretiliyor; elle `toFixed(2)+" TL"` ya da sabit `dd/MM/yyyy` gibi birleştirme yok (E27; ISO 9241-110 öz-betimleyicilik).
 - [ ] Boş durumlar neden boş olduğunu ve ilk eylemi söylüyor; tamamen boş alan yok (Nielsen H10).
 - [ ] Başarı bildirimleri ne olduğunu söylüyor; geri alınabilir eylemde "Geri al" sunuluyor (Nielsen H1, H3).
 - [ ] Yükleniyor metinleri 1 s'yi aşan işte ne yapıldığını belirtiyor (Nielsen H1; Dix: responsiveness).
 - [ ] İzin/çerez istekleri gerekçe veriyor, reddetme seçeneği eşit görünüyor (Nielsen H3; ISO 9241-110 kontrol edilebilirlik).
 - [ ] Hata mesajlarında ünlem, emoji, büyük harfle bağırma ve espri yok (Nielsen H2).
+- [ ] Kullanıcıya görünen metinde `text-transform: uppercase/lowercase` ve `.toUpperCase()/.toLowerCase()` yok; gerekliyse `toLocaleUpperCase('tr-TR')` kullanılıyor (E26; Türkçe i/İ).
+- [ ] Sayı, tarih ve para `Intl.NumberFormat`/`Intl.DateTimeFormat` ile biçimleniyor; elle `toFixed(2)+" TL"` ya da sabit `dd/MM/yyyy` deseni yok (E27; ISO 9241-110).
 - [ ] Sayfa başlıkları ve başlık metinleri ekranın amacını açıkça tanımlıyor (WCAG 2.4.6).
 - [ ] Teknik hata kodları başlık değil, ikincil destek bilgisi olarak veriliyor (Nielsen H2, H9).
 

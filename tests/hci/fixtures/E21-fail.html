@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E21 FAIL — forced-colors altında sınır ve odak göstergesi yok</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Sınır yalnız background-color ile çiziliyor; forced-colors zemini siler. */
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: none; border-radius: 8px; font: inherit; }
+  input { font: inherit; height: 44px; padding: 8px; border: none; background: transparent; }
+  /* Odak stili yalnız box-shadow; forced-colors box-shadow'u kaldırır. */
+  :focus, :focus-visible { outline: none !important; box-shadow: 0 0 0 3px #1D5FD1 !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kayıt</h1>
+  <p>Yüksek karşıtlık modunda düğme ve alan sınırı kaybolur; klavye odağı da görünmez.</p>
+  <form>
+    <label for="email">E-posta</label>
+    <input id="email" type="email" autocomplete="email">
+    <button class="btn" type="submit">Kaydet</button>
+  </form>
+</main>
+</body>
+</html>

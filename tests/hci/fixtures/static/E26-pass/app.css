@@ -1,0 +1,5 @@
+/* E26 PASS — harf dönüşümü yok; metin biçimi korunur. */
+.label {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}

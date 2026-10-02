@@ -109,6 +109,20 @@ Severity ≥ 3 bulgular `references/evidence-rubric.md` §4'e göre bağımsız 
 gizlenerek yalnız bulgu metni + kanıtla yeniden puanlanır. İki puan farklıysa bulgu "elle
 doğrulanmalı" işaretlenir, raporda ayrı listelenir ve nihai severity iki puanın büyüğü olur.
 
+### 4d. Tercih Modları ve Saydam Yüzeyler (E21–E23)
+
+Standart AA kontrastının yanında sistem tercihleri ayrı denetlenir:
+
+| Kontrol | Ne aranır | E |
+|---------|-----------|---|
+| `forced-colors: active` | Etkileşimli öğe sınırı ve odak göstergesi görünür kalıyor mu? Sınır yalnız `background-color` ile mi çizilmiş (yüksek karşıtlıkta kaybolur)? | E21 |
+| `prefers-contrast: more` | Tercih kuralı varsa metin ≥ 7:1, UI kenarlığı ≥ 4.5:1 mi? Yalnız açık tema değeri tekrar edilip eşik altında kalıyor mu? | E22 |
+| Saydam/blur yüzey | `rgba`/`backdrop-filter` yüzey yalnız geçici katmanda mı; `@media (prefers-reduced-transparency: reduce)` altında opak yedek var mı; üstündeki metin en kötü zeminde ≥ 4.5:1 mi? | E23 |
+
+`background-color` ile çizilen sınıra güvenmek yüksek karşıtlık modunda sınırı kaybettirir; sınır `border`/`outline`
+ile de verilmeli ya da sistem renk anahtarlarına (`ButtonText`, `Highlight`) bağlanmalıdır. Saydam yüzeyler
+kalıcı içerik zemininde kullanılmaz.
+
 ### 5. Color Blindness Simülasyonu
 
 3 tip için zihinde simüle et:
@@ -153,6 +167,7 @@ hata mesajlarının anlamı. Manuel maddeler işaretlenmeden rapor "teslim edile
 - [ ] Color harmony tespit edildi mi?
 - [ ] 60-30-10 kontrol edildi mi?
 - [ ] Color blindness 3 tip için yorumlandı mı?
+- [ ] forced-colors, `prefers-contrast: more` ve saydam/blur yüzey yedekleri (E21–E23) denetlendi mi?
 - [ ] FAIL'lar için somut hex önerisi var mı?
 - [ ] Her bulguda kanıt türü (ekran görüntüsü / DOM seçici / erişilebilirlik ağacı / verify-ui kodu) belirtildi mi?
 - [ ] Severity 3-4 bulgularda DOM seçici veya verify-ui kodu kanıtı var mı?

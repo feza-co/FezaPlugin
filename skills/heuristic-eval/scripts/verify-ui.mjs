@@ -345,10 +345,12 @@ function makeOutDir(argOut) {
 }
 
 function parseArgs(argv) {
-  const args = { target: null, out: null, json: false };
+  const args = { target: null, out: null, json: false, static: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
-    if (a === '--out') {
+    if (a === '--static') {
+      args.static = true;
+    } else if (a === '--out') {
       args.out = argv[++i];
     } else if (a.startsWith('--out=')) {
       args.out = a.slice('--out='.length);
@@ -357,12 +359,14 @@ function parseArgs(argv) {
     } else if (a === '--help' || a === '-h') {
       process.stdout.write(
         'Kullanım: node scripts/verify-ui.mjs <URL | yerel.html> [--out DIR] [--json]\n' +
+        '        node scripts/verify-ui.mjs --static <dizin> [--out DIR] [--json]\n' +
         '\n' +
-        'E1–E18 kriterlerini otomatik/karma olarak ölçer (E9–E11, E19–E29 statik/\n' +
-        'gelecek faz). Sonuçlar report.json -> results.E<kod> altında { ok, value,\n' +
-        'threshold, method } taşır; method = otomatik | karma | statik. ok: null ise\n' +
-        'ilgili kriter elle doğrulanmalıdır (na gerekçesiyle). Çıkış: 0 geçti, 1 ihlal,\n' +
-        '2 araç yok ya da girdi hatası.\n'
+        'E1–E27 kriterlerini otomatik/karma olarak ölçer (E9–E11, E19–E29 statik/\n' +
+        'gelecek faz). --static ile tarayıcı açmadan kaynak taraması yapılır (E23, E24\n' +
+        'fiziksel yön, E26, E27). Sonuçlar report.json -> results.E<kod> altında\n' +
+        '{ ok, value, threshold, method } taşır; method = otomatik | karma | statik.\n' +
+        'ok: null ise ilgili kriter elle doğrulanmalıdır (na gerekçesiyle). Çıkış:\n' +
+        '0 geçti, 1 ihlal, 2 araç yok ya da girdi hatası.\n'
       );
       process.exit(0);
     } else if (!args.target) {
@@ -693,6 +697,8 @@ function collectUiContrastInPage(selector) {
     const neighbor = neighborBackground(el);
 
     // Kenarlık: 4 kenarın en düşük oranlısı (yalnız görünür kenarlar).
+    // Tamamen saydam (alpha 0) kenarlık görünür sınır oluşturmaz; forced-colors
+    // altında sistem renkli sınıra dönüşen şeffaf kenarlık bu yüzden atlanır.
     const sideRatios = [];
     for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
       const w = parseFloat(style['border' + side + 'Width'] || '0');
@@ -700,6 +706,7 @@ function collectUiContrastInPage(selector) {
       if (!(w > 0) || st === 'none' || st === 'hidden') continue;
       const bc = parseColor(style['border' + side + 'Color']);
       if (!bc) continue;
+      if (bc.a === 0) continue; // tamamen saydam: görünür sınır yok
       const opaque = bc.a >= 1 ? bc : composite(bc, neighbor);
       sideRatios.push({ side: side.toLowerCase(), ratio: contrast(opaque, neighbor) });
     }
@@ -1402,6 +1409,773 @@ async function dragTest(context, url) {
 }
 
 // --------------------------------------------------------------------------- #
+// E21 — forced-colors (görünür sınır + odak göstergesi)
+// --------------------------------------------------------------------------- #
+
+// forced-colors altında etkileşimli öğe sınırı: kenarlık (genişlik>0, stil≠none)
+// ya da outline. box-shadow forced-colors'ta silindiği için sayılmaz.
+function forcedColorsBoundaryInPage(selector) {
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  const items = [];
+  for (const el of document.querySelectorAll(selector)) {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    if (
+      !(r.width > 0 && r.height > 0) ||
+      s.visibility === 'hidden' ||
+      s.display === 'none' ||
+      Number(s.opacity) === 0
+    ) {
+      continue;
+    }
+    let border = false;
+    for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+      const w = parseFloat(s['border' + side + 'Width'] || '0');
+      const st = s['border' + side + 'Style'];
+      if (w > 0 && st !== 'none' && st !== 'hidden') {
+        border = true;
+        break;
+      }
+    }
+    const outline =
+      s.outlineStyle !== 'none' && parseFloat(s.outlineWidth || '0') > 0;
+    items.push({
+      selector: describe(el),
+      boundary: border || outline,
+      border,
+      outline,
+      appearance: s.appearance,
+    });
+  }
+  return items;
+}
+
+async function forcedColorsTest(context, url) {
+  const page = await context.newPage();
+  const out = { total: 0, boundary: [], focus: [] };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+
+    const items = await page.evaluate(
+      forcedColorsBoundaryInPage,
+      INTERACTIVE_SELECTOR
+    );
+    out.total = items.length;
+    out.boundary = items
+      .filter((i) => !i.boundary)
+      .map((i) => ({ selector: i.selector, reason: 'görünür sınır yok' }));
+
+    // Odak göstergesi: Tab ile gezinirken her odaklanan öğede outline görünür olmalı
+    // (forced-colors box-shadow'u siler).
+    const info = await page.evaluate(tagFocusablesInPage, INTERACTIVE_SELECTOR);
+    await page.evaluate(() => {
+      if (document.body) document.body.focus();
+    });
+    const maxSteps = info.total + 3;
+    for (let i = 0; i < maxSteps; i++) {
+      await page.keyboard.press('Tab');
+      const snap = await page.evaluate(focusSnapshotInPage);
+      if (!snap || !snap.focused) break;
+      const outlineVisible =
+        snap.outlineStyle !== 'none' && parseFloat(snap.outlineWidth || '0') > 0;
+      if (!outlineVisible) {
+        out.focus.push({
+          selector: snap.descriptor,
+          reason: 'forced-colors altında odak göstergesi yok',
+        });
+      }
+    }
+  } finally {
+    await page.close();
+  }
+  return out;
+}
+
+// --------------------------------------------------------------------------- #
+// E22 — prefers-contrast: more (metin + UI kenarlık kontrastı)
+// --------------------------------------------------------------------------- #
+
+function contrastMoreAuditInPage(uiSelector) {
+  const parseColor = (str) => {
+    const m = String(str || '').match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const p = m[1].split(',').map((s) => parseFloat(s.trim()));
+    if (p.length < 3 || p.some((v) => Number.isNaN(v))) return null;
+    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+  };
+  const composite = (top, bottom) => ({
+    r: top.r * top.a + bottom.r * (1 - top.a),
+    g: top.g * top.a + bottom.g * (1 - top.a),
+    b: top.b * top.a + bottom.b * (1 - top.a),
+    a: 1,
+  });
+  const luminance = (c) => {
+    const lin = (v) => {
+      const x = v / 255;
+      return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+  };
+  const contrast = (a, b) => {
+    const l1 = luminance(a);
+    const l2 = luminance(b);
+    const hi = Math.max(l1, l2);
+    const lo = Math.min(l1, l2);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  const effectiveBg = (el) => {
+    const stack = [];
+    let node = el.parentElement;
+    while (node) {
+      const c = parseColor(getComputedStyle(node).backgroundColor);
+      if (c && c.a > 0) {
+        stack.push(c);
+        if (c.a >= 1) break;
+      }
+      node = node.parentElement;
+    }
+    let bg = { r: 255, g: 255, b: 255, a: 1 };
+    for (let i = stack.length - 1; i >= 0; i--) bg = composite(stack[i], bg);
+    // Öğenin kendi zemini varsa onu da ekle.
+    const own = parseColor(getComputedStyle(el).backgroundColor);
+    if (own && own.a > 0) bg = composite(own.a >= 1 ? own : own, bg);
+    return bg;
+  };
+
+  // @media (prefers-contrast: ...) kuralı tanımlı mı?
+  let hasRule = false;
+  try {
+    for (const sheet of Array.from(document.styleSheets)) {
+      let rules;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        continue;
+      }
+      const walk = (list) => {
+        for (const rule of Array.from(list || [])) {
+          const txt = rule.cssText || '';
+          const media = rule.media ? rule.media.mediaText : '';
+          if (/prefers-contrast/i.test(media) || /prefers-contrast/i.test(txt)) {
+            hasRule = true;
+          }
+          if (rule.cssRules) walk(rule.cssRules);
+        }
+      };
+      walk(rules);
+    }
+  } catch {
+    /* yut */
+  }
+
+  const text = [];
+  for (const el of Array.from(document.querySelectorAll('body *'))) {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    if (
+      !(r.width > 0 && r.height > 0) ||
+      s.visibility === 'hidden' ||
+      s.display === 'none'
+    ) {
+      continue;
+    }
+    let hasText = false;
+    for (const n of Array.from(el.childNodes)) {
+      if (n.nodeType === 3 && n.nodeValue && n.nodeValue.trim()) hasText = true;
+    }
+    if (!hasText) continue;
+    const fg = parseColor(s.color);
+    if (!fg) continue;
+    const bg = effectiveBg(el);
+    const opaque = fg.a >= 1 ? fg : composite(fg, bg);
+    text.push({ selector: describe(el), ratio: contrast(opaque, bg) });
+  }
+
+  const ui = [];
+  for (const el of Array.from(document.querySelectorAll(uiSelector))) {
+    const r = el.getBoundingClientRect();
+    const s = getComputedStyle(el);
+    if (
+      !(r.width > 0 && r.height > 0) ||
+      s.visibility === 'hidden' ||
+      s.display === 'none'
+    ) {
+      continue;
+    }
+    const neighbor = effectiveBg(el);
+    let min = null;
+    for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+      const w = parseFloat(s['border' + side + 'Width'] || '0');
+      const st = s['border' + side + 'Style'];
+      if (!(w > 0) || st === 'none' || st === 'hidden') continue;
+      const bc = parseColor(s['border' + side + 'Color']);
+      if (!bc) continue;
+      const opaque = bc.a >= 1 ? bc : composite(bc, neighbor);
+      const ratio = contrast(opaque, neighbor);
+      if (min === null || ratio < min) min = ratio;
+    }
+    if (min !== null) ui.push({ selector: describe(el), ratio: min });
+  }
+
+  return { hasRule, text, ui };
+}
+
+async function contrastMoreTest(context, url) {
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+    return await page.evaluate(contrastMoreAuditInPage, UI_COMPONENT_SELECTOR);
+  } finally {
+    await page.close();
+  }
+}
+
+// --------------------------------------------------------------------------- #
+// E24 — dir=rtl geçişi (yatay taşma)
+// --------------------------------------------------------------------------- #
+
+async function rtlTest(context, url) {
+  const page = await context.newPage();
+  const result = { viewports: [], rtlOverflow: [] };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.waitForTimeout(200);
+    for (const width of [390, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.waitForTimeout(120);
+      const ltr = await page.evaluate(() => {
+        const de = document.documentElement;
+        return { scrollWidth: de.scrollWidth, clientWidth: de.clientWidth };
+      });
+      await page.evaluate(() => {
+        document.documentElement.setAttribute('dir', 'rtl');
+      });
+      await page.waitForTimeout(120);
+      const rtl = await page.evaluate(() => {
+        const de = document.documentElement;
+        return { scrollWidth: de.scrollWidth, clientWidth: de.clientWidth };
+      });
+      await page.evaluate(() => {
+        document.documentElement.removeAttribute('dir');
+      });
+      result.viewports.push({ width, ltr, rtl });
+      // RTL'e özgü taşma: rtl'de taşıyor ama ltr'de taşmıyor, ya da RTL daha geniş.
+      const rtlScroll = rtl.scrollWidth > rtl.clientWidth;
+      const ltrScroll = ltr.scrollWidth > ltr.clientWidth;
+      if (rtlScroll && (!ltrScroll || rtl.scrollWidth > ltr.scrollWidth)) {
+        result.rtlOverflow.push({
+          viewport: width,
+          rtl: rtl.scrollWidth,
+          ltr: ltr.scrollWidth,
+          clientWidth: rtl.clientWidth,
+        });
+      }
+    }
+  } finally {
+    await page.close();
+  }
+  return result;
+}
+
+// --------------------------------------------------------------------------- #
+// E25 — sahte yerelleştirme (%E25_expansion_ratio genişleme + aksan)
+// --------------------------------------------------------------------------- #
+
+function fakeLocalizeInPage(ratio) {
+  const ACCENT_MAP = {
+    a: 'á', e: 'é', i: 'í', o: 'ó', u: 'ú', c: 'ç', s: 'ş', g: 'ğ', n: 'ñ',
+    y: 'ý', z: 'ž', d: 'ð', t: 'ţ', r: 'ř',
+    A: 'Á', E: 'É', I: 'Í', O: 'Ó', U: 'Ú', C: 'Ç', S: 'Ş', G: 'Ğ', N: 'Ñ',
+    Y: 'Ý', Z: 'Ž', D: 'Ð', T: 'Ţ', R: 'Ř',
+  };
+  const accent = (str) =>
+    str
+      .split('')
+      .map((ch) => (ACCENT_MAP[ch] !== undefined ? ACCENT_MAP[ch] : ch))
+      .join('');
+  let changed = 0;
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) nodes.push(walker.currentNode);
+  for (const node of nodes) {
+    const value = node.nodeValue;
+    if (!value || value.trim().length < 2) continue;
+    const target = Math.ceil(value.length * ratio);
+    let expanded = accent(value);
+    while (expanded.length < target) expanded += '·';
+    node.nodeValue = '[' + expanded + ']';
+    changed++;
+  }
+  return changed;
+}
+
+function overflowAuditInPage() {
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  const de = document.documentElement;
+  const horizontalScroll = de.scrollWidth > de.clientWidth;
+  const clipped = [];
+  for (const el of Array.from(document.querySelectorAll('body *'))) {
+    const s = getComputedStyle(el);
+    const hidesX = s.overflowX === 'hidden' || s.overflowX === 'clip';
+    const hidesY = s.overflowY === 'hidden' || s.overflowY === 'clip';
+    if (!hidesX && !hidesY) continue;
+    if (!el.textContent || el.textContent.trim().length === 0) continue;
+    const overflowX =
+      hidesX && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0;
+    const overflowY =
+      hidesY && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0;
+    if (overflowX || overflowY) clipped.push(describe(el));
+  }
+  return { horizontalScroll, clipped };
+}
+
+async function expansionTest(context, url) {
+  const page = await context.newPage();
+  const result = { viewports: [], violations: [], horizontalScroll: false };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.waitForTimeout(200);
+    const baseline = new Map();
+    for (const width of [320, 390, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.waitForTimeout(120);
+      const b = await page.evaluate(overflowAuditInPage);
+      baseline.set(width, b);
+    }
+    const changed = await page.evaluate(fakeLocalizeInPage, THRESHOLDS.E25_expansion_ratio);
+    result.changed = changed;
+    for (const width of [320, 390, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await page.waitForTimeout(120);
+      const a = await page.evaluate(overflowAuditInPage);
+      const b = baseline.get(width);
+      const newScroll = a.horizontalScroll && !b.horizontalScroll;
+      const baseClip = new Set(b.clipped);
+      const newClip = a.clipped.filter((s) => !baseClip.has(s));
+      result.viewports.push({ width, ...a });
+      if (newScroll) {
+        result.horizontalScroll = true;
+        result.violations.push({ viewport: width, kind: 'yatay kaydırma' });
+      }
+      for (const s of newClip) {
+        result.violations.push({ viewport: width, selector: s, kind: 'metin kırpılması' });
+      }
+    }
+  } finally {
+    await page.close();
+  }
+  return result;
+}
+
+// --------------------------------------------------------------------------- #
+// E12 (genişleme) — reduce altında transform animasyonu / parallax
+// --------------------------------------------------------------------------- #
+
+async function motionReduceAuditInPage() {
+  const out = { transformAnimations: [], parallax: [] };
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  for (const el of Array.from(document.querySelectorAll('*'))) {
+    let anims = [];
+    try {
+      anims = el.getAnimations();
+    } catch {
+      anims = [];
+    }
+    for (const a of anims) {
+      let frames = [];
+      try {
+        frames = a.effect.getKeyframes();
+      } catch {
+        frames = [];
+      }
+      const usesTransform = frames.some(
+        (f) => f.transform && f.transform !== 'none'
+      );
+      if (usesTransform && a.playState === 'running') {
+        out.transformAnimations.push({
+          selector: describe(el),
+          name: a.animationName || null,
+        });
+      }
+    }
+  }
+
+  // Parallax: kaydırmada transform değişimi. scroll olayı asenkron işlendiği için
+  // kısa bir bekleme ardından yeniden okunur.
+  const els = Array.from(document.querySelectorAll('body *')).slice(0, 3000);
+  const before = els.map((el) => getComputedStyle(el).transform);
+  const y0 = window.scrollY;
+  window.scrollTo(0, document.documentElement.scrollHeight);
+  await new Promise((r) => setTimeout(r, 120));
+  els.forEach((el, i) => {
+    const t = getComputedStyle(el).transform;
+    const b = before[i];
+    if (t !== b && (t !== 'none' || b !== 'none')) {
+      out.parallax.push({ selector: describe(el) });
+    }
+  });
+  window.scrollTo(0, y0);
+  return out;
+}
+
+async function motionAuditTest(context, url) {
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.waitForTimeout(300);
+    return await page.evaluate(motionReduceAuditInPage);
+  } finally {
+    await page.close();
+  }
+}
+
+// --------------------------------------------------------------------------- #
+// Statik mod — tarayıcı açmadan kaynak taraması (E23, E24 statik, E26, E27)
+// --------------------------------------------------------------------------- #
+
+const STATIC_SCAN_EXTS = new Set([
+  '.html', '.htm', '.css', '.js', '.mjs', '.cjs', '.jsx', '.tsx', '.ts', '.vue', '.svelte',
+]);
+const STATIC_SKIP_DIRS = new Set([
+  'node_modules', '.git', 'dist', 'build', 'out', 'coverage', '.next', '.nuxt', '.cache', '__pycache__',
+]);
+
+function stripComments(text) {
+  return text
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/[^\n]*/g, '$1 ');
+}
+
+function walkSourceFiles(dir) {
+  const files = [];
+  const walk = (d) => {
+    let entries;
+    try {
+      entries = fs.readdirSync(d, { withFileTypes: true });
+    } catch {
+      return;
+    }
+    for (const e of entries) {
+      if (e.isDirectory()) {
+        if (STATIC_SKIP_DIRS.has(e.name)) continue;
+        if (e.name.startsWith('.')) continue;
+        walk(path.join(d, e.name));
+      } else if (e.isFile()) {
+        if (!STATIC_SCAN_EXTS.has(path.extname(e.name).toLowerCase())) continue;
+        if (/\.min\./.test(e.name)) continue;
+        files.push(path.join(d, e.name));
+      }
+    }
+  };
+  walk(dir);
+  return files;
+}
+
+function relPath(root, file) {
+  return path.relative(root, file).split(path.sep).join('/');
+}
+
+// Alpha bileşeni 1'den küçük mü? ("0.5", ".5", "50%" biçimleri desteklenir.)
+function alphaBelow1(raw) {
+  if (!raw) return false;
+  const tok = raw.trim();
+  if (!tok) return false;
+  if (tok.endsWith('%')) {
+    const a = parseFloat(tok) / 100;
+    return Number.isFinite(a) && a < 1;
+  }
+  const a = parseFloat(tok);
+  return Number.isFinite(a) && a < 1;
+}
+
+// Zemin değerinde alpha<1 olan bir renk var mı? Yalnız 4 bileşenli
+// (alpha içeren) rgba()/hsla() ve eğik çizgili (/) rgb()/hsl() biçimleri
+// yarı saydam sayılır; son kanalı 0 olan opak rgb(255,0,0) gibi değerler sayılmaz.
+function hasTransparentBackground(body) {
+  const bgRe = /background(?:-color)?\s*:\s*([^;}]+)/gi;
+  let bg;
+  while ((bg = bgRe.exec(body)) !== null) {
+    const val = bg[1];
+    const fnRe = /\b(rgba?|hsla?)\(([^)]*)\)/gi;
+    let f;
+    while ((f = fnRe.exec(val)) !== null) {
+      const inner = f[2];
+      if (inner.includes('/')) {
+        const aTok = inner.split('/')[1];
+        if (aTok && alphaBelow1(aTok.trim().split(/\s+/).pop())) return true;
+      }
+      const parts = inner.split(',').map((s) => s.trim()).filter(Boolean);
+      if (parts.length >= 4 && alphaBelow1(parts[parts.length - 1])) return true;
+    }
+  }
+  return false;
+}
+
+function normalizeSelector(sel) {
+  return sel.trim().replace(/\s+/g, ' ');
+}
+
+function selectorParts(sel) {
+  return sel.split(',').map(normalizeSelector).filter(Boolean);
+}
+
+// Blok öncesi metinden asıl CSS seçiciyi ayıklar: önceki kural/@media
+// kalıntılarını ve HTML başlığını (ilk blok) atar.
+function extractSelector(block) {
+  let before = block.slice(0, block.indexOf('{'));
+  before = before.slice(before.lastIndexOf('{') + 1);
+  before = before.slice(before.lastIndexOf('}') + 1);
+  if (before.includes('<')) {
+    const gt = before.lastIndexOf('>');
+    if (gt !== -1) before = before.slice(gt + 1);
+  }
+  return normalizeSelector(before);
+}
+
+// @media (prefers-reduced-transparency: reduce) bloklarındaki opak yedek
+// seçicilerini toplar; karşılaştırma seçici bazındadır (global değil).
+function extractReducedTransparencySelectors(text) {
+  const set = new Set();
+  const markerRe = /@media[^{]*prefers-reduced-transparency\s*:\s*reduce[^{]*\{/gi;
+  let m;
+  while ((m = markerRe.exec(text)) !== null) {
+    const start = markerRe.lastIndex;
+    let depth = 1;
+    let i = start;
+    while (i < text.length && depth > 0) {
+      const ch = text[i];
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      i++;
+    }
+    const inner = text.slice(start, i - 1);
+    for (const block of inner.match(/[^{}]+\{[^{}]*\}/g) || []) {
+      const sel = extractSelector(block);
+      for (const p of selectorParts(sel)) set.add(p);
+    }
+  }
+  return set;
+}
+
+function scanE23(files, root) {
+  const candidates = [];
+  const fallbackSelectors = new Set();
+  for (const file of files) {
+    const raw = fs.readFileSync(file, 'utf8');
+    const text = stripComments(raw);
+    // Yorumlardaki "prefers-reduced-transparency" atıfları yedeği saymaz;
+    // yalnız gerçek CSS kuralı (yorumdan arındırılmış metin) yedek kabul edilir.
+    for (const s of extractReducedTransparencySelectors(text)) fallbackSelectors.add(s);
+    // Yarı saydam zemin / backdrop-filter içeren seçici bloklarını yakala.
+    const blocks = text.match(/[^{}]+\{[^{}]*\}/g) || [];
+    for (const block of blocks) {
+      const body = block.slice(block.indexOf('{') + 1);
+      const backdrop = /(?:-webkit-)?backdrop-filter\s*:\s*(?!none\b)[^;}]+/i.test(body);
+      const semiTransparent = hasTransparentBackground(body);
+      if (backdrop || semiTransparent) {
+        candidates.push({ file: relPath(root, file), selector: extractSelector(block) });
+      }
+    }
+  }
+  // Yedek seçici bazında aranır: aday seçicinin kendi opak yedeği yoksa ihlaldir.
+  const violations = candidates.filter((c) =>
+    !selectorParts(c.selector).some((p) => fallbackSelectors.has(p))
+  );
+  const warnings = candidates.map((c) => ({
+    file: c.file,
+    selector: c.selector,
+    reason: 'saydam/blur yüzey üstü metnin en kötü zemine göre kontrastı elle doğrulanmalı (≥ 4.5:1)',
+  }));
+  return {
+    candidates,
+    hasReducedTransparency: fallbackSelectors.size > 0,
+    violations,
+    warnings,
+  };
+}
+
+function scanE24Static(files, root) {
+  const findings = [];
+  const push = (file, line, rule, suggestion) =>
+    findings.push({ file: relPath(root, file), line, rule, suggestion });
+  for (const file of files) {
+    const text = stripComments(fs.readFileSync(file, 'utf8'));
+    text.split('\n').forEach((raw, i) => {
+      const line = i + 1;
+      if (/\b(margin|padding|border)-(left|right)\s*:/.test(raw)) {
+        push(file, line, raw.trim(), 'margin-inline / padding-inline / border-inline kullan');
+      }
+      if (/(^|[;{\s])(left|right)\s*:/.test(raw) && !/-(left|right)\s*:/.test(raw)) {
+        push(file, line, raw.trim(), 'inset-inline-start / inset-inline-end kullan');
+      }
+      if (/text-align\s*:\s*(left|right)\b/.test(raw)) {
+        push(file, line, raw.trim(), 'text-align: start / end kullan');
+      }
+      if (/\bfloat\s*:\s*(left|right)\b/.test(raw)) {
+        push(file, line, raw.trim(), 'mantıksal akış / flex kullan');
+      }
+    });
+  }
+  return findings;
+}
+
+function scanE26(files, root) {
+  const violations = [];
+  for (const file of files) {
+    const text = stripComments(fs.readFileSync(file, 'utf8'));
+    text.split('\n').forEach((raw, i) => {
+      if (/text-transform\s*:\s*(uppercase|lowercase)\b/.test(raw)) {
+        violations.push({
+          file: relPath(root, file),
+          line: i + 1,
+          rule: raw.trim(),
+          suggestion: 'Türkçe i/İ için metni doğrudan yerelleştirilmiş hâliyle yaz; uppercase/lowercase dönüşümü yapma',
+        });
+      }
+      // Lookbehind yok: `toLocaleUpperCase(` deseni zaten \.toUpperCase\s*\( ile eşleşmez,
+      // bu yüzden `userLocale.toUpperCase()` gibi adlar da doğru biçimde yakalanır.
+      if (/\.toUpperCase\s*\(/.test(raw) || /\.toLowerCase\s*\(/.test(raw)) {
+        violations.push({
+          file: relPath(root, file),
+          line: i + 1,
+          rule: raw.trim(),
+          suggestion: "toLocaleUpperCase('tr-TR') / toLocaleLowerCase('tr-TR') kullan",
+        });
+      }
+    });
+  }
+  return violations;
+}
+
+function scanE27(files, root) {
+  const violations = [];
+  for (const file of files) {
+    const text = stripComments(fs.readFileSync(file, 'utf8'));
+    text.split('\n').forEach((raw, i) => {
+      const line = i + 1;
+      if (/\.toFixed\s*\(/.test(raw) && /(TL|₺|%|\$|€|USD|EUR|TRY)/.test(raw)) {
+        violations.push({
+          file: relPath(root, file),
+          line,
+          rule: raw.trim(),
+          suggestion: 'Intl.NumberFormat kullan (style: currency/percent)',
+        });
+      }
+      if (/["'`]\s*(?:TL|₺)\s*["'`]/.test(raw) || /\+\s*["'`][^"'`]*\bTL\b[^"'`]*["'`]/.test(raw)) {
+        violations.push({
+          file: relPath(root, file),
+          line,
+          rule: raw.trim(),
+          suggestion: 'Para birimini elle birleştirme; Intl.NumberFormat kullan',
+        });
+      }
+      if (/\bdd[./]MM[./]yyyy\b|\bMM[./]dd[./]yyyy\b|\bGG[./]AA[./]YYYY\b/.test(raw)) {
+        violations.push({
+          file: relPath(root, file),
+          line,
+          rule: raw.trim(),
+          suggestion: 'Sabit tarih deseni yerine Intl.DateTimeFormat kullan',
+        });
+      }
+    });
+  }
+  return violations;
+}
+
+function runStatic(dir) {
+  const root = path.resolve(dir);
+  if (!fs.existsSync(root)) throw new InputError('Statik dizin bulunamadı: ' + root);
+  const files = walkSourceFiles(root);
+  const startedAt = new Date().toISOString();
+
+  const e23 = scanE23(files, root);
+  const e24 = scanE24Static(files, root);
+  const e26 = scanE26(files, root);
+  const e27 = scanE27(files, root);
+
+  const results = {};
+  results.E23 = {
+    ok: e23.violations.length === 0,
+    value: e23.violations.length,
+    threshold: THRESHOLDS.E23_text_contrast_min,
+    method: 'karma',
+    violations: e23.violations,
+    warnings: e23.warnings,
+    hasReducedTransparency: e23.hasReducedTransparency,
+    na: e23.candidates.length === 0 ? 'saydam/blur yüzey bulunamadı' : undefined,
+  };
+  results.E24 = {
+    ok: true,
+    value: e24.length,
+    threshold: null,
+    method: 'statik',
+    static: e24,
+    warnings: e24,
+    na: e24.length
+      ? 'fiziksel yön özellikleri bulundu (bilgi); dinamik RTL geçişi tarayıcı modu ile ölçülür'
+      : 'fiziksel yön özelliği bulunamadı',
+  };
+  results.E26 = {
+    ok: e26.length === 0,
+    value: e26.length,
+    threshold: 0,
+    method: 'statik',
+    violations: e26,
+  };
+  results.E27 = {
+    ok: e27.length === 0,
+    value: e27.length,
+    threshold: 0,
+    method: 'statik',
+    violations: e27,
+  };
+
+  const report = {
+    target: dir,
+    mode: 'static',
+    startedAt,
+    thresholds: THRESHOLDS,
+    scannedFiles: files.length,
+    results,
+    ok: !Object.values(results).some((r) => r.ok === false),
+  };
+  return report;
+}
+
+// --------------------------------------------------------------------------- #
 // Sonuç değerlendirme (E kodları)
 // --------------------------------------------------------------------------- #
 
@@ -1661,24 +2435,31 @@ function evaluateResults(report) {
   results.E11 = { ok: null, value: null, threshold: null, method: 'statik', na: 'durum kapsaması elle incelenir' };
   results.E19 = { ok: null, value: null, threshold: null, method: 'statik', na: 'tekrar giriş elle incelenir' };
   results.E20 = { ok: null, value: null, threshold: null, method: 'statik', na: 'tutarlı yardım elle incelenir' };
-  results.E26 = { ok: null, value: null, threshold: null, method: 'statik', na: 'Türkçe büyük/küçük harf elle incelenir' };
-  results.E27 = { ok: null, value: null, threshold: null, method: 'statik', na: 'yerel biçim elle incelenir' };
+  results.E23 = { ok: null, value: null, threshold: THRESHOLDS.E23_text_contrast_min, method: 'karma', na: 'saydam yüzey denetimi statik modda (--static) yapılır' };
+  results.E26 = { ok: null, value: null, threshold: null, method: 'statik', na: 'Türkçe büyük/küçük harf elle incelenir (--static ile taranır)' };
+  results.E27 = { ok: null, value: null, threshold: null, method: 'statik', na: 'yerel biçim elle incelenir (--static ile taranır)' };
   results.E29 = { ok: null, value: null, threshold: null, method: 'statik', na: 'eşit belirginlik elle incelenir' };
 
-  // E12: hareket
+  // E12: hareket — reduce altında transform tabanlı animasyon/parallax yok.
   const motion = report.motion || {};
   const maxAnim = (motion.maxAnimation && motion.maxAnimation.value) || 0;
   const maxTrans = (motion.maxTransition && motion.maxTransition.value) || 0;
   const animFail = maxAnim > THRESHOLDS.E12_max_animation_s;
   const transFail = maxTrans > THRESHOLDS.E12_max_transition_s;
+  const motionAudit = report.motionAudit || {};
+  const transformAnims = motionAudit.transformAnimations || [];
+  const parallax = motionAudit.parallax || [];
+  const transformFail = transformAnims.length > 0 || parallax.length > 0;
   results.E12 = {
-    ok: !animFail && !transFail,
+    ok: !animFail && !transFail && !transformFail,
     value: Math.max(maxAnim, maxTrans),
     threshold: THRESHOLDS.E12_max_transition_s,
     method: 'otomatik',
     violations: {
       animation: animFail ? motion.maxAnimation : null,
       transition: transFail ? motion.maxTransition : null,
+      transformAnimations: transformAnims,
+      parallax,
     },
   };
 
@@ -1756,13 +2537,108 @@ function evaluateResults(report) {
     };
   }
 
-  // E21-E25: sonraki fazlarda kodlanacak (yer ayırma).
-  results.E21 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'forced-colors denetimi sonraki fazda' };
-  results.E22 = { ok: null, value: null, threshold: THRESHOLDS.E22_text_contrast_min, method: 'otomatik', na: 'prefers-contrast denetimi sonraki fazda' };
-  results.E23 = { ok: null, value: null, threshold: THRESHOLDS.E23_text_contrast_min, method: 'karma', na: 'saydam yüzey denetimi sonraki fazda' };
-  results.E24 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'RTL denetimi sonraki fazda' };
-  results.E25 = { ok: null, value: null, threshold: THRESHOLDS.E25_expansion_ratio, method: 'otomatik', na: 'metin genişlemesi denetimi sonraki fazda' };
-  results.E28 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'başlık/bölge yapısı denetimi sonraki fazda' };
+  // E21 — forced-colors: etkileşimli öğe sınırı + odak göstergesi.
+  const fc = report.forcedColors || {};
+  if (fc.emulation === false) {
+    results.E21 = {
+      ok: null,
+      value: null,
+      threshold: null,
+      method: 'otomatik',
+      na: 'forced-colors emülasyonu desteklenmiyor',
+    };
+  } else {
+    const fcBoundary = fc.boundary || [];
+    const fcFocus = fc.focus || [];
+    results.E21 = {
+      ok: fcBoundary.length === 0 && fcFocus.length === 0,
+      value: fcBoundary.length + fcFocus.length,
+      threshold: 0,
+      method: 'otomatik',
+      violations: { boundary: fcBoundary, focus: fcFocus },
+      total: fc.total || 0,
+      na: (fc.total || 0) === 0 ? 'etkileşimli öğe bulunamadı' : undefined,
+    };
+  }
+
+  // E22 — prefers-contrast: more: metin ≥ E22_text_contrast_min, kenarlık ≥ E22_ui_contrast_min.
+  const cm = report.contrastMore || {};
+  if (cm.emulation === false) {
+    results.E22 = {
+      ok: null,
+      value: null,
+      threshold: THRESHOLDS.E22_text_contrast_min,
+      method: 'otomatik',
+      na: 'prefers-contrast emülasyonu desteklenmiyor',
+    };
+  } else if (cm.hasRule === false) {
+    results.E22 = {
+      ok: null,
+      value: null,
+      threshold: THRESHOLDS.E22_text_contrast_min,
+      method: 'otomatik',
+      na: 'prefers-contrast kuralı yok',
+    };
+  } else {
+    const textViol = (cm.text || []).filter(
+      (t) => t.ratio < THRESHOLDS.E22_text_contrast_min
+    );
+    const uiViol = (cm.ui || []).filter(
+      (u) => u.ratio < THRESHOLDS.E22_ui_contrast_min
+    );
+    results.E22 = {
+      ok: textViol.length === 0 && uiViol.length === 0,
+      value: textViol.length + uiViol.length,
+      threshold: THRESHOLDS.E22_text_contrast_min,
+      method: 'otomatik',
+      violations: { text: textViol, ui: uiViol },
+    };
+  }
+
+  // E24 — RTL: dir=rtl geçişinde yatay taşma yok (fiziksel yön statik modda).
+  const rtl = report.rtl || {};
+  if (rtl.emulation === false) {
+    results.E24 = {
+      ok: null,
+      value: null,
+      threshold: null,
+      method: 'otomatik',
+      na: 'RTL geçişi uygulanamadı',
+    };
+  } else {
+    const overflow = rtl.rtlOverflow || [];
+    results.E24 = {
+      ok: overflow.length === 0,
+      value: overflow.length,
+      threshold: 0,
+      method: 'otomatik',
+      violations: overflow,
+    };
+  }
+
+  // E25 — sahte yerelleştirme: %30 genişlemede yatay kaydırma/kırpma yok.
+  const exp = report.expansion || {};
+  if (exp.emulation === false) {
+    results.E25 = {
+      ok: null,
+      value: null,
+      threshold: THRESHOLDS.E25_expansion_ratio,
+      method: 'otomatik',
+      na: 'metin genişlemesi uygulanamadı',
+    };
+  } else {
+    const violations = exp.violations || [];
+    results.E25 = {
+      ok: violations.length === 0 && !exp.horizontalScroll,
+      value: violations.length,
+      threshold: THRESHOLDS.E25_expansion_ratio,
+      method: 'otomatik',
+      violations,
+    };
+  }
+
+  // E28: başlık/bölge yapısı (bu sürümde kapsam dışı).
+  results.E28 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'başlık/bölge yapısı denetimi bu sürümde kapsam dışı' };
 
   return results;
 }
@@ -1791,7 +2667,9 @@ function printSummary(report) {
     );
   }
   lines.push('Genel: ' + (report.ok ? 'OK' : 'FAIL'));
-  lines.push('report.json: ' + path.join(report.__outDir, 'report.json'));
+  if (report.__outDir) {
+    lines.push('report.json: ' + path.join(report.__outDir, 'report.json'));
+  }
   process.stdout.write(lines.join('\n') + '\n');
 }
 
@@ -1805,6 +2683,31 @@ async function main() {
     args = parseArgs(process.argv.slice(2));
   } catch (err) {
     fatal(2, 'Girdi hatası: ' + err.message);
+  }
+
+  // Statik mod: tarayıcı açmadan kaynak taraması (E23, E24 fiziksel, E26, E27).
+  if (args.static) {
+    try {
+      const outDir = makeOutDir(args.out);
+      const report = runStatic(args.target);
+      report.__outDir = outDir;
+      const reportForDisk = { ...report };
+      delete reportForDisk.__outDir;
+      fs.writeFileSync(
+        path.join(outDir, 'report.json'),
+        JSON.stringify(reportForDisk, null, 2)
+      );
+      if (args.json) {
+        process.stdout.write(JSON.stringify(reportForDisk, null, 2) + '\n');
+      } else {
+        printSummary(report);
+      }
+      process.exitCode = report.ok ? 0 : 1;
+    } catch (err) {
+      if (err instanceof InputError) fatal(2, 'Girdi hatası: ' + err.message);
+      fatal(2, 'Beklenmeyen hata: ' + (err && err.stack ? err.stack : err));
+    }
+    return;
   }
 
   let staticServer = null;
@@ -1954,6 +2857,84 @@ async function main() {
       await dragCtx.close();
     }
 
+    // E21 — forced-colors emülasyonu (korunmuş renk yok; sınır + odak).
+    let forcedColors;
+    try {
+      const fcCtx = await browser.newContext({
+        viewport: { width: 1280, height: 800 },
+        forcedColors: 'active',
+      });
+      try {
+        forcedColors = await forcedColorsTest(fcCtx, url);
+      } finally {
+        await fcCtx.close();
+      }
+    } catch (err) {
+      forcedColors = { emulation: false, error: String(err.message || err) };
+    }
+
+    // E22 — prefers-contrast: more.
+    let contrastMore;
+    try {
+      const cmCtx = await browser.newContext({
+        viewport: { width: 1280, height: 800 },
+        contrast: 'more',
+      });
+      try {
+        contrastMore = await contrastMoreTest(cmCtx, url);
+      } finally {
+        await cmCtx.close();
+      }
+    } catch (err) {
+      contrastMore = { emulation: false, error: String(err.message || err) };
+    }
+
+    // E24 — dir=rtl geçişi.
+    let rtl;
+    try {
+      const rtlCtx = await browser.newContext({
+        viewport: { width: 390, height: 800 },
+      });
+      try {
+        rtl = await rtlTest(rtlCtx, url);
+      } finally {
+        await rtlCtx.close();
+      }
+    } catch (err) {
+      rtl = { emulation: false, error: String(err.message || err) };
+    }
+
+    // E25 — sahte yerelleştirme (%E25 genişleme + aksan).
+    let expansion;
+    try {
+      const expCtx = await browser.newContext({
+        viewport: { width: 320, height: 800 },
+      });
+      try {
+        expansion = await expansionTest(expCtx, url);
+      } finally {
+        await expCtx.close();
+      }
+    } catch (err) {
+      expansion = { emulation: false, error: String(err.message || err) };
+    }
+
+    // E12 genişleme — reduce altında transform animasyonu / parallax.
+    let motionAudit;
+    try {
+      const maCtx = await browser.newContext({
+        viewport: { width: 1280, height: 800 },
+        reducedMotion: 'reduce',
+      });
+      try {
+        motionAudit = await motionAuditTest(maCtx, url);
+      } finally {
+        await maCtx.close();
+      }
+    } catch (err) {
+      motionAudit = { transformAnimations: [], parallax: [], error: String(err.message || err) };
+    }
+
     report = {
       target: target,
       url,
@@ -1962,10 +2943,15 @@ async function main() {
       passes: [...lightPasses, ...darkPasses],
       keyboard,
       motion,
+      motionAudit,
       zoom,
       textSpacing,
       auth,
       drag,
+      forcedColors,
+      contrastMore,
+      rtl,
+      expansion,
       results: null,
       ok: false,
       __outDir: outDir,

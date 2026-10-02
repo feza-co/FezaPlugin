@@ -64,7 +64,7 @@ Bu dosya feza-hci paketindeki tüm skill'lere `references/thresholds.md` olarak 
 
 **E11 — Durum kapsaması.** Ölçen: statik inceleme (kaynak WCAG 2.2 SC 4.1.3 ve 3.3.1). Düzeltme: her asenkron işleme yükleniyor, hata ve başarı durumu ekle; her listeye boş durum ekle.
 
-**E12 — Hareket.** Ölçen: `scripts/verify-ui.mjs` (reduced-motion emülasyonu; animasyon/geçiş süresi). Kaynak WCAG 2.2 SC 2.3.3 (AAA, hareketle tetiklenen animasyon). Düzeltme: `@media (prefers-reduced-motion: reduce)` altında `transform` tabanlı animasyonu kapat; durum değişimini yalnız `opacity` ile anlat.
+**E12 — Hareket.** Ölçen: `scripts/verify-ui.mjs` (reduced-motion emülasyonu; animasyon/geçiş süresi + `reduce` altında `transform: scale/translate` tabanlı `getAnimations()` çalışan animasyonlar ve kaydırmada `transform` değişimi/parallax). Kaynak WCAG 2.2 SC 2.3.3 (AAA, hareketle tetiklenen animasyon). Düzeltme: `@media (prefers-reduced-motion: reduce)` altında `transform` tabanlı animasyonu ve parallax'ı kapat; durum değişimini yalnız `opacity` ile anlat.
 
 **E13 — Metin büyütme.** Ölçen: `scripts/verify-ui.mjs` (kök yazı boyutu %200; kırpılma ve yatay kaydırma). Kaynak WCAG 2.2 SC 1.4.4 (AA). Düzeltme: sabit yükseklik ve `overflow: hidden` kullanma, `rem` tabanlı ölçü kullan.
 
@@ -82,19 +82,19 @@ Bu dosya feza-hci paketindeki tüm skill'lere `references/thresholds.md` olarak 
 
 **E20 — Tutarlı yardım.** Ölçen: statik inceleme (kaynak WCAG 2.2 SC 3.2.6). Düzeltme: yardım mekanizmasını (iletişim, SSS bağlantısı) birden çok sayfada aynı göreli sırada tut.
 
-**E21 — forced-colors.** Ölçen: `scripts/verify-ui.mjs` (`forcedColors: 'active'` emülasyonu; etkileşimli öğe sınırı ve odak göstergesi görünürlüğü). Kaynak WCAG 2.2 SC 1.4.11 ve Microsoft yüksek karşıtlık kılavuzu. Düzeltme: `forced-colors: active` altında sınırı `BorderColor`/`-ms-high-contrast` ile koru; yalnız `background-color` ile çizilen sınırları sistem renklerine bağla.
+**E21 — forced-colors.** Ölçen: `scripts/verify-ui.mjs` (`forcedColors: 'active'` emülasyonu; etkileşimli öğelerde görünür sınır — kenarlık genişliği>0 ya da outline — ve Tab ile odakta outline tabanlı görünür odak göstergesi; box-shadow bu modda silindiği için sayılmaz). Kaynak WCAG 2.2 SC 1.4.11 ve Microsoft yüksek karşıtlık kılavuzu. Düzeltme: `forced-colors: active` altında sınırı `BorderColor`/sistem renk anahtarlarıyla koru; yalnız `background-color` ile çizilen sınırları sistem renklerine bağla.
 
-**E22 — prefers-contrast: more.** Ölçen: `scripts/verify-ui.mjs` (`contrast: 'more'` emülasyonunda metin ≥ 7.0:1, kenarlık ≥ 4.5:1). Kaynak WCAG 2.2 SC 1.4.6 (AAA hedefi) ve `prefers-contrast` ortam medyası. Düzeltme: `@media (prefers-contrast: more)` altında daha koyu metin ve daha belirgin kenarlık token'ları tanımla.
+**E22 — prefers-contrast: more.** Ölçen: `scripts/verify-ui.mjs` (`contrast: 'more'` emülasyonunda metin ≥ 7.0:1, kenarlık ≥ 4.5:1; sayfada `prefers-contrast` kuralı hiç tanımlı değilse `ok:null` + gerekçe). Kaynak WCAG 2.2 SC 1.4.6 (AAA hedefi) ve `prefers-contrast` ortam medyası. Düzeltme: `@media (prefers-contrast: more)` altında daha koyu metin ve daha belirgin kenarlık token'ları tanımla.
 
-**E23 — Saydam yüzey.** Ölçen: `scripts/verify-ui.mjs` (saydam/blur yüzeylerin altındaki en kötü zeminle metin kontrastı; opak yedek varlığı). Kaynak WCAG 2.2 SC 1.4.3. Düzeltme: saydam yüzeyleri yalnız geçici katmanlarda (menü, tooltip) kullan; `@media (prefers-reduced-transparency: reduce)` altında opak zemin tanımla.
+**E23 — Saydam yüzey.** Ölçen: `scripts/verify-ui.mjs --static <dizin>` (kaynakta `backdrop-filter`/yarı saydam zemin içeren seçicileri bulur; `@media (prefers-reduced-transparency: reduce)` opak yedeği yoksa ihlal; en kötü zemine göre metin kontrastı `warnings` ile elle doğrulanır). Kaynak WCAG 2.2 SC 1.4.3. Düzeltme: saydam yüzeyleri yalnız geçici katmanlarda (menü, tooltip) kullan; `@media (prefers-reduced-transparency: reduce)` altında opak zemin tanımla.
 
-**E24 — RTL.** Ölçen: `scripts/verify-ui.mjs` (`dir=rtl` geçişinde yatay taşma; fiziksel yön özellikleri statik bulgu). Kaynak WCAG 2.2 SC 1.3.3/1.4.10 ve mantıksal özellik pratiği. Düzeltme: `margin-left` gibi fiziksel özellikler yerine `margin-inline`/`inset-inline-start` kullan.
+**E24 — RTL.** Ölçen: `scripts/verify-ui.mjs` (`dir=rtl` geçişinde 390/1280 px'de yatay taşma; LTR'de taşmayan sayfada RTL'e özgü taşma aranır) ve statik mod (`--static`) fiziksel yön özelliklerini (`margin-left/right`, `padding-left/right`, `left`/`right`, `text-align: left|right`, `float: left|right`) mantıksal karşılık önerisiyle `warnings` olarak bulur (FAIL değil). Kaynak WCAG 2.2 SC 1.3.3/1.4.10 ve mantıksal özellik pratiği. Düzeltme: `margin-left` gibi fiziksel özellikler yerine `margin-inline`/`inset-inline-start` kullan.
 
-**E25 — Metin genişlemesi.** Ölçen: `scripts/verify-ui.mjs` (%30 uzatılmış aksanlı metinde yatay kaydırma/kırpma). Kaynak WCAG 2.2 SC 1.4.10 (çeviri esnekliği). Düzeltme: sabit genişlikli metin kaplarını kaldır, düğme/etiket genişliğini içeriğe bırak.
+**E25 — Metin genişlemesi.** Ölçen: `scripts/verify-ui.mjs` (%30 uzatılıp aksanlanan görünür metin düğümlerinde 320/390/1280 px'de yatay kaydırma ya da `overflow` kabında kırpılma). Kaynak WCAG 2.2 SC 1.4.10 (çeviri esnekliği). Düzeltme: sabit genişlikli metin kaplarını kaldır, düğme/etiket genişliğini içeriğe bırak.
 
-**E26 — Türkçe büyük/küçük harf.** Ölçen: statik inceleme (kaynak WCAG 2.2 SC 3.1.1 ve Türkçe i/İ kuralı). Düzeltme: kullanıcıya görünen metinde `text-transform: uppercase` ve `.toUpperCase()` kullanma; `toLocaleUpperCase(locale)` tercih et.
+**E26 — Türkçe büyük/küçük harf.** Ölçen: `scripts/verify-ui.mjs --static <dizin>` (kaynakta `text-transform: uppercase|lowercase` ve `toLocaleUpperCase`/`toLocaleLowerCase` dışındaki `.toUpperCase()/.toLowerCase()` çağrıları; yorumlar atlanır). Kaynak WCAG 2.2 SC 3.1.1 ve Türkçe i/İ kuralı. Düzeltme: kullanıcıya görünen metinde `text-transform: uppercase` ve `.toUpperCase()` kullanma; `toLocaleUpperCase(locale)` tercih et.
 
-**E27 — Yerel biçim.** Ölçen: statik inceleme (kaynak WCAG 2.2 SC 3.1.1, ISO 9241-110). Düzeltme: elle sayı/tarih/para biçimi yerine `Intl.NumberFormat` / `Intl.DateTimeFormat` kullan.
+**E27 — Yerel biçim.** Ölçen: `scripts/verify-ui.mjs --static <dizin>` (`toFixed(` + para/yüzde dizgesi, `" TL"`/`"₺"` birleştirme, sabit `dd/MM/yyyy`/`MM/dd` desenleri; yorumlar atlanır). Kaynak WCAG 2.2 SC 3.1.1, ISO 9241-110. Düzeltme: elle sayı/tarih/para biçimi yerine `Intl.NumberFormat` / `Intl.DateTimeFormat` kullan.
 
 **E28 — Başlık/bölge yapısı.** Ölçen: `scripts/verify-ui.mjs` (Playwright `ariaSnapshot()` ile tek `h1`, atlanmayan başlık seviyesi, `main` varlığı, adı boş etkileşimli öğe yokluğu). Kaynak WCAG 2.2 SC 1.3.1, 2.4.6. Düzeltme: başlık hiyerarşisini düzelt, `main` ekle, etkileşimli öğelere erişilebilir ad ver.
 
@@ -133,4 +133,4 @@ Yukarıdaki blok `scripts/verify-ui.mjs` içindeki THRESHOLDS nesnesiyle birebir
 
 ## report.json ile Eşleme
 
-`scripts/verify-ui.mjs` çıktısındaki `report.json` → `results.E1..E29` alanları bu kriterleri taşır. Her alan `ok`, `value`, `threshold`, `method` ve (varsa) `violations` içerir; `method` ∈ `otomatik | karma | statik`. `ok: null` geldiğinde `na` alanı gerekçeyi verir ve kriter elle doğrulanmalıdır (bu durum `report.ok`'u başarısız yapmaz, çıkış kodunu bozmaz). E9-E11, E19, E20, E26, E27 statik kriterlerdir; script bunları `ok: null` ile raporlar ve elle incelenmeleri gerekir. E21-E25 ve E28 sonraki fazlarda ölçülecektir; şimdilik `ok: null` + gerekçe ile yer tutar.
+`scripts/verify-ui.mjs` çıktısındaki `report.json` → `results.E1..E29` alanları bu kriterleri taşır. Her alan `ok`, `value`, `threshold`, `method` ve (varsa) `violations` içerir; `method` ∈ `otomatik | karma | statik`. `ok: null` geldiğinde `na` alanı gerekçeyi verir ve kriter elle doğrulanmalıdır (bu durum `report.ok`'u başarısız yapmaz, çıkış kodunu bozmaz). E9-E11, E19, E20, E26, E27 statik kriterlerdir; script bunları `ok: null` ile raporlar ve elle incelenmeleri gerekir (E23, E24 statik bulgu, E26, E27 `--static` modunda kaynak taramasıyla otomatik bulunur). E1-E18, E21-E25 ve E28 otomatik/karma ölçülür; E29 karma ve statik incelemeye dayanır.
