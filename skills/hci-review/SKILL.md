@@ -10,6 +10,7 @@ description: >
   ve önerileri somut adımlara çevirir. Tetikleyici: "HCI review", "HCI değerlendir",
   "frontend revize", "UI değerlendirmesi", "/feza-hci:hci-review".
   Fix modu: "--fix", "--fix=all", "düzelt", "bulguları düzelt", "fix it", "apply fixes" — bulguları UI dosyalarına uygular ve verify-ui ile doğrular.
+  Uyum raporu: "--acr" — VPAT 2.5 INT/EU yapısına uyumlu ACR (WCAG 2.2 A/AA) üretir.
 allowed-tools: Read, Write, Edit, Glob, Grep, Bash, AskUserQuestion
 ---
 
@@ -22,6 +23,7 @@ UI/akış için holistik HCI değerlendirmesi. Heuristic-eval'den farkı: sadece
 - "HCI değerlendirmesi / review"
 - "frontend / UI eleştir / revize öner"
 - Fix modu: `--fix`, `--fix=all`, "düzelt", "bulguları düzelt", "fix it", "apply fixes"
+- Uyum raporu: `--acr`, "uyum raporu", "ACR", "erişilebilirlik uyum beyanı"
 
 ## Adım 0 — Bağlamı Topla
 
@@ -54,6 +56,7 @@ EN FAZLA 3 SORU:
 - `references/evidence-rubric.md` — kanıt türleri, severity ankrajları, ikinci geçiş ve kapsam şeffaflığı (ortak standart).
 - `references/deceptive-patterns.md` — aldatıcı tasarım kalıpları (tek kaynak): tanım, TR örnek, düzeltme, ilgili E kodu.
 - `references/ux-writing.md` — mikro-metin (etiket, hata, boş durum) bulgularında ölçüt.
+- `references/conformance-report.md` — ACR şablonu (VPAT 2.5 INT/EU yapısı, WCAG 2.2 A/AA tam liste, terimler, kanıt kuralları).
 - `references/output-conventions.md`.
 
 ## Adım 3 — Üret
@@ -113,6 +116,7 @@ büyüğü olur.
 - [ ] Bulgular kullanıcı sınıfına özelleştirildi mi (junior bir kullanıcıya farklı, expert'e farklı)?
 - [ ] Yasak terimler yok mu?
 - [ ] Fix modu istendiyse: değişecek dosya listesi tek mesajla gösterildi, yalnız UI dosyaları değişti, verify-ui çalıştı, "Uygulanan düzeltmeler" tablosu eklendi?
+- [ ] `--acr` istendiyse: verify-ui `--profile` ile çalıştı, `report.json` otomatik satırları dolduruldu, kalan satırlar "Değerlendirilmedi" ve manuel kontrol listesine aktarıldı, kanıtsız "Destekliyor" satırı yok ve "hukuki uyum beyanı değildir" notu var mı?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 
@@ -146,6 +150,34 @@ Bulgu konumu dosya + seçici/satır değilse bulgu düzeltilmez, "Elle düzeltil
 Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
 ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
+
+## Adım 8 — Uyum Raporu / ACR (yalnızca `--acr` ile)
+
+Tetikleyici: `--acr`, "uyum raporu", "ACR", "erişilebilirlik uyum beyanı". Tetikleyici yoksa atlanır.
+Şablon ve terimler: `references/conformance-report.md`.
+
+1. **Ölçümü çalıştır:** verify-ui'yi uyum profiliyle çalıştır —
+   `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL> --profile wcag22aa|en301549 --out <dir>`
+   (mutlak yol; script kullanıcı projesine kopyalanmaz). `en301549` profilinde axe sürümü `EN-301-549`
+   etiketini desteklemiyorsa profil `wcag22aa`ya düşer; bunu rapora yaz. `report.json` alanı `profile`
+   kullanılan profili taşır. E28 başlık/bölge yapısı `ariaSnapshot()` ile ölçülür; `--aria-baseline <dosya>`
+   verilirse farkı rapora ekle.
+2. **Otomatik satırları doldur:** `references/conformance-report.md` §5–§6 tablolarındaki her SC için,
+   ilgili `report.json → results.E<kod>` sonucunu "Kanıt" sütununa yaz. Bir SC ancak **o SC'ye özgü**
+   bir E kodu `ok: true` ise (ya da E1 içinde SC'ye özgü axe kuralı — ör. `image-alt` → 1.1.1 —
+   report.json'daki kural kimliğiyle eşleşip `ok: true` ise) "Destekliyor" olur; yalnızca genel
+   `E1 ok: true` bir SC'yi "Destekliyor" yapmaz. SC'ye özgü ölçüm yoksa satır "Kısmen / destekleyici
+   kanıt" notuyla işaretlenir ve manuel kontrol listesine aktarılır. `ok: false` olanlar "Desteklemiyor" yapılır.
+3. **Kalanı "Değerlendirilmedi" bırak:** otomatik kanıtı olmayan, statik/karma ya da manuel satırlar
+   "Değerlendirilmedi" olarak kalır ve raporun "Otomatik doğrulanamayanlar" manuel kontrol listesine
+   (`references/evidence-rubric.md` §5) aktarılır. Statik/karma bir kriter "Destekliyor" yazılacaksa
+   "elle doğrulandı: <kim/ne zaman>" notu zorunludur; kanıtsız "Destekliyor" yasaktır.
+4. **Kapsam ve uygulanamazlar:** kriter ürün kapsamı dışındaysa (ör. medya yoksa 1.2.x) "Uygulanamaz"
+   + gerekçe yaz. Türkiye için yalnız Genelgesi 2025/10'un WCAG 2.2'ye atfı yazılır; seviye ve TS EN
+   numarası yazılmaz.
+5. **Dosyaya yaz:** `ACR_<ürün>_<tarih>.md` (ör. `ACR_myapp_2026-10-02.md`) — değerlendirme raporunun
+   yanına, cwd'ye. Rapor adı ürün ve ISO tarih içerir.
+6. **Not:** "Bu rapor hukuki uyum beyanı değildir" ifadesi rapora konur; "0 ihlal = erişilebilir" yazılmaz.
 
 ## Sınırlar
 - Max 4 soru.
