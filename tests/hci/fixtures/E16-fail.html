@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E16 FAIL — metin aralığı artınca yatay kırpılıyor</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* Tabanda sığan tek satır; harf/kelime aralığı artınca yatayda taşıp kırpılır.
+     Yalnız overflow-x gizli; E13'ün dikey kırpma ölçümünü tetiklemez. */
+  .clampbox { width: 250px; overflow-x: hidden; border: 1px solid #79808C; border-radius: 8px; padding: 2px; }
+  .clampbox p { margin: 0; white-space: nowrap; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Hakkında</h1>
+  <div class="clampbox">
+    <p>Sabit genişlikli tek satır metin.</p>
+  </div>
+</main>
+</body>
+</html>

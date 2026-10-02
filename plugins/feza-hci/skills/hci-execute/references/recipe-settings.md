@@ -132,6 +132,8 @@ Masaüstünde sol dikey sekmeler, sağda içerik. Tehlikeli eylemler bölümü a
 
 `references/thresholds.md` içindeki E1-E13 eşiklerine ek olarak bu ekrana özel kontroller:
 
+- [ ] **E20:** Yardım/iletişim mekanizması (destek bağlantısı, SSS) bu ekran ile diğer sayfalarda aynı göreli sırada duruyor (SC 3.2.6).
+- [ ] **E20:** Yardım bağlantısı ekran genişliğine göre yeniden sıralanırken göreli konumunu koruyor (mobilde de aynı bölgede).
 - [ ] Tehlikeli eylemler ayrı bölgede, farklı görsel ağırlıkta ve adlandırılmış onayla korunuyor.
 - [ ] Hesap silme onayında düğme "Hesabı sil" diyor ve kaybedilecek veriler listeleniyor.
 - [ ] Bildirim anahtarları anında kaydediliyor ve 5-10 s "Geri al" toast'ı sunuyor.

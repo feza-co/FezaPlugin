@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E15 FAIL — 24 px altı hedefler birbirine çok yakın</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  .tiny { width: 20px; height: 20px; padding: 0; background: #1D5FD1; color: #FFFFFF; border: none; border-radius: 4px; font: inherit; }
+  .row { display: flex; gap: 0; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Satır düzenleme</h1>
+  <p>Aşağıdaki küçük düğmeler bitişiktir ve 24 px aralık bırakmaz.</p>
+  <div class="row">
+    <button class="tiny" type="button" aria-label="Yukarı taşı">↑</button>
+    <button class="tiny" type="button" aria-label="Aşağı taşı">↓</button>
+  </div>
+</main>
+</body>
+</html>

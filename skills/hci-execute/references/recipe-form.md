@@ -128,6 +128,8 @@ Tarih/para: TR `1 Ekim 2026`, `1.250,00 TL`; EN `Oct 1, 2026`, `$1,250.00`.
 
 `references/thresholds.md` içindeki E1-E13 eşiklerine ek olarak bu ekrana özel kontroller:
 
+- [ ] **E19:** Aynı akışta daha önce girilen bilgi ikinci kez boş istenmiyor; mevcut değer önceden doldurulur ya da seçtirilir (SC 3.3.7).
+- [ ] **E19:** Çok adımlı formda önceki adımdan gelen değerler sonraki adımda korunuyor ve kullanıcıya gösteriliyor.
 - [ ] Her alanda görünür `<label>` var; yer tutucu etiket yerine geçmiyor (SC 3.3.2).
 - [ ] Doğrulama yalnız blur ve gönderimde tetikleniyor; yazarken agresif hata yok.
 - [ ] Gönderimde üstte hata özeti ve özetten hatalı alana bağlantı var; odak ilk hatalı alana taşınıyor.

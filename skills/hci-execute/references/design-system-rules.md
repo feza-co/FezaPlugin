@@ -1,6 +1,6 @@
 # Tasarım Sistemi Kuralları
 
-Kaynaklar: WCAG 2.1 (W3C, 2018) SC 1.4.1, 1.4.3, 1.4.4, 1.4.10, 1.4.11, 1.4.12, 2.3.3, 2.4.7; ISO 9241-110:2020 (etkileşim ilkeleri); Miller (1956); yaygın tipografi ve 8 pt ızgara pratiği.
+Kaynaklar: WCAG 2.1 (W3C, 2018) SC 1.4.1, 1.4.3, 1.4.4, 1.4.10, 1.4.11, 1.4.12, 2.3.3, 2.4.7; WCAG 2.2 (W3C, 2023) SC 2.4.11, 2.5.7, 2.5.8, 3.3.8; ISO 9241-110:2020 (etkileşim ilkeleri); Miller (1956); yaygın tipografi ve 8 pt ızgara pratiği.
 
 ## 1. Token Mimarisi
 
@@ -147,6 +147,7 @@ Ek kontroller: `border-strong / surface` açık temada 3.67:1, koyu temada 3.47:
 | Ölçek | Oranlı ölçek; varsayılan 1.25 (major third): 12, 14, 16, 20, 25, 31, 39 px |
 | Gövde | ≥ 16 px (1rem); form alanlarında da 16 px (mobil tarayıcıda otomatik yakınlaştırmayı önler) |
 | Satır yüksekliği | Gövde 1.5; başlık 1.2-1.3 (SC 1.4.12 kullanıcı geçersiz kılmasına dayanıklı) |
+| Satır aralığına dayanıklılık | Metin kaplarında sabit `height` yok; satır 1.5, harf 0.12em, kelime 0.16em ve paragraf 2em artışında içerik kırpılmaz/taşmaz. `overflow: hidden` yerine akışı bırak (E16, SC 1.4.12) |
 | Satır uzunluğu | 45-75 karakter (`max-width: 65ch`) |
 | Birim | `rem`; yazı boyutu px ile kilitlenmez (SC 1.4.4, %200 büyütme) |
 | Ağırlık | En fazla 3 ağırlık (400, 600, 700) |
@@ -168,6 +169,8 @@ Ek kontroller: `border-strong / surface` açık temada 3.67:1, koyu temada 3.47:
 - Gestalt yakınlık: grup içi boşluk < gruplar arası boşluk (ör. 8 vs 24).
 - Kırılımlar (mobil önce, `min-width`): 640, 1024, 1280 px. İçerik genişliği masaüstünde en fazla ~1200 px.
 - Dokunma hedefi: en az 44 × 44 CSS px; komşu hedefler arasında en az 8 px.
+- Hedef aralığı (E15, SC 2.5.8): 24 × 24 px altındaki hedeflerin merkezinden 24 px çaplı bir daire başka bir hedefle kesişmez; sağlanamıyorsa hedef büyütülür. Satır içi metin bağlantıları muaftır.
+- Sabit/yapışkan katman (E14, SC 2.4.11): sabit başlık ve alt çubuk yüksekliği kadar `scroll-padding-top` / `scroll-padding-bottom` tanımlanır (W3C tekniği C43); odaklanan öğe bu katmanların altında tamamen gizlenmez.
 
 ## 5. Biçim: Köşe ve Gölge
 
@@ -205,3 +208,13 @@ Gölge tek başına sınır bilgisi taşımaz; etkileşimli öğenin sınırı `
 - Odak halkası hem zemine hem bileşenin kendisine karşı ≥ 3:1.
 - `outline: none` yalnız eşdeğer görünür stil sağlanırsa.
 - Odak, yapışkan başlık ya da alt çubuk altında gizlenmez (`scroll-margin-top`).
+
+## 8. Erişilebilir Kimlik Doğrulama ve İşaretçi Alternatifleri
+
+| Kural | Değer / davranış |
+|-------|------------------|
+| Yapıştırma (E17, SC 3.3.8) | Parola ve OTP alanlarında `paste` engellenmez; parola yöneticisi çalışır. Kopyala-yapıştır kısıtı yok |
+| `autocomplete` değerleri | Parola: `current-password` / `new-password`; kullanıcı adı/e-posta: `username` / `email`; OTP: `one-time-code` |
+| Şifre görünürlüğü | "Şifreyi göster" düğmesi metinle sunulur ve `aria-pressed` ile durumu bildirir; varsayılan gizli |
+| Bilişsel test yasağı (E17) | Kullanıcıdan parolayı ezberleyip yazmasını gerektiren bilişsel test yok (ör. hesaplama); kimlik bilgisi girişi ya da yapıştırma serbest |
+| Sürükleme alternatifi (E18, SC 2.5.7) | Sürükle-bırak ile yapılan her işlem (sıralama, taşıma, kaydırıcı) için tek işaretçi alternatifi sunulur: ok tuşlarıyla taşıma ya da "yukarı/aşağı taşı" düğmeleri. `draggable` öğelerine klavye erişimi de sağlanır |

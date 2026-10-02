@@ -4,7 +4,7 @@ Kaynaklar: WCAG 2.1 (W3C, 2018), Nielsen (1994) 10 kullanılabilirlik heuristiğ
 
 Bu liste iki kez kullanılır: **uygularken** kural olarak, **doğrularken** (gizli döngü) denetim listesi olarak.
 
-Sayısal eşikler: `references/thresholds.md` (E1-E13). Bu listedeki maddeler eşiklerle çelişirse eşik dosyası geçerlidir.
+Sayısal eşikler: `references/thresholds.md` (E1-E29). Bu listedeki maddeler eşiklerle çelişirse eşik dosyası geçerlidir.
 
 ## 1. WCAG 2.1 A + AA Kontrol Listesi (arayüz üretimi için seçilmiş)
 
@@ -41,6 +41,18 @@ Sayısal eşikler: `references/thresholds.md` (E1-E13). Bu listedeki maddeler e�
 | W29 | 4.1.2 Name, Role, Value | A | Özel bileşende doğru rol ve durum (`aria-expanded`, `aria-pressed`) | Özel bileşenler |
 | W30 | 4.1.3 Status Messages | AA | Toast ve durum mesajı `role="status"` / `aria-live="polite"`; acil hata `role="alert"` | Bildirim bileşeni |
 | W31 | 2.5.5 Target Size | AAA (hedef) | Birincil eylem ≥ 44 × 44 CSS px; her etkileşimli hedef en az 24 × 24 CSS px (WCAG 2.2 SC 2.5.8) | Düğme, bağlantı, ikon boyutları |
+
+### WCAG 2.2 ek maddeleri (E kodu eşlemesiyle)
+
+| # | Kriter | Seviye | Uygulamada nasıl karşılanır | Statik kontrol | E |
+|---|--------|--------|-----------------------------|----------------|---|
+| W32 | 2.4.11 Focus Not Obscured (Minimum) | AA | Odaklanan öğe sabit/yapışkan katman altında tamamen gizlenmez; `scroll-padding` yeterli | Sabit başlık/alt çubuk yüksekliği ile `scroll-padding` karşılaştır | E14 |
+| W33 | 2.5.8 Target Size (Minimum) | AA | 24 × 24 px altı hedefler arasında merkezden en az 24 px aralık (istisna) | Küçük/bitişik ikon düğmeleri | E15 |
+| W34 | 1.4.12 Text Spacing | AA | Satır 1.5, harf 0.12em, kelime 0.16em, paragraf 2em artışında kırpılma yok | Sabit `height` + `overflow: hidden` aranır | E16 |
+| W35 | 3.3.8 Accessible Authentication (Minimum) | AA | Parola/OTP yapıştırması engellenmez; `autocomplete` doğru; "göster" düğmesi var | `onpaste`/`preventDefault`, `autocomplete` değerleri | E17 |
+| W36 | 2.5.7 Dragging Movements | AA | Sürükleme ile yapılan işlem için tek işaretçi alternatifi (ok tuşu/düğme) var | `draggable`, `dragstart`/`pointerdown` işleyicileri | E18 |
+| W37 | 3.3.7 Redundant Entry | A | Aynı akışta daha önce verilen bilgi ikinci kez boş istenmez; otomatik doldur ya da seçtir | Adres/iletişim tekrarları | E19 |
+| W38 | 3.2.6 Consistent Help | A | Yardım mekanizması (iletişim/SSS) sayfalar arasında aynı göreli sırada | Sayfa alt bilgisi/başlık sırası | E20 |
 
 ## 2. Heuristik Uygulama Listesi (Nielsen 1994 ↔ Dix et al. ↔ ISO 9241-110)
 
@@ -94,9 +106,9 @@ Sonuçlar kullanıcıya puan olarak gösterilmez; yalnız düzeltmeler uygulanı
 | Sıra | Ne yapılır | Araç |
 |------|-----------|------|
 | 1 | Otomatik doğrulamayı çalıştır: `node scripts/verify-ui.mjs <giriş sayfası>` | `scripts/verify-ui.mjs` |
-| 2 | `report.json` sonuçlarını E1-E13'e göre oku (`results.E1..E13`); OK/FAIL ve ihlalleri not et | `report.json` |
+| 2 | `report.json` sonuçlarını E1-E18'e göre oku (`results.E1..E18`); OK/FAIL/`ok:null` ve ihlalleri not et | `report.json` |
 | 3 | Ekran görüntülerini Read ile aç; hizalama/taşma/hiyerarşi/boşluk tutarlılığını değerlendir | Read |
-| 4 | Statik kriterler E9-E11'i incele (birincil eylem, görev derinliği, durum kapsaması) | Kod okuma |
+| 4 | Statik kriterler E9-E11, E19, E20, E26, E27'yi incele (birincil eylem, görev derinliği, durum kapsaması, tekrar giriş, tutarlı yardım, harf/yerel biçim) | Kod okuma |
 | 5 | İhlalleri düzelt ve yeniden çalıştır (en fazla 2 tur) | `scripts/verify-ui.mjs` |
 | 6 | Çıkış kodu 2 ise statik kontrol; "Bilinen Boşluklar"a "otomatik render doğrulaması yapılamadı" yaz | Kod okuma |
 
@@ -117,3 +129,14 @@ Herhangi bir WCAG A/AA ihlali en az severity 2 sayılır. Klavye ile tamamlanama
 ### Tur kuralı
 
 En fazla 2 düzeltme turu. Turdan sonra kalan severity ≥ 2 bulgu varsa `DESIGN_RATIONALE_<proje>.md` → "Bilinen Boşluklar" tablosuna severity, konum ve önerilen çözümle yazılır. E1-E13'ten biri FAIL ise severity'den bağımsız düzeltilir.
+
+### Statik E kriterleri kontrol listesi
+
+Otomatik/karma ölçümün kapsamadığı ya da onay gerektiren maddeler kod okuma ile işaretlenir:
+
+- [ ] **E14 — odak örtülmesi:** Sabit/yapışkan başlık ya da alt çubuk, odaklanan öğeyi tamamen kapatmıyor; `scroll-padding-top/bottom` sabit katman yüksekliği kadar tanımlı (C43).
+- [ ] **E15 — hedef aralığı:** 24 px altındaki hedefler 24 px çaplı daire kuralını sağlıyor; sağlamayanlar büyütülür ya da aralarına boşluk konur.
+- [ ] **E16 — metin aralığı:** Metin kaplarında sabit yükseklik + `overflow: hidden` yok; satır/harf/kelime aralığı artışında içerik kırpılmıyor.
+- [ ] **E17 — erişilebilir kimlik doğrulama:** Parola/OTP yapıştırması engellenmiyor; `autocomplete` değerleri doğru; "göster" düğmesi metinle ve `aria-pressed` ile sunuluyor.
+- [ ] **E19 — tekrar giriş:** Aynı akışta daha önce girilen bilgi ikinci kez boş istenmiyor; mevcut değer otomatik dolduruluyor ya da seçtiriliyor.
+- [ ] **E20 — tutarlı yardım:** Yardım/iletişim mekanizması birden çok sayfada aynı göreli sırada (ör. her zaman alt bilgide) duruyor.

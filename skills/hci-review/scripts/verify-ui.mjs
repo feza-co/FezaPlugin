@@ -14,10 +14,18 @@
  * Ne yapar:
  *   - 320/390/768/1280 px genişlikte tam sayfa ekran görüntüsü
  *   - axe-core taraması (wcag2a, wcag2aa, wcag21a, wcag21aa, wcag22aa)
- *   - yatay kaydırma ve dokunma hedefi boyutu denetimi
- *   - klavye odak sırası, görünür odak ve odak tuzağı testi
- *   - reduced-motion + koyu tema geçişi ve hareket denetimi
- *   - %200 metin büyütmede reflow/kırpılma denetimi
+ *   - yatay kaydırma ve dokunma hedefi boyutu denetimi (E4/E5)
+ *   - klavye odak sırası, görünür odak, odak tuzağı ve odak örtülmesi (E6/E7/E14)
+ *   - reduced-motion + koyu tema geçişi ve hareket denetimi (E12)
+ *   - %200 metin büyütmede reflow/kırpılma denetimi (E13)
+ *   - UI bileşeni kenarlık/dolgu/ikon kontrastı (E3)
+ *   - hedef aralığı istisnası (E15), metin aralığına dayanıklılık (E16)
+ *   - erişilebilir kimlik doğrulama (E17, karma) ve sürükleme tespiti (E18, karma)
+ *
+ * Sonuçlar `report.json` -> `results.E<kod>` altında `{ ok, value, threshold, method }`
+ * taşır; `method` = otomatik | karma | statik. `ok: null` iken `na` gerekçesi bulunur
+ * ve kriter elle doğrulanmalıdır (çıkış kodunu bozmaz). `report.ok`, `ok === false`
+ * olan sonuç yoksa true olur (null başarısız sayılmaz).
  *
  * Çıkış kodları: 0 tümü OK | 1 en az bir FAIL | 2 araç yok ya da girdi hatası.
  *
@@ -47,7 +55,17 @@ const THRESHOLDS = {
   "E7_focus_order": true,
   "E12_max_animation_s": 0.01,
   "E12_max_transition_s": 0.3,
-  "E13_zoom_percent": 200
+  "E13_zoom_percent": 200,
+  "E14_focus_obscured_points": 5,
+  "E15_target_spacing_px": 24,
+  "E16_line_height": 1.5,
+  "E16_paragraph_spacing_em": 2,
+  "E16_letter_spacing_em": 0.12,
+  "E16_word_spacing_em": 0.16,
+  "E22_text_contrast_min": 7.0,
+  "E22_ui_contrast_min": 4.5,
+  "E23_text_contrast_min": 4.5,
+  "E25_expansion_ratio": 1.3
 };
 // THRESHOLDS-END
 
@@ -338,7 +356,13 @@ function parseArgs(argv) {
       args.json = true;
     } else if (a === '--help' || a === '-h') {
       process.stdout.write(
-        'Kullanım: node scripts/verify-ui.mjs <URL | yerel.html> [--out DIR] [--json]\n'
+        'Kullanım: node scripts/verify-ui.mjs <URL | yerel.html> [--out DIR] [--json]\n' +
+        '\n' +
+        'E1–E18 kriterlerini otomatik/karma olarak ölçer (E9–E11, E19–E29 statik/\n' +
+        'gelecek faz). Sonuçlar report.json -> results.E<kod> altında { ok, value,\n' +
+        'threshold, method } taşır; method = otomatik | karma | statik. ok: null ise\n' +
+        'ilgili kriter elle doğrulanmalıdır (na gerekçesiyle). Çıkış: 0 geçti, 1 ihlal,\n' +
+        '2 araç yok ya da girdi hatası.\n'
       );
       process.exit(0);
     } else if (!args.target) {
@@ -412,6 +436,10 @@ function collectTargetsInPage({ selector: interactiveSelector, primary: primaryS
       selector: describe(el),
       w: Math.round(rect.width * 100) / 100,
       h: Math.round(rect.height * 100) / 100,
+      left: Math.round(rect.left * 100) / 100,
+      top: Math.round(rect.top * 100) / 100,
+      cx: Math.round((rect.left + rect.width / 2) * 100) / 100,
+      cy: Math.round((rect.top + rect.height / 2) * 100) / 100,
       primary,
       inline,
     });
@@ -572,6 +600,366 @@ function reflowInPage() {
 }
 
 // --------------------------------------------------------------------------- #
+// Sayfa içi: E3 — UI bileşeni kontrastı (kenarlık / dolgu / ikon)
+// --------------------------------------------------------------------------- #
+
+const UI_COMPONENT_SELECTOR =
+  'button, input:not([type=hidden]), select, textarea, [role=button], ' +
+  '[role=checkbox], [role=switch], a.btn';
+
+function collectUiContrastInPage(selector) {
+  const parseColor = (str) => {
+    const m = String(str || '').match(/rgba?\(([^)]+)\)/);
+    if (!m) return null;
+    const p = m[1].split(',').map((s) => parseFloat(s.trim()));
+    if (p.length < 3 || p.some((v) => Number.isNaN(v))) return null;
+    return { r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1 };
+  };
+  const composite = (top, bottom) => {
+    const a = top.a;
+    return {
+      r: top.r * a + bottom.r * (1 - a),
+      g: top.g * a + bottom.g * (1 - a),
+      b: top.b * a + bottom.b * (1 - a),
+      a: 1,
+    };
+  };
+  const luminance = (c) => {
+    const lin = (v) => {
+      const x = v / 255;
+      return x <= 0.04045 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * lin(c.r) + 0.7152 * lin(c.g) + 0.0722 * lin(c.b);
+  };
+  const contrast = (a, b) => {
+    const l1 = luminance(a);
+    const l2 = luminance(b);
+    const hi = Math.max(l1, l2);
+    const lo = Math.min(l1, l2);
+    return (hi + 0.05) / (lo + 0.05);
+  };
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  // İlk opak ata zeminini bul; aradaki yarı saydam katmanları bindir.
+  const neighborBackground = (el) => {
+    const stack = [];
+    let node = el.parentElement;
+    while (node) {
+      const c = parseColor(getComputedStyle(node).backgroundColor);
+      if (c && c.a > 0) {
+        stack.push(c);
+        if (c.a >= 1) break;
+      }
+      node = node.parentElement;
+    }
+    let bg = { r: 255, g: 255, b: 255, a: 1 };
+    for (let i = stack.length - 1; i >= 0; i--) bg = composite(stack[i], bg);
+    return bg;
+  };
+
+  const results = [];
+  const skipped = [];
+  const icons = [];
+  const els = Array.from(document.querySelectorAll(selector));
+
+  for (const el of els) {
+    const rect = el.getBoundingClientRect();
+    const style = getComputedStyle(el);
+    const visible =
+      rect.width > 0 &&
+      rect.height > 0 &&
+      style.visibility !== 'hidden' &&
+      style.display !== 'none' &&
+      Number(style.opacity) > 0;
+    if (!visible) continue;
+
+    const tag = el.tagName.toLowerCase();
+    const type = (el.getAttribute('type') || '').toLowerCase();
+    // Yerel (appearance:auto) onay kutusu/radyo tarayıcı çizimindedir; atla.
+    if (
+      (tag === 'input' && (type === 'checkbox' || type === 'radio')) &&
+      style.appearance === 'auto'
+    ) {
+      skipped.push(describe(el));
+      continue;
+    }
+
+    const neighbor = neighborBackground(el);
+
+    // Kenarlık: 4 kenarın en düşük oranlısı (yalnız görünür kenarlar).
+    const sideRatios = [];
+    for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+      const w = parseFloat(style['border' + side + 'Width'] || '0');
+      const st = style['border' + side + 'Style'];
+      if (!(w > 0) || st === 'none' || st === 'hidden') continue;
+      const bc = parseColor(style['border' + side + 'Color']);
+      if (!bc) continue;
+      const opaque = bc.a >= 1 ? bc : composite(bc, neighbor);
+      sideRatios.push({ side: side.toLowerCase(), ratio: contrast(opaque, neighbor) });
+    }
+    let borderMin = null;
+    for (const s of sideRatios) {
+      if (borderMin === null || s.ratio < borderMin.ratio) borderMin = s;
+    }
+
+    // Dolgu: bileşenin kendi zemini komşu zeminden farklıysa sınır oluşturur.
+    const fillC = parseColor(style.backgroundColor);
+    let fillRatio = null;
+    if (fillC && fillC.a > 0) {
+      const fillOpaque = fillC.a >= 1 ? fillC : composite(fillC, neighbor);
+      fillRatio = contrast(fillOpaque, neighbor);
+    }
+
+    const hasBoundary = borderMin !== null || (fillRatio !== null && fillRatio > 1);
+    if (!hasBoundary) continue; // yalnız metinsel görünüm — atla
+
+    let boundaryRatio = null;
+    let boundaryPart = null;
+    if (borderMin !== null) {
+      boundaryRatio = borderMin.ratio;
+      boundaryPart = 'border-' + borderMin.side;
+    }
+    // Bileşen tanımlayıcı oranı = max(kenarlık-min, dolgu-vs-komşu). Dolgu
+    // komşuyla aynıysa (oran 1) sınır oluşturmaz; kenarlık belirleyicidir.
+    if (fillRatio !== null && (boundaryRatio === null || fillRatio > boundaryRatio)) {
+      boundaryRatio = fillRatio;
+      boundaryPart = 'fill';
+    }
+
+    results.push({
+      selector: describe(el),
+      ratio: boundaryRatio,
+      part: boundaryPart,
+    });
+
+    // Metinsiz svg ikonlar: fill/stroke (currentColor çözümlü) vs bileşen zemini.
+    const componentBg =
+      fillC && fillC.a >= 1
+        ? fillC
+        : fillC && fillC.a > 0
+          ? composite(fillC, neighbor)
+          : neighbor;
+    for (const svg of Array.from(el.querySelectorAll('svg'))) {
+      if (svg.textContent && svg.textContent.trim().length > 0) continue;
+      const ss = getComputedStyle(svg);
+      const color = parseColor(ss.color) || { r: 0, g: 0, b: 0, a: 1 };
+      const candidates = [];
+      const norm = (v) => (v === 'currentcolor' ? ss.color : v);
+      const fill = norm(ss.fill);
+      if (fill && fill !== 'none') {
+        const c = parseColor(fill);
+        if (c) candidates.push({ part: 'icon-fill', c });
+      }
+      const stroke = norm(ss.stroke);
+      if (stroke && stroke !== 'none') {
+        const c = parseColor(stroke);
+        if (c) candidates.push({ part: 'icon-stroke', c });
+      }
+      for (const cand of candidates) {
+        // Bazı durumlarda parse renksiz kalırsa currentColor'a düş.
+        const col = cand.c.a === 0 ? color : cand.c;
+        const opaque = col.a >= 1 ? col : composite(col, componentBg);
+        const ratio = contrast(opaque, componentBg);
+        icons.push({ selector: describe(el) + ' > svg', ratio, part: cand.part });
+      }
+    }
+  }
+  return { results, skipped, icons };
+}
+
+// --------------------------------------------------------------------------- #
+// Sayfa içi: E14 — odak örtülmesi (fixed/sticky katman)
+// --------------------------------------------------------------------------- #
+
+function focusObscuredProbeInPage() {
+  const el = document.activeElement;
+  if (!el || el === document.body || el === document.documentElement) return null;
+  const rect = el.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return null;
+
+  const describe = (node) => {
+    let sel = node.tagName ? node.tagName.toLowerCase() : '?';
+    if (node.id) sel += '#' + node.id;
+    if (typeof node.className === 'string' && node.className.trim()) {
+      sel += '.' + node.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  const isFixedAncestor = (node) => {
+    let n = node;
+    while (n && n !== document.documentElement) {
+      const pos = getComputedStyle(n).position;
+      if (pos === 'fixed' || pos === 'sticky') return true;
+      n = n.parentElement;
+    }
+    return false;
+  };
+
+  const inset = 1;
+  const pts = [
+    [rect.left + inset, rect.top + inset],
+    [rect.right - inset, rect.top + inset],
+    [rect.left + inset, rect.bottom - inset],
+    [rect.right - inset, rect.bottom - inset],
+    [rect.left + rect.width / 2, rect.top + rect.height / 2],
+  ];
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const obscured = [];
+  let probed = 0;
+  for (const [x, y] of pts) {
+    const cx = Math.min(Math.max(x, 0), vw - 1);
+    const cy = Math.min(Math.max(y, 0), vh - 1);
+    // Sınırlandıktan sonra nokta hâlâ odak öğesinin üzerinde değilse atla.
+    if (cx < rect.left || cx > rect.right || cy < rect.top || cy > rect.bottom) {
+      continue;
+    }
+    probed++;
+    const top = document.elementFromPoint(cx, cy);
+    const related = top && (top === el || el.contains(top));
+    if (!related && top && isFixedAncestor(top)) {
+      obscured.push({ x: Math.round(cx), y: Math.round(cy), by: describe(top) });
+    }
+  }
+  return {
+    descriptor: describe(el),
+    probed,
+    obscuredCount: obscured.length,
+    obscured,
+  };
+}
+
+// --------------------------------------------------------------------------- #
+// Sayfa içi: E16 — metin aralığına dayanıklılık
+// --------------------------------------------------------------------------- #
+
+function textSpacingOverflowInPage() {
+  const de = document.documentElement;
+  const horizontalScroll = de.scrollWidth > de.clientWidth;
+  const clipped = [];
+  for (const el of document.querySelectorAll('body *')) {
+    const s = getComputedStyle(el);
+    const hidesX = s.overflowX === 'hidden' || s.overflowX === 'clip';
+    const hidesY = s.overflowY === 'hidden' || s.overflowY === 'clip';
+    if (!hidesX && !hidesY) continue;
+    if (!el.textContent || el.textContent.trim().length === 0) continue;
+    const overflowY = hidesY && el.scrollHeight > el.clientHeight + 1 && el.clientHeight > 0;
+    const overflowX = hidesX && el.scrollWidth > el.clientWidth + 1 && el.clientWidth > 0;
+    if (overflowY || overflowX) {
+      let sel = el.tagName.toLowerCase();
+      if (el.id) sel += '#' + el.id;
+      if (typeof el.className === 'string' && el.className.trim()) {
+        sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+      }
+      clipped.push(sel);
+    }
+  }
+  return { horizontalScroll, clipped };
+}
+
+// --------------------------------------------------------------------------- #
+// Sayfa içi: E17 — erişilebilir kimlik doğrulama
+// --------------------------------------------------------------------------- #
+
+function authAuditInPage() {
+  const describe = (el) => {
+    let sel = el.tagName.toLowerCase();
+    if (el.id) sel += '#' + el.id;
+    if (typeof el.className === 'string' && el.className.trim()) {
+      sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+    }
+    return sel;
+  };
+  const looksOtp = (el) => {
+    const ac = (el.getAttribute('autocomplete') || '').toLowerCase();
+    if (ac === 'one-time-code') return true;
+    const hint = (el.id + ' ' + (el.getAttribute('name') || '') + ' ' + (el.getAttribute('inputmode') || '')).toLowerCase();
+    return /otp|one-?time|verification|dogrulama|kod|\bcode\b|token/.test(hint);
+  };
+  const inputs = Array.from(document.querySelectorAll('input'));
+  const passwordFields = inputs.filter((el) => (el.getAttribute('type') || '').toLowerCase() === 'password');
+  const otpFields = inputs.filter((el) => looksOtp(el) && (el.getAttribute('type') || 'text').toLowerCase() !== 'password');
+  const usernameFields = inputs.filter((el) => {
+    const type = (el.getAttribute('type') || 'text').toLowerCase();
+    if (type === 'password' || type === 'hidden') return false;
+    const hint = (el.id + ' ' + (el.getAttribute('name') || '')).toLowerCase();
+    return /user(name)?|login|kullanici|kullanıcı/.test(hint);
+  });
+  const present = passwordFields.length > 0 || otpFields.length > 0;
+  if (!present) return { present: false };
+
+  const autocompleteIssues = [];
+  for (const f of passwordFields) {
+    const ac = (f.getAttribute('autocomplete') || '').toLowerCase();
+    if (ac !== 'current-password' && ac !== 'new-password') {
+      autocompleteIssues.push({ selector: describe(f), kind: 'password', autocomplete: ac || null });
+    }
+  }
+  for (const f of otpFields) {
+    const ac = (f.getAttribute('autocomplete') || '').toLowerCase();
+    if (ac !== 'one-time-code') {
+      autocompleteIssues.push({ selector: describe(f), kind: 'otp', autocomplete: ac || null });
+    }
+  }
+  for (const f of usernameFields) {
+    const ac = (f.getAttribute('autocomplete') || '').toLowerCase();
+    if (ac !== 'username') {
+      autocompleteIssues.push({ selector: describe(f), kind: 'username', autocomplete: ac || null });
+    }
+  }
+
+  // Yapıştırma engeli: paste olayı preventDefault ediliyorsa ihlal.
+  const pasteIssues = [];
+  for (const f of passwordFields.concat(otpFields)) {
+    let prevented = false;
+    try {
+      const dt = new DataTransfer();
+      dt.setData('text/plain', 'a1b2c3');
+      const evt = new ClipboardEvent('paste', {
+        bubbles: true,
+        cancelable: true,
+        clipboardData: dt,
+      });
+      const notPrevented = f.dispatchEvent(evt);
+      prevented = !notPrevented || evt.defaultPrevented;
+    } catch {
+      prevented = false;
+    }
+    if (prevented) pasteIssues.push({ selector: describe(f) });
+  }
+
+  // "Göster" düğmesi: parola alanının bulunduğu formda var mı?
+  const showWarnings = [];
+  for (const f of passwordFields) {
+    const form = f.closest('form') || document;
+    const buttons = Array.from(form.querySelectorAll('button, [role=button], input[type=button]'));
+    const hasShow = buttons.some((b) => {
+      const text = (b.textContent || '') + ' ' + (b.getAttribute('aria-label') || '') + ' ' + (b.getAttribute('value') || '');
+      return /g[oö]ster|show|gizle|hide/i.test(text);
+    });
+    if (!hasShow) {
+      showWarnings.push({ selector: describe(f), reason: 'parola alanı yakınında "göster" düğmesi yok' });
+    }
+  }
+
+  return {
+    present: true,
+    passwordFields: passwordFields.map(describe),
+    otpFields: otpFields.map(describe),
+    usernameFields: usernameFields.map(describe),
+    pasteIssues,
+    autocompleteIssues,
+    showWarnings,
+  };
+}
+
+// --------------------------------------------------------------------------- #
 // axe-core çalıştırma ve E kodu eşlemesi
 // --------------------------------------------------------------------------- #
 
@@ -655,6 +1043,13 @@ async function capturePass(context, url, outDir, AxeBuilder, label, opts = {}) {
         PRIMARY_SELECTOR
       );
 
+      let uiContrast = { results: [], skipped: [], icons: [] };
+      try {
+        uiContrast = await page.evaluate(collectUiContrastInPage, UI_COMPONENT_SELECTOR);
+      } catch (err) {
+        uiContrast = { results: [], skipped: [], icons: [], error: String(err && err.message ? err.message : err) };
+      }
+
       passes.push({
         name: label,
         viewport: width,
@@ -666,6 +1061,7 @@ async function capturePass(context, url, outDir, AxeBuilder, label, opts = {}) {
         horizontalScroll,
         horizontal,
         targets,
+        uiContrast,
       });
     }
   } finally {
@@ -690,6 +1086,8 @@ async function keyboardTest(context, url) {
     unreached: [],
   };
   const page = await context.newPage();
+  const focusObscured = [];
+  const focusPartial = [];
   try {
     await page.goto(url, { waitUntil: 'load', timeout: 60000 });
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -715,6 +1113,30 @@ async function keyboardTest(context, url) {
         break;
       }
       result.steps.push(snap);
+
+      // E14: odak örtülmesi (fixed/sticky katman).
+      try {
+        const probe = await page.evaluate(focusObscuredProbeInPage);
+        if (probe && probe.probed > 0) {
+          const threshold = THRESHOLDS.E14_focus_obscured_points;
+          if (probe.obscuredCount >= threshold && probe.obscuredCount >= probe.probed) {
+            focusObscured.push({
+              selector: probe.descriptor,
+              obscured: probe.obscuredCount,
+              probed: probe.probed,
+              points: probe.obscured,
+            });
+          } else if (probe.obscuredCount > 0) {
+            focusPartial.push({
+              selector: probe.descriptor,
+              obscured: probe.obscuredCount,
+              probed: probe.probed,
+            });
+          }
+        }
+      } catch {
+        /* ölçüm başarısızsa atla */
+      }
 
       // Görünür odak denetimi: odak stili, odaksız stilden farklı olmalı.
       const fid = await page.evaluate(() => {
@@ -800,6 +1222,8 @@ async function keyboardTest(context, url) {
   } finally {
     await page.close();
   }
+  result.focusObscured = focusObscured;
+  result.focusPartial = focusPartial;
   return result;
 }
 
@@ -851,6 +1275,133 @@ async function zoomTest(context, url) {
 }
 
 // --------------------------------------------------------------------------- #
+// E16 — metin aralığına dayanıklılık (1280 px)
+// --------------------------------------------------------------------------- #
+
+async function textSpacingTest(context, url) {
+  const page = await context.newPage();
+  const result = { baseline: null, applied: null, violations: [], horizontalScroll: false, na: null };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+
+    const baseline = await page.evaluate(textSpacingOverflowInPage);
+    result.baseline = baseline;
+
+    await page.addStyleTag({
+      content:
+        '* { line-height: 1.5 !important; letter-spacing: 0.12em !important; ' +
+        'word-spacing: 0.16em !important } p { margin-bottom: 2em !important }',
+    });
+    await page.waitForTimeout(200);
+    const applied = await page.evaluate(textSpacingOverflowInPage);
+    result.applied = applied;
+    result.horizontalScroll = applied.horizontalScroll && !baseline.horizontalScroll;
+
+    const baselineSet = new Set(baseline.clipped);
+    result.violations = applied.clipped.filter((s) => !baselineSet.has(s));
+  } finally {
+    await page.close();
+  }
+  return result;
+}
+
+// --------------------------------------------------------------------------- #
+// E17 — erişilebilir kimlik doğrulama (karma)
+// --------------------------------------------------------------------------- #
+
+async function authTest(context, url) {
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+    return await page.evaluate(authAuditInPage);
+  } finally {
+    await page.close();
+  }
+}
+
+// --------------------------------------------------------------------------- #
+// E18 — sürükleme tespiti (karma; onay statik)
+// --------------------------------------------------------------------------- #
+
+async function dragTest(context, url) {
+  const page = await context.newPage();
+  const result = { candidates: [], cdpAvailable: true };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.waitForTimeout(200);
+
+    let session = null;
+    try {
+      session = await context.newCDPSession(page);
+      await session.send('DOM.enable');
+      const doc = await session.send('DOM.getDocument', { depth: -1 });
+      const rootNodeId = doc.root.nodeId;
+      const events = ['dragstart', 'pointerdown', 'mousedown', 'touchstart'];
+      const nodes = await session.send('DOM.querySelectorAll', {
+        nodeId: rootNodeId,
+        selector: '*',
+      });
+      const seen = new Set();
+      for (const nodeId of nodes.nodeIds || []) {
+        if (result.candidates.length > 200) break;
+        let objectId = null;
+        try {
+          const resolved = await session.send('DOM.resolveNode', { nodeId });
+          objectId = resolved.object && resolved.object.objectId;
+        } catch {
+          continue;
+        }
+        if (!objectId) continue;
+        let listeners = [];
+        try {
+          const res = await session.send('DOMDebugger.getEventListeners', { objectId });
+          listeners = res.listeners || [];
+        } catch {
+          continue;
+        }
+        for (const l of listeners) {
+          if (events.includes(l.type) && !seen.has(nodeId)) {
+            seen.add(nodeId);
+            result.candidates.push({ nodeId, type: l.type });
+          }
+        }
+      }
+    } catch (err) {
+      result.cdpAvailable = false;
+      result.cdpError = String(err && err.message ? err.message : err);
+    } finally {
+      if (session) {
+        try {
+          await session.detach();
+        } catch {
+          /* yut */
+        }
+      }
+    }
+
+    // draggable="true" öğeleri (CDP olmasa da yakalanır).
+    const draggables = await page.evaluate(() =>
+      Array.from(document.querySelectorAll('[draggable="true"]')).map((el) => {
+        let sel = el.tagName.toLowerCase();
+        if (el.id) sel += '#' + el.id;
+        if (typeof el.className === 'string' && el.className.trim()) {
+          sel += '.' + el.className.trim().split(/\s+/).slice(0, 2).join('.');
+        }
+        return sel;
+      })
+    );
+    result.draggables = draggables;
+  } finally {
+    await page.close();
+  }
+  return result;
+}
+
+// --------------------------------------------------------------------------- #
 // Sonuç değerlendirme (E kodları)
 // --------------------------------------------------------------------------- #
 
@@ -875,6 +1426,7 @@ function evaluateResults(report) {
     ok: seriousCritical.length <= THRESHOLDS.E1_axe_serious_critical_max,
     value: seriousCritical.length,
     threshold: THRESHOLDS.E1_axe_serious_critical_max,
+    method: 'otomatik',
     violations: seriousCritical,
   };
 
@@ -891,21 +1443,104 @@ function evaluateResults(report) {
     ok: e2Nodes.length === 0,
     value: e2Nodes.length,
     threshold: THRESHOLDS.E2_text_contrast_min,
+    method: 'otomatik',
     violations: e2Nodes,
   };
 
-  // E3: etkileşim öğesi kontrastı — axe ile ayrı kural yok; burada yalnız
-  // 4.5 altı normalize edilmiş axe bulgusu bilgi olarak raporlanır.
+  // E3: UI bileşeni kontrastı — getComputedStyle ile kenarlık/dolgu/ikon
+  // çiftleri; oran yuvarlanmaz, 2.999 FAIL.
+  const e3Violations = [];
+  const e3Skipped = [];
+  let e3Min = null;
+  for (const pass of report.passes) {
+    const ui = pass.uiContrast || { results: [], icons: [], skipped: [] };
+    for (const s of ui.skipped || []) e3Skipped.push(s);
+    for (const comp of ui.results || []) {
+      if (e3Min === null || comp.ratio < e3Min) e3Min = comp.ratio;
+      if (comp.ratio < THRESHOLDS.E3_ui_contrast_min) {
+        e3Violations.push({
+          selector: comp.selector,
+          ratio: comp.ratio,
+          part: comp.part,
+          viewport: pass.viewport,
+        });
+      }
+    }
+    for (const icon of ui.icons || []) {
+      if (e3Min === null || icon.ratio < e3Min) e3Min = icon.ratio;
+      if (icon.ratio < THRESHOLDS.E3_ui_contrast_min) {
+        e3Violations.push({
+          selector: icon.selector,
+          ratio: icon.ratio,
+          part: icon.part,
+          viewport: pass.viewport,
+        });
+      }
+    }
+  }
   results.E3 = {
-    ok: true,
-    value: 0,
+    ok: e3Violations.length === 0,
+    value: e3Min === null ? null : e3Min,
     threshold: THRESHOLDS.E3_ui_contrast_min,
-    note: 'axe color-contrast dışındaki non-text kontrast otomatik ölçülmedi.',
+    method: 'otomatik',
+    violations: e3Violations,
+    skipped: e3Skipped,
+    na: e3Min === null ? 'ölçülebilir UI bileşeni sınırı/dolgu/ikon bulunamadı' : undefined,
   };
 
-  // E4: dokunma hedefleri
+  // E4: dokunma hedefleri (E15 aralık istisnası ile ilişkili)
+  // Önce E15: 24 px altı hedeflerin aralık istisnasını sağlayıp sağlamadığı.
+  const e15Violations = [];
+  const e15Excepted = new Map(); // viewport -> Set(selector)
+  for (const pass of report.passes) {
+    const targets = pass.targets || [];
+    const small = targets.filter(
+      (t) => !t.inline && (t.w < THRESHOLDS.E15_target_spacing_px || t.h < THRESHOLDS.E15_target_spacing_px)
+    );
+    const excepted = new Set();
+    const r = THRESHOLDS.E15_target_spacing_px / 2;
+    for (const a of small) {
+      let intersects = false;
+      for (const b of targets) {
+        if (b === a) continue;
+        if (b.left === undefined) continue;
+        // Dairenin merkezi (a.cx,a.cy); B dikdörtgeniyle kesişim.
+        const nearestX = Math.max(b.left, Math.min(a.cx, b.left + b.w));
+        const nearestY = Math.max(b.top, Math.min(a.cy, b.top + b.h));
+        const dx = a.cx - nearestX;
+        const dy = a.cy - nearestY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const bSmall =
+          b.w < THRESHOLDS.E15_target_spacing_px || b.h < THRESHOLDS.E15_target_spacing_px;
+        let hit = dist < r;
+        if (!hit && bSmall) {
+          const cdx = a.cx - b.cx;
+          const cdy = a.cy - b.cy;
+          if (Math.sqrt(cdx * cdx + cdy * cdy) < THRESHOLDS.E15_target_spacing_px) hit = true;
+        }
+        if (hit) {
+          intersects = true;
+          break;
+        }
+      }
+      if (intersects) {
+        e15Violations.push({
+          selector: a.selector,
+          w: a.w,
+          h: a.h,
+          viewport: pass.viewport,
+          reason: '24 px aralık istisnası sağlanmıyor',
+        });
+      } else {
+        excepted.add(a.selector);
+      }
+    }
+    e15Excepted.set(pass.viewport, excepted);
+  }
+
   const targetViolations = [];
   for (const pass of report.passes) {
+    const excepted = e15Excepted.get(pass.viewport) || new Set();
     for (const t of pass.targets) {
       if (t.inline) continue; // satır içi metin bağlantıları muaf (SC 2.5.8)
       if (t.primary) {
@@ -921,6 +1556,7 @@ function evaluateResults(report) {
         }
       }
       if (t.w < THRESHOLDS.E4_any_target_min_px || t.h < THRESHOLDS.E4_any_target_min_px) {
+        if (excepted.has(t.selector)) continue; // E15 istisnası sağlandı
         targetViolations.push({
           selector: t.selector,
           w: t.w,
@@ -933,22 +1569,35 @@ function evaluateResults(report) {
     }
   }
   report.passes.forEach((pass) => {
+    const excepted = e15Excepted.get(pass.viewport) || new Set();
     pass.targets = pass.targets.map((t) => ({
       ...t,
+      excepted: excepted.has(t.selector),
       ok:
         t.inline ||
         ((!t.primary ||
           (t.w >= THRESHOLDS.E4_primary_target_min_px &&
             t.h >= THRESHOLDS.E4_primary_target_min_px)) &&
-          t.w >= THRESHOLDS.E4_any_target_min_px &&
-          t.h >= THRESHOLDS.E4_any_target_min_px),
+          (excepted.has(t.selector) ||
+            (t.w >= THRESHOLDS.E4_any_target_min_px &&
+              t.h >= THRESHOLDS.E4_any_target_min_px))),
     }));
   });
   results.E4 = {
     ok: targetViolations.length === 0,
     value: targetViolations.length,
     threshold: THRESHOLDS.E4_any_target_min_px,
+    method: 'otomatik',
     violations: targetViolations,
+  };
+
+  // E15: hedef aralığı istisnası
+  results.E15 = {
+    ok: e15Violations.length === 0,
+    value: e15Violations.length,
+    threshold: THRESHOLDS.E15_target_spacing_px,
+    method: 'otomatik',
+    violations: e15Violations,
   };
 
   // E5: reflow / yatay kaydırma
@@ -960,6 +1609,7 @@ function evaluateResults(report) {
     ok: scrollViolations.length === 0 && !zoomScroll,
     value: scrollViolations.length + (zoomScroll ? 1 : 0),
     threshold: THRESHOLDS.E5_reflow_width_px,
+    method: 'otomatik',
     violations: scrollViolations,
   };
 
@@ -969,6 +1619,7 @@ function evaluateResults(report) {
     ok: (kb.visibleFocusIssues || []).length === 0,
     value: (kb.visibleFocusIssues || []).length,
     threshold: THRESHOLDS.E6_visible_focus,
+    method: 'otomatik',
     violations: kb.visibleFocusIssues || [],
   };
 
@@ -981,6 +1632,7 @@ function evaluateResults(report) {
     ok: orderProblems === 0,
     value: orderProblems,
     threshold: THRESHOLDS.E7_focus_order,
+    method: 'otomatik',
     violations: {
       orderIssues: kb.orderIssues || [],
       tabindexPositive: kb.tabindexPositive || [],
@@ -999,8 +1651,19 @@ function evaluateResults(report) {
     ok: e8Nodes.length === 0,
     value: e8Nodes.length,
     threshold: 0,
+    method: 'otomatik',
     violations: e8Nodes,
   };
+
+  // E9-E11, E19-E21, E24, E26-E29: statik kriterler (script ölçmez).
+  results.E9 = { ok: null, value: null, threshold: null, method: 'statik', na: 'ekran başına birincil eylem elle incelenir' };
+  results.E10 = { ok: null, value: null, threshold: null, method: 'statik', na: 'görev derinliği elle incelenir' };
+  results.E11 = { ok: null, value: null, threshold: null, method: 'statik', na: 'durum kapsaması elle incelenir' };
+  results.E19 = { ok: null, value: null, threshold: null, method: 'statik', na: 'tekrar giriş elle incelenir' };
+  results.E20 = { ok: null, value: null, threshold: null, method: 'statik', na: 'tutarlı yardım elle incelenir' };
+  results.E26 = { ok: null, value: null, threshold: null, method: 'statik', na: 'Türkçe büyük/küçük harf elle incelenir' };
+  results.E27 = { ok: null, value: null, threshold: null, method: 'statik', na: 'yerel biçim elle incelenir' };
+  results.E29 = { ok: null, value: null, threshold: null, method: 'statik', na: 'eşit belirginlik elle incelenir' };
 
   // E12: hareket
   const motion = report.motion || {};
@@ -1012,6 +1675,7 @@ function evaluateResults(report) {
     ok: !animFail && !transFail,
     value: Math.max(maxAnim, maxTrans),
     threshold: THRESHOLDS.E12_max_transition_s,
+    method: 'otomatik',
     violations: {
       animation: animFail ? motion.maxAnimation : null,
       transition: transFail ? motion.maxTransition : null,
@@ -1024,8 +1688,81 @@ function evaluateResults(report) {
     ok: !(report.zoom && report.zoom.horizontalScroll) && clipped.length === 0,
     value: clipped.length + (report.zoom && report.zoom.horizontalScroll ? 1 : 0),
     threshold: THRESHOLDS.E13_zoom_percent,
+    method: 'otomatik',
     violations: clipped,
   };
+
+  // E14: odak örtülmesi
+  const obscured = kb.focusObscured || [];
+  const partial = kb.focusPartial || [];
+  results.E14 = {
+    ok: obscured.length === 0,
+    value: obscured.length,
+    threshold: THRESHOLDS.E14_focus_obscured_points,
+    method: 'otomatik',
+    violations: obscured,
+    partial,
+  };
+
+  // E16: metin aralığına dayanıklılık
+  const ts = report.textSpacing || {};
+  const tsv = ts.violations || [];
+  results.E16 = {
+    ok: tsv.length === 0 && !ts.horizontalScroll,
+    value: tsv.length + (ts.horizontalScroll ? 1 : 0),
+    threshold: THRESHOLDS.E16_line_height,
+    method: 'otomatik',
+    violations: tsv,
+  };
+
+  // E17: erişilebilir kimlik doğrulama (karma)
+  const auth = report.auth || {};
+  if (!auth.present) {
+    results.E17 = {
+      ok: null,
+      value: null,
+      threshold: null,
+      method: 'karma',
+      na: 'sayfada parola/OTP alanı yok',
+    };
+  } else {
+    const autocompleteIssues = auth.autocompleteIssues || [];
+    const pasteIssues = auth.pasteIssues || [];
+    const failed = autocompleteIssues.length + pasteIssues.length;
+    results.E17 = {
+      ok: failed === 0,
+      value: failed,
+      threshold: 0,
+      method: 'karma',
+      violations: { pasteIssues, autocompleteIssues },
+      warnings: auth.showWarnings || [],
+    };
+  }
+
+  // E18: sürükleme (karma; onay statik)
+  const drag = report.drag || {};
+  const dragCandidates = (drag.candidates || []).length + (drag.draggables || []).length;
+  if (dragCandidates === 0) {
+    results.E18 = { ok: true, value: 0, threshold: null, method: 'karma', candidates: [] };
+  } else {
+    results.E18 = {
+      ok: null,
+      value: dragCandidates,
+      threshold: null,
+      method: 'karma',
+      candidates: drag.candidates || [],
+      draggables: drag.draggables || [],
+      na: 'sürükleme işleyicileri bulundu; tek işaretçi alternatifi elle doğrulanmalı',
+    };
+  }
+
+  // E21-E25: sonraki fazlarda kodlanacak (yer ayırma).
+  results.E21 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'forced-colors denetimi sonraki fazda' };
+  results.E22 = { ok: null, value: null, threshold: THRESHOLDS.E22_text_contrast_min, method: 'otomatik', na: 'prefers-contrast denetimi sonraki fazda' };
+  results.E23 = { ok: null, value: null, threshold: THRESHOLDS.E23_text_contrast_min, method: 'karma', na: 'saydam yüzey denetimi sonraki fazda' };
+  results.E24 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'RTL denetimi sonraki fazda' };
+  results.E25 = { ok: null, value: null, threshold: THRESHOLDS.E25_expansion_ratio, method: 'otomatik', na: 'metin genişlemesi denetimi sonraki fazda' };
+  results.E28 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'başlık/bölge yapısı denetimi sonraki fazda' };
 
   return results;
 }
@@ -1038,14 +1775,19 @@ function printSummary(report) {
   const lines = [];
   lines.push('UI doğrulama raporu — ' + report.target);
   lines.push('İhlal sütunu: FAIL olan E kodlarında bulgu sayısı.');
-  const order = ['E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E12', 'E13'];
+  const order = [
+    'E1', 'E2', 'E3', 'E4', 'E5', 'E6', 'E7', 'E8', 'E9', 'E10', 'E11', 'E12',
+    'E13', 'E14', 'E15', 'E16', 'E17', 'E18', 'E19', 'E20', 'E21', 'E22', 'E23',
+    'E24', 'E25', 'E26', 'E27', 'E28', 'E29',
+  ];
   for (const code of order) {
     const r = report.results[code];
     if (!r) continue;
-    const status = r.ok ? 'OK  ' : 'FAIL';
+    const status = r.ok === null ? 'N/A ' : r.ok ? 'OK  ' : 'FAIL';
+    const value = r.value === null || r.value === undefined ? '-' : String(r.value);
     lines.push(
-      '  ' + status + ' ' + code.padEnd(4) + ' ihlal: ' + String(r.value).padEnd(4) +
-        ' eşik: ' + r.threshold
+      '  ' + status + ' ' + code.padEnd(4) + ' ihlal: ' + value.padEnd(4) +
+        ' eşik: ' + (r.threshold === null ? '-' : r.threshold) + ' [' + r.method + ']'
     );
   }
   lines.push('Genel: ' + (report.ok ? 'OK' : 'FAIL'));
@@ -1170,6 +1912,48 @@ async function main() {
 
     await darkCtx.close();
 
+    // E16 — metin aralığına dayanıklılık (kendi açık tema context'i).
+    let textSpacing;
+    const tsCtx = await browser.newContext({
+      viewport: { width: 1280, height: 800 },
+      colorScheme: 'light',
+    });
+    try {
+      textSpacing = await textSpacingTest(tsCtx, url);
+    } catch (err) {
+      textSpacing = { violations: [], horizontalScroll: false, error: String(err.message || err) };
+    } finally {
+      await tsCtx.close();
+    }
+
+    // E17 — erişilebilir kimlik doğrulama.
+    let auth;
+    const authCtx = await browser.newContext({
+      viewport: { width: 1280, height: 800 },
+      colorScheme: 'light',
+    });
+    try {
+      auth = await authTest(authCtx, url);
+    } catch (err) {
+      auth = { present: false, error: String(err.message || err) };
+    } finally {
+      await authCtx.close();
+    }
+
+    // E18 — sürükleme tespiti (kendi context'i; CDP gerekir).
+    let drag;
+    const dragCtx = await browser.newContext({
+      viewport: { width: 1280, height: 800 },
+      colorScheme: 'light',
+    });
+    try {
+      drag = await dragTest(dragCtx, url);
+    } catch (err) {
+      drag = { candidates: [], draggables: [], error: String(err.message || err) };
+    } finally {
+      await dragCtx.close();
+    }
+
     report = {
       target: target,
       url,
@@ -1179,12 +1963,15 @@ async function main() {
       keyboard,
       motion,
       zoom,
+      textSpacing,
+      auth,
+      drag,
       results: null,
       ok: false,
       __outDir: outDir,
     };
     report.results = evaluateResults(report);
-    report.ok = Object.values(report.results).every((r) => r.ok);
+    report.ok = !Object.values(report.results).some((r) => r.ok === false);
 
     const reportForDisk = { ...report };
     delete reportForDisk.__outDir;

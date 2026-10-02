@@ -177,7 +177,7 @@ Projede zaten `index.html` ya da çakışan dosya varsa üzerine yazmadan önce 
 | 16 | Yardım: alan içi ipucu ve bağlamsal açıklama; boş durumda ilk eylemi öner | Nielsen H10 |
 | 17 | Görseller: anlamlı görselde `alt`, süs görselinde `alt=""`; logo yerine işaretli placeholder | WCAG 1.1.1 |
 
-Her ekran için seçilen `references/recipe-<ad>.md` tarifini uygula: "3. Zorunlu durumlar" tablosundaki her durumu (varsayılan, yükleniyor, boş, hata, başarı, devre dışı) **gerçekten** kodla, "4. Etkileşim kuralları" ve "5. Erişilebilirlik notları"nı izle, "6. Sık yapılan hatalar"dan kaçın, "8. Kabul kontrolleri"ni Adım 6'da E1-E13'e ek olarak işaretle. Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
+Her ekran için seçilen `references/recipe-<ad>.md` tarifini uygula: "3. Zorunlu durumlar" tablosundaki her durumu (varsayılan, yükleniyor, boş, hata, başarı, devre dışı) **gerçekten** kodla, "4. Etkileşim kuralları" ve "5. Erişilebilirlik notları"nı izle, "6. Sık yapılan hatalar"dan kaçın, "8. Kabul kontrolleri"ni Adım 6'da E1-E18'e ek olarak işaretle. Örnek veri gerçekçi ve yerelleştirilmiş olsun; `Lorem ipsum` kullanma.
 
 ### Mikro-metin
 
@@ -195,15 +195,16 @@ Uygulama v1 → verify-ui.mjs + görsel inceleme + statik kontroller
                 └─ kapanmayanlar → DESIGN_RATIONALE "Bilinen Boşluklar"
 ```
 
-1. **Render doğrulaması (önce):** `node scripts/verify-ui.mjs <giriş sayfası ya da yerel sunucu URL'si>` — script bu skill klasöründedir; kullanıcı projesinin kökünde çalıştırılırken skill klasöründeki dosyanın mutlak yolu verilir. 320/390/768/1280 px'de ekran görüntüsü, axe-core (WCAG 2.1 A/AA), yatay kaydırma, dokunma hedefi, klavye/odak testi, reduced-motion + koyu tema ikinci geçişi ve %200 metin büyütme yapar. Çıktı `.feza/ui-check/<zaman>/` altında (ekran görüntüleri + `report.json`); bu klasör teslimin parçası değildir, kullanıcıya `.feza/` dizinini `.gitignore`'a eklemesi önerilir. Çıkış kodu 0 = eşikler sağlandı, 1 = ihlal, 2 = araç yok. Projeye bağımlılık eklenmez; script gerekirse paketleri geçici kullanıcı önbelleğine kurar.
+1. **Render doğrulaması (önce):** `node scripts/verify-ui.mjs <giriş sayfası ya da yerel sunucu URL'si>` — script bu skill klasöründedir; kullanıcı projesinin kökünde çalıştırılırken skill klasöründeki dosyanın mutlak yolu verilir. 320/390/768/1280 px'de ekran görüntüsü, axe-core (WCAG 2.1 A/AA + 2.2), yatay kaydırma, dokunma hedefi, klavye/odak testi, odak örtülmesi (E14), hedef aralığı (E15), metin aralığı (E16), erişilebilir kimlik doğrulama (E17), sürükleme tespiti (E18), reduced-motion + koyu tema ikinci geçişi ve %200 metin büyütme yapar. Çıktı `.feza/ui-check/<zaman>/` altında (ekran görüntüleri + `report.json`); bu klasör teslimin parçası değildir, kullanıcıya `.feza/` dizinini `.gitignore`'a eklemesi önerilir. Çıkış kodu 0 = eşikler sağlandı, 1 = ihlal, 2 = araç yok. Projeye bağımlılık eklenmez; script gerekirse paketleri geçici kullanıcı önbelleğine kurar.
 2. **Görsel inceleme:** ekran görüntülerini Read aracıyla aç; hizalama, taşma, görsel hiyerarşi, boşluk tutarlılığı ve koyu temada okunurluk sorunlarını bulgu olarak ekle.
-3. **Sayısal eşikler:** `references/thresholds.md` E1-E13; sonuçlar `report.json` → `results` alanında. Statik kriterler (E9, E10, E11) elle kontrol edilir. E1-E13'ten biri FAIL ise severity'den bağımsız düzeltilir.
-4. **Nielsen 10** — her heuristik için en az bir kontrol; bulgulara Nielsen 0-4 severity ver.
-5. **Dix et al. ilkeleri** — öğrenilebilirlik (öngörülebilirlik, tutarlılık, aşinalık), esneklik (diyalog inisiyatifi, ikame edilebilirlik), sağlamlık (gözlenebilirlik, kurtarılabilirlik, yanıt verebilirlik, görev uygunluğu).
-6. **WCAG 2.1 AA kontrol listesi** — `references/implementation-checklist.md` A ve AA maddeleri.
-7. **Kontrast hesabı** — `scripts/contrast.py` ile `styles/tokens.css` içindeki her çift yeniden hesaplanır; açık ve koyu tema ayrı (`--theme light` / `--theme dark`); Python yoksa formül `references/design-system-rules.md` 2.4'e göre elle uygulanır.
-8. **Bilişsel yük** — `/feza-hci:cognitive-load` mantığı: ekran başına etkileşimli öğe sayısı, grup sayısı, karar noktası, geri bildirim gecikmesi.
-9. **Mikro-metin kontrolü** — `references/ux-writing.md` §6 listesi: belirsiz buton etiketi, suçlayıcı hata dili, terim tutarsızlığı, placeholder-etiket, eksik düzeltme yönergesi, yerel ayar biçimi. Her ihlal severity ≥ 2 sayılır.
+3. **Sayısal eşikler:** `references/thresholds.md` E1-E29; sonuçlar `report.json` → `results` alanında `{ ok, value, threshold, method }`. `method` = `otomatik | karma | statik`. `ok: null` gelen sonuç (`na` gerekçeli) otomatik ölçülemedi demektir; **elle doğrulanır** ve çıkış kodunu bozmaz. Otomatik/karma kriterler E1-E18, E21-E25, E28; statik olanlar E9-E11, E19, E20, E26, E27, E29. E1-E18'den biri `ok: false` ise severity'den bağımsız düzeltilir.
+4. **E14-E18 doğrulaması:** E14 (odak tamamen örtülmüş) ve E15/E16 (otomatik) ihlalleri doğrudan düzeltilir. E17/E18 `karma`dır — script tespit eder (yapıştırma engeli, `autocomplete`, "göster" düğmesi, sürükleme işleyicileri), onay kod okuma ile verilir; E18'de `ok: null` dönen `candidates` elle incelenip tek işaretçi alternatifi eklenir.
+5. **Nielsen 10** — her heuristik için en az bir kontrol; bulgulara Nielsen 0-4 severity ver.
+6. **Dix et al. ilkeleri** — öğrenilebilirlik (öngörülebilirlik, tutarlılık, aşinalık), esneklik (diyalog inisiyatifi, ikame edilebilirlik), sağlamlık (gözlenebilirlik, kurtarılabilirlik, yanıt verebilirlik, görev uygunluğu).
+7. **WCAG 2.1/2.2 AA kontrol listesi** — `references/implementation-checklist.md` A ve AA maddeleri (WCAG 2.2 ek maddeleri dahil).
+8. **Kontrast hesabı** — `scripts/contrast.py` ile `styles/tokens.css` içindeki her çift yeniden hesaplanır; açık ve koyu tema ayrı (`--theme light` / `--theme dark`); Python yoksa formül `references/design-system-rules.md` 2.4'e göre elle uygulanır.
+9. **Bilişsel yük** — `/feza-hci:cognitive-load` mantığı: ekran başına etkileşimli öğe sayısı, grup sayısı, karar noktası, geri bildirim gecikmesi.
+10. **Mikro-metin kontrolü** — `references/ux-writing.md` §6 listesi: belirsiz buton etiketi, suçlayıcı hata dili, terim tutarsızlığı, placeholder-etiket, eksik düzeltme yönergesi, yerel ayar biçimi. Her ihlal severity ≥ 2 sayılır.
 
 **Düzeltme turu:** `report.json` ihlalleri ve görsel bulgular düzeltilir; script yeniden çalıştırılır. En fazla 2 tur.
 
@@ -259,6 +260,13 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] Her etkileşimli bileşende durum matrisi tam (focus-visible, disabled, loading, error dahil)?
 - [ ] Boş, yükleniyor ve hata durumları kodlandı?
 - [ ] Klavyeyle tüm görevler tamamlanabiliyor; odak görünür ve sıralı?
+- [ ] **E14:** Odaklanan öğe sabit/yapışkan katman altında tamamen gizlenmiyor; `scroll-padding` tanımlı?
+- [ ] **E15:** 24 px altı hedefler arasında yeterli aralık var ya da hedefler büyütüldü?
+- [ ] **E16:** Satır/harf/kelime aralığı artırıldığında metin kırpılmıyor/taşmıyor?
+- [ ] **E17:** Parola/OTP yapıştırması engellenmiyor; `autocomplete` doğru; "göster" düğmesi var?
+- [ ] **E18:** Sürükle-bırak işlemleri için tek işaretçi (ok tuşu/düğme) alternatifi var?
+- [ ] **E19:** Aynı akışta aynı bilgi ikinci kez boş istenmiyor (otomatik doldur/seçtir)?
+- [ ] **E20:** Yardım mekanizması sayfalar arasında aynı göreli sırada?
 - [ ] 320 px'de yatay kaydırma yok; dokunma hedefleri ≥ 44 px?
 - [ ] `prefers-reduced-motion` ve `prefers-color-scheme` destekleniyor?
 - [ ] Severity ≥ 2 bulgu kalmadı ya da Bilinen Boşluklar'a gerekçeli yazıldı?
