@@ -1,0 +1,12 @@
+{
+  "$description": "Koyu tema geçersiz kılma örneği (--tokens-dark).",
+  "color": {
+    "$type": "color",
+    "bg": { "$value": "#11161D" },
+    "surface": { "$value": "#1A212B" },
+    "text": { "$value": "#E8ECF1" },
+    "text-muted": { "$value": "#A9B3C1" },
+    "primary": { "$value": "#7AA7F5" },
+    "on-primary": { "$value": "#0B1420" }
+  }
+}

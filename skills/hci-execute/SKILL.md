@@ -145,6 +145,7 @@ Ekranları gerçek dosyalar olarak yaz. Mevcut stack varsa onun klasör yapısı
 ├── <ekran>.html            diğer ekranlar (ya da tek sayfa + hash yönlendirme)
 ├── styles/
 │   ├── tokens.css          tek token kaynağı (açık + koyu tema)
+│   ├── tokens.tokens.json  isteğe bağlı DTCG karşılığı (aynı değerler; bkz. §9)
 │   ├── base.css            reset, tipografi, odak stili, reduced-motion
 │   └── components.css      bileşenler ve durumları
 ├── scripts/
@@ -275,6 +276,10 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] Her ekran bir tarife bağlandı; tarif yoksa varsayım kaydedildi?
 - [ ] Mikro-metinler `references/ux-writing.md` §6 kontrol listesinden geçti?
 - [ ] Logo ve marka varlıkları placeholder olarak işaretli?
+- [ ] **Şablon izleri:** aynı gölge, her başlık üstünde büyük harfli küçük etiket, tekdüze köşe yarıçapı, her bölüm ortalanmış, tekrar eden ikon-başlık-metin kart üçlüsü gibi kalıplaşmalar gerekçelendirildi ya da giderildi (`references/design-system-rules.md` §10.4)?
+- [ ] **Hareket:** işlevsel 100-300 ms / ifade edici 300-500 ms; `prefers-reduced-motion: reduce` altında ifade edici hareket kapalı, dekoratif/parallax yok (§10.1, E12)?
+- [ ] **Container query:** kart ve tablo pencere değil kapsayıcı genişliğine göre uyarlanıyor; desteklenmiyorsa akış yedeği var (§10.3)?
+- [ ] İsteğe bağlı `tokens.tokens.json` üretildiyse `tokens.css` ile değerleri birebir aynı ve `contrast.py --tokens` ile doğrulandı (§9)?
 
 ## Sınırlar
 - En fazla 3 soru (Adım 0'daki brief sorusu dahil değil).

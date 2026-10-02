@@ -1,0 +1,81 @@
+{
+  "$description": "Faz 7 kabul testi için örnek DTCG token dosyası (2025.10).",
+  "color": {
+    "$type": "color",
+    "$description": "Anlamsal renk rolleri; bileşenler yalnız bunları kullanır.",
+    "bg": { "$value": "#FFFFFF", "$description": "Sayfa zemini" },
+    "surface": { "$value": "#F4F6F8" },
+    "text": { "$value": "#1B2430" },
+    "text-muted": { "$value": "#4A5565" },
+    "primary": { "$value": "#1D5FD1" },
+    "on-primary": { "$value": "#FFFFFF" },
+    "interactive": {
+      "$value": "{color.primary}",
+      "$description": "Alias örneği: birincil eyleme bağlanır."
+    },
+    "danger": {
+      "$value": {
+        "colorSpace": "srgb",
+        "components": [0.7059, 0.1373, 0.0941],
+        "alpha": 1,
+        "hex": "#B42318"
+      },
+      "$description": "Yapısal renk nesnesi örneği (srgb)."
+    },
+    "legacy-accent": {
+      "$value": "#8A4B00",
+      "$deprecated": "use color.danger instead"
+    },
+    "wide-gamut": {
+      "$value": {
+        "colorSpace": "display-p3",
+        "components": [0.1098, 0.3725, 0.8196],
+        "hex": "#1D5FD1"
+      },
+      "$description": "srgb dışı colorSpace örneği: hex alanı kullanılır."
+    }
+  },
+  "dimension": {
+    "$type": "dimension",
+    "space-4": { "$value": "16px" },
+    "radius-md": { "$value": "8px" }
+  },
+  "duration": {
+    "$type": "duration",
+    "functional-fast": { "$value": "150ms" }
+  },
+  "motion": {
+    "cubicBezier": {
+      "$type": "cubicBezier",
+      "ease-out": { "$value": [0, 0, 0.2, 1] }
+    }
+  },
+  "elevation": {
+    "$type": "shadow",
+    "card": {
+      "$value": {
+        "color": "#00000014",
+        "offsetX": "0px",
+        "offsetY": "1px",
+        "blur": "2px",
+        "spread": "0px"
+      }
+    }
+  },
+  "type": {
+    "$type": "typography",
+    "body": {
+      "$value": {
+        "fontFamily": "system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.5,
+        "letterSpacing": "0em"
+      }
+    }
+  },
+  "font": {
+    "$type": "fontFamily",
+    "sans": { "$value": ["system-ui", "sans-serif"] }
+  }
+}

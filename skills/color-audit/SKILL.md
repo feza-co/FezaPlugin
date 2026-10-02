@@ -24,11 +24,18 @@ Renk paletini renk teorisi prensipleri + WCAG 2.1 AA'ya göre denetler.
 
 ## Adım 0 — Bağlamı Topla
 1. **Tasarım token dosyaları:** `tokens.json`, `*.tokens.*`, `figma-tokens.json`
-2. **CSS değişkenleri:** `:root` blokları içinde `--color-*`, `--primary`
-3. **Tailwind config:** `tailwind.config.js`/`.ts` `theme.colors`
-4. **CSS dosyaları:** hex (`#abcdef`), `rgb()`, `hsl()` Grep ile çıkar
-5. `BRIEF.md`/`SCOPE_*.md` — marka ipuçları
-6. Hiç yoksa **TEK** soru: "Mevcut paleti listeler misin? (en az primary, secondary, background, text)"
+2. **DTCG token dosyası:** `*.tokens.json` (`$value`/`$type`/`$description`/`$deprecated`,
+   alias `{color.primary}`). Kontrast çiftlerini bu dosyadan çözmek için
+   `python scripts/contrast.py --tokens <file.tokens.json> --pairs pairs.json --json`
+   kullan (`{color.text}` / `color.text` / `--color-text` biçimleri kabul edilir; açık+koyu
+   tema için `--tokens <light> --tokens-dark <dark>`). Alias döngüsü ya da desteklenmeyen
+   renk değeri çıkış kodu 2 verir; desteklenen alt küme `--help`'te listelenir (color,
+   dimension, duration, cubicBezier, shadow, typography).
+3. **CSS değişkenleri:** `:root` blokları içinde `--color-*`, `--primary`
+4. **Tailwind config:** `tailwind.config.js`/`.ts` `theme.colors`
+5. **CSS dosyaları:** hex (`#abcdef`), `rgb()`, `hsl()` Grep ile çıkar
+6. `BRIEF.md`/`SCOPE_*.md` — marka ipuçları
+7. Hiç yoksa **TEK** soru: "Mevcut paleti listeler misin? (en az primary, secondary, background, text)"
 
 ## Adım 1 — Gri Nokta (max 3)
 

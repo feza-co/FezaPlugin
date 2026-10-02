@@ -1,0 +1,11 @@
+{
+  "pairs": [
+    {"name": "text/bg", "fg": "--color-text", "bg": "--color-bg", "min": 4.5},
+    {"name": "text-muted/surface", "fg": "--color-text-muted", "bg": "--color-surface", "min": 4.5},
+    {"name": "on-primary/primary", "fg": "--color-on-primary", "bg": "--color-primary", "min": 4.5},
+    {"name": "interactive/bg", "fg": "--color-interactive", "bg": "--color-bg", "min": 3.0},
+    {"name": "danger/bg", "fg": "--color-danger", "bg": "--color-bg", "min": 4.5},
+    {"name": "legacy-accent/bg", "fg": "--color-legacy-accent", "bg": "--color-bg", "min": 4.5},
+    {"name": "wide-gamut/bg", "fg": "--color-wide-gamut", "bg": "--color-bg", "min": 4.5}
+  ]
+}

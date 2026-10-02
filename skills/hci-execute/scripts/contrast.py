@@ -24,19 +24,36 @@ Kullanım:
     python contrast.py --css styles/tokens.css --pairs pairs.json --theme dark
     python contrast.py --css styles/tokens.css --pairs pairs.json --json
 
-pairs.json biçimi:
+    # DTCG tasarım token dosyasından çözerek (tek tema ya da açık/koyu tema)
+    python contrast.py --tokens styles/tokens.tokens.json --pairs pairs.json --json
+    python contrast.py --tokens light.tokens.json --tokens-dark dark.tokens.json --pairs pairs.json
+
+pairs.json biçimi (düz liste ya da {"pairs": [...]} sarmalı):
     [{"name": "text/bg", "fg": "#1B2430", "bg": "#FFFFFF", "min": 4.5}, ...]
 
 fg/bg değerleri `var(--color-text)` ya da `--color-text` biçimindeyse ve `--css`
-verilmişse token değeri CSS'ten çözülür.
+verilmişse token değeri CSS'ten çözülür. `--tokens` verilmişse `{color.text}` ya da
+`color.text` biçimindeki DTCG token referansı çözülür.
 
 Renk biçimleri: #RGB, #RRGGBB, #RRGGBBAA. Alpha varsa önce zemin üzerine
 (alpha compositing) karıştırılır, sonra hesaplanır.
 
+DTCG desteği (Design Tokens Community Group, Format Module 2025.10):
+    - Grup/token ayrımı: `$value` taşıyan düğüm token'dır.
+    - `$type` gruptan kalıtılır; `$description` ve `$deprecated` okunur
+      (`$deprecated` kullanılan token için uyarı yazılır).
+    - Alias `{color.primary}` çözülür; döngü tespit edilirse çıkış kodu 2.
+    - Renk değeri string hex ya da DTCG yapısal renk nesnesi olabilir:
+      `{"colorSpace":"srgb","components":[r,g,b],"alpha":a,"hex":"#..."}`.
+      srgb dışı colorSpace'te `hex` alanı kullanılır; yoksa çıkış kodu 2.
+    - Desteklenen alt küme: color, dimension, duration, cubicBezier, shadow,
+      typography. Diğer türler "kapsam dışı"dır: ayrıştırılır ama kontrast
+      hesabına girmez.
+
 Çıkış kodları:
     0  tüm çiftler eşiği geçti (ya da eşik verilmedi)
     1  en az bir çift eşiğin altında
-    2  girdi hatası (geçersiz renk, eksik dosya, çözülemeyen token)
+    2  girdi hatası (geçersiz renk, eksik dosya, çözülemeyen token, alias döngüsü)
 """
 
 from __future__ import annotations
@@ -258,6 +275,232 @@ def to_color_value(raw, tokens):
 
 
 # --------------------------------------------------------------------------- #
+# DTCG tasarım token çözümleme (Design Tokens Community Group 2025.10)
+# --------------------------------------------------------------------------- #
+
+# Desteklenen DTCG $type alt kümesi. Renk dışı türler ayrıştırılır ama kontrast
+# hesabına girmez.
+DTCG_SUPPORTED_TYPES = (
+    "color",
+    "dimension",
+    "duration",
+    "cubicBezier",
+    "shadow",
+    "typography",
+)
+
+MAX_ALIAS_DEPTH = 32
+
+_DTCG_BRACE_RE = re.compile(r"^\{\s*([^{}]+?)\s*\}$")
+_DTCG_PATH_RE = re.compile(r"^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+)+$")
+
+
+def _dtcg_brace_ref(value):
+    """Yalnız `{color.text}` (süslü parantezli) DTCG alias adını döndürür."""
+    if not isinstance(value, str):
+        return None
+    m = _DTCG_BRACE_RE.match(value)
+    if m:
+        return m.group(1).strip()
+    return None
+
+
+def _dtcg_ref_name(value):
+    """`{color.text}` ya da `color.text` biçimindeki DTCG referans adını döndürür.
+
+    Süslü parantezli biçim her yerde geçerlidir; noktalı çıplak biçim yalnız
+    `--pairs` fg/bg alanlarında kabul edilir (token değerlerinde `1.5rem` gibi
+    ondalıklı bir değerin yanlışlıkla alias sayılmasını önlemek için).
+    """
+    brace = _dtcg_brace_ref(value)
+    if brace is not None:
+        return brace
+    if _DTCG_PATH_RE.match(value):
+        return value
+    return None
+
+
+def _bytes_from_components(components):
+    if not isinstance(components, list) or len(components) != 3:
+        raise ColorError("DTCG renk bileşenleri [r, g, b] olmalı")
+    out = []
+    for c in components:
+        if isinstance(c, bool) or not isinstance(c, (int, float)):
+            raise ColorError("DTCG renk bileşeni sayı olmalı: %r" % (c,))
+        v = min(max(float(c), 0.0), 1.0)
+        out.append(int(round(v * 255)))
+    return out
+
+
+def _hex_from_components(components, alpha):
+    r, g, b = _bytes_from_components(components)
+    if alpha is not None and not isinstance(alpha, bool) and isinstance(alpha, (int, float)):
+        a = min(max(float(alpha), 0.0), 1.0)
+        if a < 1.0:
+            return "#%02X%02X%02X%02X" % (r, g, b, int(round(a * 255)))
+    return "#%02X%02X%02X%02X" % (r, g, b, 255)
+
+
+def _color_from_dtcg(value):
+    """DTCG color değerini (#RRGGBB / #RRGGBBAA) hex stringine çevirir.
+
+    String hex ya da yapısal renk nesnesi kabul edilir. srgb dışı colorSpace'te
+    `hex` alanı varsa o kullanılır, yoksa desteklenmiyor hatası verilir.
+    """
+    if isinstance(value, str):
+        if _HEX_RE.match(value.strip()):
+            v = value.strip()
+            return v if v.startswith("#") else "#" + v
+        raise ColorError("desteklenmeyen DTCG renk değeri: %r" % value)
+    if isinstance(value, dict):
+        space = value.get("colorSpace")
+        hex_value = value.get("hex")
+        if space == "srgb":
+            if "components" in value:
+                return _hex_from_components(value.get("components"), value.get("alpha"))
+            if isinstance(hex_value, str) and _HEX_RE.match(hex_value.strip()):
+                v = hex_value.strip()
+                return v if v.startswith("#") else "#" + v
+            raise ColorError("srgb DTCG renk: components ya da hex yok")
+        if isinstance(hex_value, str) and _HEX_RE.match(hex_value.strip()):
+            v = hex_value.strip()
+            return v if v.startswith("#") else "#" + v
+        raise ColorError(
+            "desteklenmeyen colorSpace: %r (hex yok)" % (space,)
+        )
+    raise ColorError("desteklenmeyen DTCG renk değeri: %r" % (value,))
+
+
+def _walk_dtcg(node, path_parts, inherited_type, out):
+    """DTCG ağacını gezip token'ları path -> {value, type} sözlüğüne toplar."""
+    if not isinstance(node, dict):
+        raise ColorError("DTCG düğümü nesne değil: %s" % (".".join(path_parts) or "<kök>"))
+    node_type = node.get("$type", inherited_type)
+    if "$value" in node:
+        name = ".".join(path_parts)
+        out[name] = {
+            "value": node["$value"],
+            "type": node_type,
+            "deprecated": node.get("$deprecated"),
+            "description": node.get("$description"),
+        }
+        return
+    for key, child in node.items():
+        if key.startswith("$"):
+            continue
+        _walk_dtcg(child, path_parts + [key], node_type, out)
+
+
+def _resolve_dtcg_alias(name, tokens, stack, warnings):
+    """Alias zincirini çözer; döngü ya da derinlik aşımında ColorError verir."""
+    if len(stack) > MAX_ALIAS_DEPTH:
+        raise ColorError("alias derinlik sınırı aşıldı (%d): %s" % (MAX_ALIAS_DEPTH, name))
+    if name in stack:
+        chain = " -> ".join(stack + [name])
+        raise ColorError("alias döngüsü: %s" % chain)
+    tok = tokens.get(name)
+    if tok is None:
+        raise ColorError("DTCG token bulunamadı: %s" % name)
+    val = tok["value"]
+    ref = _dtcg_brace_ref(val)
+    if ref is not None:
+        resolved, resolved_type = _resolve_dtcg_alias(
+            ref, tokens, stack + [name], warnings
+        )
+        return resolved, tok.get("type") or resolved_type
+    return val, tok.get("type")
+
+
+def load_dtcg_tokens(path):
+    """DTCG JSON dosyasından {'light': {path: renk}} döndürür.
+
+    Alias'lar çözülür; renk türündeki token'lar hex stringine indirgenir. Renk
+    dışı (dimension, duration, cubicBezier, shadow, typography ve kapsam dışı
+    türler) token'lar ayrıştırılır ama sonuç sözlüğüne girmez. `$deprecated`
+    token'lar için stderr'e uyarı yazılır.
+    """
+    try:
+        with open(path, "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+    except OSError as exc:
+        raise ColorError("DTCG dosyası okunamadı: %s (%s)" % (path, exc))
+    except json.JSONDecodeError as exc:
+        raise ColorError("DTCG JSON geçersiz: %s (%s)" % (path, exc))
+    if not isinstance(data, dict):
+        raise ColorError("DTCG kökü nesne olmalı: %s" % path)
+
+    raw = {}
+    _walk_dtcg(data, [], None, raw)
+
+    warnings = []
+    colors = {}
+    for name, tok in raw.items():
+        if tok.get("deprecated"):
+            warnings.append("$deprecated: %s (%s)" % (name, tok["deprecated"]))
+    for name, tok in raw.items():
+        ref = _dtcg_brace_ref(tok["value"])
+        value, ttype = _resolve_dtcg_alias(name, raw, [], warnings)
+        if ttype is None:
+            ttype = tok.get("type")
+        if ref is not None and ttype is None:
+            target = _dtcg_brace_ref(raw.get(ref, {}).get("value"))
+            ttype = raw.get(ref, {}).get("type")
+            if ttype is None and target is not None:
+                ttype = raw.get(target, {}).get("type")
+        if ttype != "color":
+            continue
+        colors[name] = _color_from_dtcg(value)
+
+    # Aynı pairs.json'ın CSS ve DTCG kaynaklarıyla paylaşılabilmesi için DTCG
+    # yolunu CSS değişkeni biçimine de çevir (`color.text` -> `--color-text`).
+    for name, value in list(colors.items()):
+        css_name = "--" + name.replace(".", "-")
+        colors.setdefault(css_name, value)
+
+    for w in warnings:
+        print("Uyarı: %s" % w, file=sys.stderr)
+    return {"light": colors}
+
+
+def merge_dtcg_themes(light_path, dark_path):
+    """Açık temel + isteğe bağlı koyu geçersiz kılma ile tema sözlüğü üretir."""
+    base = load_dtcg_tokens(light_path)["light"]
+    dark = dict(base)
+    if dark_path:
+        over = load_dtcg_tokens(dark_path)["light"]
+        dark.update(over)
+    return {"light": base, "dark": dark}
+
+
+def to_color_value_dtcg(raw, tokens):
+    """Pair değerini DTCG token sözlüğünden hex değerine çevirir.
+
+    `{color.text}` ve `color.text` referansları kabul edilir. Ayrıca aynı
+    `pairs.json`'ın CSS (`--css`) ile paylaşılabilmesi için CSS değişkeni biçimi
+    (`--color-text`, `var(--color-text)`) da kabul edilir; bu adlar DTCG
+    yolundan türetilir. Token yoksa hata; referans değilse değer doğrudan renk
+    olarak kullanılır.
+    """
+    v = (raw or "").strip()
+    m = _VAR_USE_RE.match(v)
+    if m:
+        inner = m.group(1)
+        if inner in tokens:
+            return tokens[inner]
+        if m.group(2) is not None:
+            return m.group(2).strip()
+        raise ColorError("DTCG token bulunamadı: %s" % inner)
+    name = _dtcg_ref_name(v)
+    if name is not None:
+        if name not in tokens:
+            raise ColorError("DTCG token bulunamadı: %s" % name)
+        return tokens[name]
+    if v in tokens:
+        return tokens[v]
+    return v
+
+
+# --------------------------------------------------------------------------- #
 # Raporlama
 # --------------------------------------------------------------------------- #
 
@@ -287,9 +530,9 @@ def _print_table(rows, has_theme):
             )
 
 
-def _build_row(name, fg, bg, minimum, theme, tokens):
-    fg_val = to_color_value(fg, tokens) if tokens is not None else fg
-    bg_val = to_color_value(bg, tokens) if tokens is not None else bg
+def _build_row(name, fg, bg, minimum, theme, resolver):
+    fg_val = resolver(fg) if resolver is not None else fg
+    bg_val = resolver(bg) if resolver is not None else bg
     ratio = contrast_ratio(fg_val, bg_val)
     ok = True if minimum is None else ratio >= minimum
     return {
@@ -311,6 +554,8 @@ def _load_pairs(path):
         raise ColorError("pairs dosyası okunamadı: %s (%s)" % (path, exc))
     except json.JSONDecodeError as exc:
         raise ColorError("pairs JSON geçersiz: %s (%s)" % (path, exc))
+    if isinstance(data, dict) and isinstance(data.get("pairs"), list):
+        data = data["pairs"]
     if not isinstance(data, list) or not data:
         raise ColorError("pairs JSON boş ya da liste değil: %s" % path)
     pairs = []
@@ -330,26 +575,78 @@ def _load_pairs(path):
     return pairs
 
 
+def _build_resolvers(args):
+    """Token kaynağına göre {tema: resolver} ve tema sırasını döndürür.
+
+    CSS ve DTCG aynı anda verilemez. Kaynak yoksa tek tema (None) döner.
+    """
+    if args.css and (args.tokens or args.tokens_dark):
+        raise ColorError("--css ile --tokens birlikte kullanılamaz")
+    if args.tokens_dark and not args.tokens:
+        raise ColorError("--tokens-dark yalnız --tokens ile kullanılır")
+
+    if args.tokens:
+        themes = ["light", "dark"] if args.theme == "both" else [args.theme]
+        token_maps = merge_dtcg_themes(args.tokens, args.tokens_dark)
+        resolvers = {}
+        for theme in themes:
+            tmap = token_maps.get(theme, token_maps["light"])
+            resolvers[theme] = (
+                lambda value, _m=tmap: to_color_value_dtcg(value, _m)
+            )
+        return themes, resolvers
+
+    if args.css:
+        tokens = load_css_tokens(args.css)
+        themes = ["light", "dark"] if args.theme == "both" else [args.theme]
+        resolvers = {}
+        for theme in themes:
+            tmap = tokens[theme]
+            resolvers[theme] = (
+                lambda value, _m=tmap: to_color_value(value, _m)
+            )
+        return themes, resolvers
+
+    return [None], {None: None}
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(
-        description="WCAG 2.1 kontrast oranı hesaplayıcısı",
+        description=(
+            "WCAG 2.1 kontrast oranı hesaplayıcısı (CSS ve DTCG token desteği)"
+        ),
         add_help=True,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog=(
+            "DTCG desteklenen alt küme: color, dimension, duration, cubicBezier, "
+            "shadow, typography.\nDiğer türler kapsam dışıdır (ayrıştırılır, kontrast "
+            "hesabına girmez).\nRenk değeri string hex ya da yapısal renk nesnesi "
+            "olabilir; srgb dışı colorSpace 'hex' ile desteklenir."
+        ),
     )
     parser.add_argument("colors", nargs="*", help="ön plan ve zemin renkleri (#RRGGBB)")
     parser.add_argument("--pairs", help="çiftleri içeren JSON dosyası")
     parser.add_argument("--css", help="token tanımlarını okuyacak CSS dosyası")
     parser.add_argument(
+        "--tokens",
+        help="DTCG tasarım token dosyası (.tokens.json); açık tema temeli",
+    )
+    parser.add_argument(
+        "--tokens-dark",
+        help="isteğe bağlı DTCG koyu tema dosyası (açık temayı geçersiz kılar)",
+    )
+    parser.add_argument(
         "--theme",
         choices=["light", "dark", "both"],
         default="both",
-        help="CSS token teması (varsayılan: both)",
+        help="token teması (varsayılan: both)",
     )
     parser.add_argument("--min", type=float, default=None, help="tek çift için eşik")
     parser.add_argument("--json", action="store_true", help="sonucu JSON olarak yazdır")
     args = parser.parse_args(argv)
 
     try:
-        tokens = load_css_tokens(args.css) if args.css else None
+        themes, resolvers = _build_resolvers(args)
     except ColorError as exc:
         print("Hata: %s" % exc, file=sys.stderr)
         return 2
@@ -359,12 +656,9 @@ def main(argv=None):
             if args.colors:
                 raise ColorError("--pairs ile konumsal renk birlikte kullanılamaz")
             pairs = _load_pairs(args.pairs)
-            themes = ["light", "dark"] if (tokens and args.theme == "both") else [args.theme]
-            if not tokens:
-                themes = [None]
             rows = []
             for theme in themes:
-                theme_tokens = tokens[theme] if tokens and theme else None
+                resolver = resolvers[theme]
                 for pair in pairs:
                     rows.append(
                         _build_row(
@@ -373,7 +667,7 @@ def main(argv=None):
                             pair["bg"],
                             pair["min"],
                             theme,
-                            theme_tokens,
+                            resolver,
                         )
                     )
         else:
@@ -381,12 +675,9 @@ def main(argv=None):
                 raise ColorError(
                     "iki renk gerekli: contrast.py <fg> <bg> (ya da --pairs dosya.json)"
                 )
-            themes = ["light", "dark"] if (tokens and args.theme == "both") else [args.theme]
-            if not tokens:
-                themes = [None]
             rows = []
             for theme in themes:
-                theme_tokens = tokens[theme] if tokens and theme else None
+                resolver = resolvers[theme]
                 rows.append(
                     _build_row(
                         "text/bg",
@@ -394,7 +685,7 @@ def main(argv=None):
                         args.colors[1],
                         args.min,
                         theme,
-                        theme_tokens,
+                        resolver,
                     )
                 )
     except ColorError as exc:

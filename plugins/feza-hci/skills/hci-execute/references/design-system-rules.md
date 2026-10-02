@@ -218,3 +218,132 @@ Gölge tek başına sınır bilgisi taşımaz; etkileşimli öğenin sınırı `
 | Şifre görünürlüğü | "Şifreyi göster" düğmesi metinle sunulur ve `aria-pressed` ile durumu bildirir; varsayılan gizli |
 | Bilişsel test yasağı (E17) | Kullanıcıdan parolayı ezberleyip yazmasını gerektiren bilişsel test yok (ör. hesaplama); kimlik bilgisi girişi ya da yapıştırma serbest |
 | Sürükleme alternatifi (E18, SC 2.5.7) | Sürükle-bırak ile yapılan her işlem (sıralama, taşıma, kaydırıcı) için tek işaretçi alternatifi sunulur: ok tuşlarıyla taşıma ya da "yukarı/aşağı taşı" düğmeleri. `draggable` öğelerine klavye erişimi de sağlanır |
+
+## 9. Tasarım Token'ları (DTCG)
+
+Bu bölüm §1'deki token mimarisinin makine okunabilir karşılığını tanımlar; §1'deki katman/rol kuralları geçerlidir.
+
+Kanıtlanmış standart: **Design Tokens Community Group Format Module 2025.10** "first stable version" (designtokens.org, 2025-10). Dönüştürme aracı olarak Style Dictionary **5.3+** DTCG 2025.10'u destekler (doğrulanmış sürüm bilgisi; daha eski sürümlerde bu biçim desteklenmez).
+
+### 9.1 İsteğe bağlı `tokens.tokens.json` çıktısı
+
+Varsayılan teslimde token kaynağı `styles/tokens.css`'tir (§1). İstenirse **aynı değerleri taşıyan** bir DTCG dosyası da üretilir:
+
+- Dosya adı: `styles/tokens.tokens.json` (`<ad>.tokens.json` kalıbı `color-audit` ve `contrast.py --tokens` tarafından tanınır).
+- `tokens.css` ile değerler **birebir aynı** olmalı; biri değişirse ikisi birlikte güncellenir.
+- Zorunlu değil; üretildiyse `DESIGN_RATIONALE_<proje>.md` §4 token tablosunda belirtilir.
+
+### 9.2 Biçim kuralları
+
+| Öğe | Kural |
+|-----|-------|
+| Grup vs token | `$value` taşıyan düğüm **token**'dır; diğerleri **grup**. Grup adları rol ağacını (§1) yansıtır: `color`, `dimension`, `duration`, `shadow`, `typography` |
+| `$type` kalıtımı | Tür grup düzeyinde bir kez yazılır, token'lar kalıtır (ör. `color` grubunda `$type: "color"`) |
+| Adlandırma | Yol parçaları §1 ve §2.1'deki rollerle eşleşir: `color.text`, `color.text-muted`, `color.primary`, `color.on-primary`, `color.border-strong`, `color.focus`, `color.danger`, `color.success`, `color.warning`, `color.info`; CSS karşılığı `--color-text`, `--color-text-muted`, … |
+| Alias | Anlamsal token ham token'a `{color.blue-600}` biçimiyle bağlanır (§1'deki `var()` zincirinin DTCG karşılığı) |
+| Açıklama | Anlamı belirsiz token'da `$description` yazılır |
+| Kullanımdan kaldırma | Eskiyen token `$deprecated` ile işaretlenir; `contrast.py --tokens` bu token'ı uyarı olarak bildirir |
+
+```json
+{
+  "color": {
+    "$type": "color",
+    "primary": { "$value": "#1D5FD1", "$description": "Birincil eylem" },
+    "text": { "$value": "#1B2430" },
+    "interactive": { "$value": "{color.primary}" },
+    "legacy-accent": { "$value": "#8A4B00", "$deprecated": "use color.danger instead" }
+  }
+}
+```
+
+### 9.3 Desteklenen alt küme
+
+| Tür | Durum |
+|-----|-------|
+| `color` | Desteklenir; `#RRGGBB[AA]` string ya da DTCG yapısal renk nesnesi (`colorSpace`, `components`, `alpha`, `hex`) |
+| `dimension`, `duration`, `cubicBezier`, `shadow`, `typography` | Desteklenir (ayrıştırılır; kontrast hesabına girmez) |
+| Diğer türler (`fontFamily` vb.) | **Kapsam dışı**: ayrıştırılır, hesaba girmez |
+
+`color` dışı türler kontrast hesabına girmez; `contrast.py --tokens` yalnız renk token'larını çiftlere çözer.
+
+### 9.4 Kontrast doğrulaması
+
+```bash
+# DTCG dosyasından çözerek (tek tema)
+python scripts/contrast.py --tokens styles/tokens.tokens.json --pairs pairs.json --json
+
+# Açık + koyu tema
+python scripts/contrast.py --tokens light.tokens.json --tokens-dark dark.tokens.json --pairs pairs.json
+```
+
+`pairs.json` içinde `fg`/`bg` için `{color.text}`, `color.text` ya da `--color-text` biçimleri kabul edilir. Alias zinciri döngüsüz çözülür; döngü ya da derinlik aşımında betik çıkış kodu 2 ile anlaşılır hata verir. Renk değerleri `contrast.py --css` ile aynı oranları vermelidir (bkz. `tests/hci/tokens/`).
+
+### 9.5 Style Dictionary ile dönüştürme (doğrulanmış sürümler)
+
+Style Dictionary **5.3+** DTCG 2025.10 biçimini okuyup platform çıktısına (CSS değişkenleri, JS/TS nesnesi) dönüştürebilir. Bu, `tokens.css` ile DTCG dosyasının tek kaynaktan üretilmesini sağlar. Ayrıntı ve alternatif akış: `references/tokens-dtcg.md`.
+
+## 10. Tasarım Dili: Hareket, Köşe, Container Queries
+
+Bu bölüm §5 (biçim) ve §6 (hareket) kurallarını genişletir; çelişki olursa §5-§6 esastır.
+
+### 10.1 Hareket token'ları
+
+| Kategori | Süre | Kullanım |
+|----------|------|----------|
+| İşlevsel | 100-300 ms | Durum geri bildirimi, hover/focus, açılır-kapanır, giriş-çıkış; §6'daki "mikro geri bildirim" ve "açılır/kapanır" aralığının token karşılığı |
+| İfade edici | 300-500 ms | Yalnız geçiş/karşılama gibi anlatısal, seyrek hareket; 500 ms'yi geçmez |
+
+- `prefers-reduced-motion: reduce` altında **ifade edici hareket kapatılır** (0 ms ya da anlık); işlevsel hareket ≤ 1 ms'ye indirilir (§6, E12).
+- Hareket amacı yalnız durum değişimini ve uzamsal ilişkiyi anlatmaktır; dekoratif/parallax hareket yasaktır (E12, SC 2.3.3).
+- Örnek token'lar: `duration.functional-fast: 150ms`, `duration.functional: 250ms`, `duration.expressive: 400ms`; eğri `cubicBezier.ease-out: [0, 0, 0.2, 1]`.
+
+### 10.2 Köşe yarıçapı ölçeği (5 kademe)
+
+| Token | Değer | Tipik kullanım |
+|-------|-------|----------------|
+| `--radius-1` | 4 px | Etiket, küçük rozet, giriş alanı |
+| `--radius-2` | 8 px | Düğme, küçük kart |
+| `--radius-3` | 12 px | Kart, panel |
+| `--radius-4` | 16 px | Diyalog, alt sayfa, büyük yüzey |
+| `--radius-5` | 24 px | Kahraman bölüm, tam yuvarlak kapsayıcı |
+
+Kademe **amaca göre** seçilir; tüm yüzeyler aynı yarıçapı almaz (bkz. §10.4 "şablon izleri"). §5'teki `--radius-sm/md/lg` bu ölçeğe karşılık gelir (sm=1, md=2, lg=4).
+
+### 10.3 Container queries (kart ve tablo)
+
+Bileşen, görünümünü **kendi kapsayıcısının** genişliğine göre uyarlar; pencere genişliğine göre değil. Bu, aynı kart/tablo bileşeninin dar sütunda ve geniş alanda doğru davranmasını sağlar.
+
+```css
+.card-host { container-type: inline-size; container-name: card; }
+
+@container card (min-width: 28rem) {
+  .card { grid-template-columns: 8rem 1fr; }
+}
+
+/* Tablo: dar kapsayıcıda kart görünümü */
+.table-host { container-type: inline-size; }
+
+@container (max-width: 40rem) {
+  .table thead { display: none; }
+  .table tr { display: block; border: 1px solid var(--color-border); border-radius: var(--radius-3); }
+  .table td::before { content: attr(data-label) ": "; font-weight: 600; }
+}
+```
+
+- Container query desteklenmiyorsa makul bir tek sütun/akış yedeği bırak (progressive enhancement).
+- Kırılımlar (§4) sayfa düzeyi; container query bileşen düzeyidir — ikisi birlikte kullanılır.
+
+### 10.4 "Şablon izleri" öz-denetimi
+
+Aşağıdakilerden biri varsa tasarım **kalıplaşmış** demektir; gerekçesiz tekrar düzeltilir (Self-Check maddesi):
+
+- [ ] Her bölümde **aynı gölge** ve aynı yüzey kullanılmış mı? (Yükseklik hiyerarşisi yoksa düzleştirilmiş demektir.)
+- [ ] Her başlığın üstünde **büyük harfli küçük etiket** (eyebrow/overline) var mı? (Her yerde tekrarı şablon izidir.)
+- [ ] Tüm köşeler **tekdüze yarıçap** mı? (§10.2 kademeleri amaca göre kullanılmalı.)
+- [ ] Her bölüm **ortalanmış** mı? (Hizalama bilgi hiyerarşisi taşımalı.)
+- [ ] Aynı **ikon-başlık-metin kart üçlüsü** tekrar tekrar mı? (İçerik türü farklıysa sunum da farklılaşmalı.)
+- [ ] Aynı **dekoratif vurgu** (aynı renk bloğu/çizgi/parıltı) her bölümde mi?
+- [ ] Bölümler yalnızca **metin değiştirilerek** mi çoğaltılmış? (Bilgi yoğunluğu ve ritim farklılaşmalı.)
+- [ ] **Dolu/boş durum** aynı iskeletle mi? (Boş durumun kendi yönlendirmesi olmalı — §2.1 `--color-text-muted`, `implementation-checklist.md` boş durum.)
+
+Bir öğe birden çok bölümde tekrarlanıyorsa gerekçesi `DESIGN_RATIONALE_<proje>.md` §5 tasarım kararları tablosuna yazılır.
