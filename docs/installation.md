@@ -8,7 +8,7 @@ FezaPlugin ships five packages from one repository:
 | `feza-pm` | 12 |
 | `feza-hci` | 9 |
 | `feza-sqa` | 7 |
-| `feza-toolkit` | 5 |
+| `feza-toolkit` | 6 |
 
 Install only what you need. `/feza-toolkit:full-package` calls skills from the other packages,
 so install all five packages if you plan to use it.
@@ -94,7 +94,7 @@ repository has a Cursor marketplace file at `.cursor-plugin/marketplace.json`
 ## Gemini CLI
 
 The repository root is a Gemini CLI extension (`gemini-extension.json`). Its skills come from the
-generated root `skills/` directory, which contains all 39 skills.
+generated root `skills/` directory, which contains all 40 skills.
 
 ```bash
 gemini extensions install https://github.com/feza-co/FezaPlugin

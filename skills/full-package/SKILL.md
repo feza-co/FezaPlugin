@@ -21,7 +21,7 @@ Brief → komple proje paketi (15+ dosya) tek komutla.
 - "kurumsal teslim paketi"
 
 ## Adim 0 — Bagilami Topla
-1. **`BRIEF.md`/`IDEA.md`/`README.md`** — proje fikri zorunlu
+1. **`BRIEF.md`/`IDEA.md`/`README.md`** — proje fikri zorunlu. Brief belirsizse önce `/feza-toolkit:brief-grill` önerilir.
 2. Onceki FezaPlugin ciktilari varsa not et (overwrite uyarisi)
 3. Yoksa **TEK** soru: "Brief yok. Kisa proje fikrini paylas (proje adi + 2-3 cumle + 5-10 ana feature)"
 

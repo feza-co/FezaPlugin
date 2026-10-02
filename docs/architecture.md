@@ -57,7 +57,7 @@ FezaPlugin/
 | `feza-pm` | `/feza-pm:<skill>` | 12 |
 | `feza-hci` | `/feza-hci:<skill>` | 9 |
 | `feza-sqa` | `/feza-sqa:<skill>` | 7 |
-| `feza-toolkit` | `/feza-toolkit:<skill>` | 5 |
+| `feza-toolkit` | `/feza-toolkit:<skill>` | 6 |
 
 Skill names are unique across packages, which allows the flat root `skills/` mirror and
 name-based invocation in clients without namespaces.

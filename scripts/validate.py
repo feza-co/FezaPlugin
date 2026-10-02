@@ -35,7 +35,7 @@ PACKAGES: dict[str, list[str]] = {
                  "design-thinking", "prototype-plan", "persona", "hci-execute"],
     "feza-sqa": ["sqa-plan", "test-plan", "metrics-plan", "inspection", "traceability-matrix", "change-control",
                  "defect-report"],
-    "feza-toolkit": ["help", "lifecycle-pick", "full-package", "demo-script", "glossary"],
+    "feza-toolkit": ["help", "lifecycle-pick", "full-package", "demo-script", "glossary", "brief-grill"],
 }
 
 NAME_RE = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")

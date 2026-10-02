@@ -7,7 +7,7 @@
 
 [Türkçe](README.tr.md)
 
-FezaPlugin is a set of 39 agent skills that turn a project brief or an existing codebase into
+FezaPlugin is a set of 40 agent skills that turn a project brief or an existing codebase into
 standards-aligned software engineering documents: requirements specifications, project plans,
 UX evaluations and quality assurance plans, plus working,
 accessibility-checked user interfaces designed from HCI principles. Each skill reads what is
@@ -36,7 +36,7 @@ review-ready Markdown document to your project.
 | [`feza-pm`](plugins/feza-pm) | 12 | Project management: scope, WBS, estimation, budget, schedule, risk, RACI, stakeholders, communication |
 | [`feza-hci`](plugins/feza-hci) | 9 | HCI and UX: reviews, heuristic evaluation, usability testing, accessibility, personas, UI design and build |
 | [`feza-sqa`](plugins/feza-sqa) | 7 | Software quality assurance: SQA plan, test plan, metrics, inspection, traceability, change and defect control |
-| [`feza-toolkit`](plugins/feza-toolkit) | 5 | Cross-package utilities: menu, lifecycle selection, full package orchestration, demo script, glossary |
+| [`feza-toolkit`](plugins/feza-toolkit) | 6 | Cross-package utilities: brief clarification interview, menu, lifecycle selection, full package orchestration, demo script, glossary |
 
 > **Note:** `/feza-toolkit:full-package` calls skills from the other packages. Install all five
 > packages to generate a complete documentation set.
@@ -181,6 +181,7 @@ Related tools and references:
 
 | Command | What it does | Output |
 |---------|--------------|--------|
+| `/feza-toolkit:brief-grill` | Pins down a brief through a decision-tree interview: asks one multiple-choice question at a time (problem and whose problem, target user, what the solution is and is not, key features, constraints, success criteria, risks, delivery) until every branch of the tree is resolved, then appends the decisions and open assumptions to the brief. No total question limit; asks nothing that can be read from files. | Updated `BRIEF.md` (decisions table) |
 | `/feza-toolkit:help` | Shows the FezaPlugin menu: the packages, every skill with the standard or method it is based on, how to call it and a suggested first step. Writes no file. | In chat |
 | `/feza-toolkit:lifecycle-pick` | Recommends a software development life cycle (SDLC) model. Scores the project on requirement clarity, team experience, customer involvement, time pressure and technology risk; compares Waterfall, Incremental and Iterative plus Agile/Scrum, Kanban, V-Model, Spiral and Hybrid; and gives the chosen model's pros and cons and a detailed plan (phases or sprints, roles, artefacts, cadence, risks). Reads scope, SRS, stakeholder, risk and estimate files when available. | `LIFECYCLE_PICK_<project>.md` |
 | `/feza-toolkit:full-package` | Orchestrator that runs the core skills of the other packages in a sensible order from a single project brief, feeding each output into the next. Choose a Mini (8 files), Standard (15 files) or Full (24+ files) package; the run ends with a `PACKAGE_<project>.md` manifest listing the generated files, suggested next steps and known gaps. All other packages must be installed. | Many documents plus `PACKAGE_<project>.md` |

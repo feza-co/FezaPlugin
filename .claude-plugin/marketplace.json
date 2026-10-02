@@ -5,7 +5,7 @@
     "url": "https://github.com/feza-co"
   },
   "metadata": {
-    "description": "FezaPlugin: 39 documentation and design skills for software teams across requirements, project management, HCI/UX, software quality assurance and a cross-package toolkit."
+    "description": "FezaPlugin: 40 documentation and design skills for software teams across requirements, project management, HCI/UX, software quality assurance and a cross-package toolkit."
   },
   "plugins": [
     {
@@ -78,7 +78,7 @@
     {
       "name": "feza-toolkit",
       "source": "./plugins/feza-toolkit",
-      "description": "Cross-package utilities: skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
+      "description": "Cross-package utilities: brief clarification interview, skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
       "category": "productivity",
       "keywords": [
         "toolkit",

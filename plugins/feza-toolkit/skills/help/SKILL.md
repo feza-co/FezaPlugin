@@ -9,7 +9,7 @@ description: >
 
 # FezaPlugin Help
 
-FezaPlugin'de mevcut 39 skill'i, 5 paket altında kategorize biçimde sunar.
+FezaPlugin'de mevcut 40 skill'i, 5 paket altında kategorize biçimde sunar.
 
 ## Ne zaman tetiklenir
 - "feza ne yapabilir / ne yapıyor"
@@ -32,9 +32,9 @@ FezaPlugin 5 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `f
 | `feza-pm` | 12 | Proje yönetimi |
 | `feza-hci` | 9 | İnsan-bilgisayar etkileşimi / UX, arayüz tasarımı ve kodlaması |
 | `feza-sqa` | 7 | Yazılım kalite güvencesi |
-| `feza-toolkit` | 5 | Yardımcı araçlar ve orkestrasyon |
+| `feza-toolkit` | 6 | Yardımcı araçlar ve orkestrasyon |
 
-## Mevcut Skill Tablosu (39 skill / 5 paket)
+## Mevcut Skill Tablosu (40 skill / 5 paket)
 
 > Her doküman üretiminde kalite kapısı (`references/quality-gate.md`) otomatik çalışır; çıktılar `references/output-conventions.md` uyarınca kapak, özet, içindekiler ve kaynakça ile teslim formatında üretilir.
 
@@ -46,6 +46,7 @@ FezaPlugin 5 bağımsız pakettir. Her paket kendi ad alanıyla çağrılır; `f
 | `/feza-toolkit:full-package` | Brief'ten tüm doküman setini sırayla üretir (orkestrasyon). | Çok paketli |
 | `/feza-toolkit:demo-script` | Paydaş / yatırımcı / müşteri sunumu için akış + Q&A bankası üretir. | Sunum pratiği |
 | `/feza-toolkit:glossary` | 100+ terimlik TR-EN sözlük üretir. | ISO/IEC/IEEE 24765, PMBOK 7 |
+| `/feza-toolkit:brief-grill` | Bir brief'i karar ağacı sorgusuyla sabitler: tek tek soru sorarak fikrin tam olarak ne olduğunu ve tüm sınırlarını netleştirir; kararları brief sonuna işler. | grill-me yaklaşımı, ISO/IEC/IEEE 29148 (kapsam netliği) |
 
 ### feza-requirements — Gereksinim Mühendisliği
 | Komut | Ne yapar | Dayanak |

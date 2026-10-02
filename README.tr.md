@@ -8,7 +8,7 @@
 [English](README.md)
 
 FezaPlugin, bir proje özetini (brief) ya da mevcut bir kod tabanını standartlara uygun yazılım
-mühendisliği dokümanlarına dönüştüren 39 ajan skill'inden oluşan bir settir: gereksinim
+mühendisliği dokümanlarına dönüştüren 40 ajan skill'inden oluşan bir settir: gereksinim
 spesifikasyonları, proje planları, UX değerlendirmeleri ve kalite
 güvence planları; ayrıca HCI ilkelerinden tasarlanmış, erişilebilirliği denetlenmiş, çalışan
 kullanıcı arayüzleri. Her skill deponuzda mevcut olanı okur, en fazla birkaç hedefli soru sorar ve
@@ -38,7 +38,7 @@ projenize eksiksiz, incelemeye hazır bir Markdown dokümanı yazar.
 | [`feza-pm`](plugins/feza-pm) | 12 | Proje yönetimi: kapsam, WBS, tahmin, bütçe, takvim, risk, RACI, paydaşlar, iletişim |
 | [`feza-hci`](plugins/feza-hci) | 9 | HCI ve UX: değerlendirmeler, heuristik denetim, kullanılabilirlik testi, erişilebilirlik, personalar, arayüz tasarımı ve kodlaması |
 | [`feza-sqa`](plugins/feza-sqa) | 7 | Yazılım kalite güvencesi: SQA planı, test planı, metrikler, inceleme, izlenebilirlik, değişiklik ve kusur kontrolü |
-| [`feza-toolkit`](plugins/feza-toolkit) | 5 | Paketler arası araçlar: menü, yaşam döngüsü seçimi, tam paket orkestrasyonu, demo senaryosu, sözlük |
+| [`feza-toolkit`](plugins/feza-toolkit) | 6 | Paketler arası araçlar: brief netleştirme mülakatı, menü, yaşam döngüsü seçimi, tam paket orkestrasyonu, demo senaryosu, sözlük |
 
 > **Not:** `/feza-toolkit:full-package` diğer paketlerin skill'lerini çağırır. Eksiksiz bir doküman
 > seti üretmek için beş paketin tamamını kurun.
@@ -183,6 +183,7 @@ Bu sürümde eklenen **E14-E29** kriterleri:
 
 | Komut | Ne yapar | Çıktı |
 |-------|----------|-------|
+| `/feza-toolkit:brief-grill` | Bir brief'i karar ağacı mülakatıyla sabitler: seferde tek çoktan seçmeli soru sorar (problem ve kimin problemi, hedef kullanıcı, çözümün ne olduğu ve ne olmadığı, temel özellikler, kısıtlar, başarı ölçütleri, riskler, teslim biçimi) ve ağacın her dalı kapanana kadar sürer; ardından kararları ve açık varsayımları brief sonuna ekler. Soru sınırı yoktur; dosyadan okunabilecek hiçbir şey sorulmaz. | Güncellenmiş `BRIEF.md` (karar tablosu) |
 | `/feza-toolkit:help` | FezaPlugin menüsünü gösterir: paketler, her skill'in dayandığı standart ya da yöntem, nasıl çağrılacağı ve önerilen ilk adım. Dosya yazmaz. | Sohbet |
 | `/feza-toolkit:lifecycle-pick` | Bir yazılım geliştirme yaşam döngüsü (SDLC) modeli önerir. Projeyi gereksinim netliği, ekip deneyimi, müşteri katılımı, zaman baskısı ve teknoloji riski açısından puanlar; Waterfall, Incremental ve Iterative ile Agile/Scrum, Kanban, V-Model, Spiral ve Hybrid'i karşılaştırır; seçilen modelin artı ve eksilerini ve ayrıntılı planını (fazlar ya da sprintler, roller, artefaktlar, kadans, riskler) verir. Varsa kapsam, SRS, paydaş, risk ve tahmin dosyalarını okur. | `LIFECYCLE_PICK_<proje>.md` |
 | `/feza-toolkit:full-package` | Tek bir proje brief'inden yola çıkarak diğer paketlerin çekirdek skill'lerini mantıklı bir sırayla çalıştıran ve her çıktıyı bir sonrakine girdi yapan orkestratör. Mini (8 dosya), Standard (15 dosya) ya da Full (24+ dosya) paket seçilir; çalışma, üretilen dosyaları, önerilen sonraki adımları ve bilinen boşlukları listeleyen bir `PACKAGE_<proje>.md` manifestiyle biter. Diğer tüm paketlerin kurulu olması gerekir. | Doküman seti ve `PACKAGE_<proje>.md` |
