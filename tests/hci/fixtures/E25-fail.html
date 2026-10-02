@@ -9,8 +9,14 @@
   body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
   main { max-width: 100%; padding: 16px; }
   h1 { font-size: 24px; }
-  /* Sabit genişlik + taşma gizli: uzatılmış metin kırpılır (orijinal sığar). */
-  .label { width: 170px; overflow: hidden; white-space: nowrap; border: 1px solid #79808C; border-radius: 8px; padding: 4px; }
+  /* Taşma tabanlı ölçüm yazı tipinden bağımsız olsun diye eş genişlikli (monospace)
+     yazı tipi ve `ch` birimi kullanılır: eş genişlikli fontta 1ch = bir karakter.
+     15 karakterlik metin 16ch'lik kabın ~%94'ünü doldurur; tabanda sığar.
+     • Metin aralığı artışı (E16: +0.12em/karakter, +0.16em/boşluk) ~%20 genişletir → taşar.
+     • Sahte yerelleştirme (E25: ×1.3 + köşeli ayraç) açıkça %100'ü aşar → taşar.
+     Genişlik `ch` ve content-box olduğundan geometri monospace fontta kesindir. */
+  .label { font-family: ui-monospace, "DejaVu Sans Mono", Consolas, monospace; box-sizing: content-box;
+    width: 16ch; overflow: hidden; white-space: nowrap; border: 1px solid #79808C; border-radius: 8px; padding: 4px; }
   .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
   :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
 </style>
@@ -18,7 +24,7 @@
 <body>
 <main>
   <h1>Ayarlar</h1>
-  <p class="label">Değişiklikleri kaydet</p>
+  <p class="label">Ayarları kaydet</p>
   <button class="btn" type="submit">Kaydet</button>
 </main>
 </body>
