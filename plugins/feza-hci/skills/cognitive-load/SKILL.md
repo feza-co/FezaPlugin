@@ -141,6 +141,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
 CCT terim skoru (1-5), `references/fix-mode.md` eşleme tablosuyla Nielsen 0-4 ölçeğine çevrilir; eşik uygulanır.
 Yapısal yeniden tasarım (ekran bölme, akış değiştirme) fix modu kapsamı dışıdır: "Elle düzeltilmeli" yazılır ve `/feza-hci:hci-execute` önerilir.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar

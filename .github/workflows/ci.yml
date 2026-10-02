@@ -68,3 +68,31 @@ jobs:
             docs/**/*.md
             plugins/*/README.md
             .github/**/*.md
+
+  hci-fixtures:
+    name: HCI fixture suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      # verify-ui.mjs bağımlılıkları önbellek dizininden çözer: Linux'ta
+      # $HOME/.cache/feza-ui-check (Windows'ta %LOCALAPPDATA%\feza-ui-check).
+      # Aynı dizine kurup FEZA_UI_CHECK_NO_INSTALL=1 ile ağ erişimini kapatıyoruz.
+      - name: Install verify-ui dependencies into its cache dir
+        run: |
+          set -euo pipefail
+          CACHE="$HOME/.cache/feza-ui-check"
+          mkdir -p "$CACHE"
+          # verify-ui önbelleği yalnız package.json varsa çözer (createRequire).
+          printf '{"name":"feza-ui-check-deps","private":true}' > "$CACHE/package.json"
+          npm install --prefix "$CACHE" --no-save playwright @axe-core/playwright
+          npx --prefix "$CACHE" playwright install --with-deps chromium
+
+      - name: Run HCI fixture suite
+        env:
+          FEZA_UI_CHECK_NO_INSTALL: "1"
+        run: node tests/hci/run.mjs

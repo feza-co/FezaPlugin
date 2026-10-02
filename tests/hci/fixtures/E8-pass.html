@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E8 PASS — labelled form fields</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  label { display: block; margin-top: 12px; }
+  input { font: inherit; width: 100%; max-width: 320px; height: 44px; padding: 8px; border: 1px solid #79808C; border-radius: 8px; }
+  .btn { min-height: 44px; min-width: 44px; padding: 8px 16px; background: #1D5FD1; color: #FFFFFF; border: none; border-radius: 8px; font: inherit; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Contact</h1>
+  <form>
+    <label for="tel">Phone number</label>
+    <input id="tel" type="tel" autocomplete="tel">
+    <button class="btn" type="submit">Send</button>
+  </form>
+</main>
+</body>
+</html>

@@ -69,8 +69,8 @@ EN FAZLA 3 SORU:
 
 | # | Bulgu | Etki | Önerilen Aksiyon | Kanıt türü | Kanıt | Referans |
 |---|-------|------|------------------|------------|-------|----------|
-| F1 | Login butonu görünür değil — kontrast 2.1 (WCAG AA fail) | Yüksek (erişilebilirlik) | Daha koyu primary kullan | verify-ui kodu | `E2 FAIL, oran 2.1:1` | WCAG 2.1 SC 1.4.3 |
-| F2 | Sepet ikonu sayısal badge yok | Orta (visibility of system status) | Badge ekle | DOM seçici | `.cart-icon` — çocuk öğe yok | Nielsen H1 |
+| F1 | Login butonu görünür değil — kontrast 2.1 (WCAG AA fail) | High | Daha koyu primary kullan | verify-ui kodu | `E2 FAIL, oran 2.1:1` | WCAG 2.1 SC 1.4.3 |
+| F2 | Sepet ikonu sayısal badge yok | Medium | Badge ekle | DOM seçici | `.cart-icon` — çocuk öğe yok | Nielsen H1 |
 | ... |
 
 Kanıt türü `references/evidence-rubric.md` §1'deki dört değerden biridir. Etki seviyesi
@@ -140,6 +140,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
 Severity ölçeği Nielsen'e şöyle eşlenir: Critical/High/Medium/Low → 4/3/2/1; varsayılan eşik ≥ 2, `--fix=all` ile tümü.
 Bulgu konumu dosya + seçici/satır değilse bulgu düzeltilmez, "Elle düzeltilmeli" olarak işaretlenir.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar

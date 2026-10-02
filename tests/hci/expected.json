@@ -1,0 +1,140 @@
+{
+  "static": ["E9", "E10", "E11", "E19", "E20"],
+  "E1-fail.html": {
+    "exit": 1,
+    "fail": ["E1"],
+    "note": "Alternatif metinsiz <img>, axe 'image-alt' (serious) tetikler."
+  },
+  "E1-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E2-fail.html": {
+    "exit": 1,
+    "fail": ["E1", "E2"],
+    "note": "color-contrast axe kuralı serious olduğu için E1 de düşer (bilinçli çakışma)."
+  },
+  "E2-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E3-fail.html": {
+    "exit": 1,
+    "fail": ["E3"]
+  },
+  "E3-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E4-fail.html": {
+    "exit": 1,
+    "fail": ["E4"],
+    "note": "40x40 birincil düğme: 24 px alt sınının üstünde (E15 temiz) ama 44x44 altında."
+  },
+  "E4-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E5-fail.html": {
+    "exit": 1,
+    "fail": ["E5"]
+  },
+  "E5-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E6-fail.html": {
+    "exit": 1,
+    "fail": ["E6"]
+  },
+  "E6-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E7-fail.html": {
+    "exit": 1,
+    "fail": ["E7"]
+  },
+  "E7-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E8-fail.html": {
+    "exit": 1,
+    "fail": ["E1", "E8"],
+    "note": "Etiketsiz alan axe 'label' (serious) tetiklediği için E1 de düşer (bilinçli çakışma)."
+  },
+  "E8-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E12-fail.html": {
+    "exit": 1,
+    "fail": ["E12"]
+  },
+  "E12-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E13-fail.html": {
+    "exit": 1,
+    "fail": ["E13"]
+  },
+  "E13-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E14-fail.html": {
+    "exit": 1,
+    "fail": ["E14"]
+  },
+  "E14-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E15-fail.html": {
+    "exit": 1,
+    "fail": ["E1", "E4", "E15"],
+    "note": "24 px altı hedefler bitişik: E15 sağlanmıyor ve E4 istisnadan yararlanamıyor; axe 'target-size' serious olduğu için E1 de düşer."
+  },
+  "E15-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E16-fail.html": {
+    "exit": 1,
+    "fail": ["E16"]
+  },
+  "E16-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E17-fail.html": {
+    "exit": 1,
+    "fail": ["E17"]
+  },
+  "E17-pass.html": {
+    "exit": 0,
+    "fail": []
+  },
+  "E18-fail.html": {
+    "exit": 0,
+    "fail": [],
+    "null": ["E18"],
+    "note": "Sürükleme adayı bulunduğu için E18 ok:null (karma; tek-işaretçi alternatifi elle doğrulanır) ve çıkış kodunu bozmaz."
+  },
+  "E18-pass.html": {
+    "exit": 0,
+    "fail": [],
+    "null": []
+  },
+  "bad.html": {
+    "exit": 1,
+    "fail": ["E1", "E2", "E3", "E4", "E15", "E5", "E8"],
+    "note": "Kasıtlı çoklu ihlal sayfası (E2/E3/E4/E5/E8 ve bunlardan doğan E1/E15)."
+  },
+  "good.html": {
+    "exit": 0,
+    "fail": []
+  }
+}

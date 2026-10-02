@@ -181,6 +181,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 Düzeltme **TOKEN seviyesinde** yapılır: değer tek yerde değişir, kullanım yerleri token'a bağlanır.
 Yeni renk değerleri `scripts/contrast.py` ile hesaplanır; elle tutulan oran kullanılmaz.
 Token katmanı yoksa önce bir katman oluşturulması önerilir ve onay alınır; onay yoksa renk yalnız raporlanır.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar

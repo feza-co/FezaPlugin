@@ -75,12 +75,15 @@ H2 ve H9 mikro-metin bulguları yazılırken `references/ux-writing.md` §5 tabl
 
 ### Severity Dağılımı
 
-Her seviyenin sayısı bir özet kutuda gösterilir:
+Her seviyenin sayısı bir özet kutuda gösterilir; etiketler `references/evidence-rubric.md` §2'deki
+sayısal 0-4 ölçeğiyle birebir aynıdır (4 görev tamamlanamıyor/erişim engeli, 3 ciddi gecikme ya da
+hata, 2 sürtünme, 1 kozmetik, 0 sorun değil):
 ```
-Catastrophic (4): X
-Major (3): Y
-Minor (2): Z
-Cosmetic (0-1): W
+Severity 4: X
+Severity 3: Y
+Severity 2: Z
+Severity 1: W
+Severity 0: V
 ```
 
 ### Rapor Şablonu Ekleri (zorunlu)
@@ -132,6 +135,8 @@ Prosedür: `references/fix-mode.md`. Eşikler: `references/thresholds.md`. Doğr
 `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>` (mutlak yol; script kullanıcı projesine kopyalanmaz).
 Severity zaten Nielsen 0-4'tür; eşik doğrudan uygulanır (varsayılan ≥ 2, `--fix=all` ile tümü).
 Bulgu tablosundaki konum dosya + seçici/satır değilse bulgu düzeltilmez, "Elle düzeltilmeli" olarak işaretlenir.
+Her düzeltme `references/fix-mode.md` §6'daki **doğrulama kapısından** geçer: ihlal sayısı kesin azalmazsa
+ya da yeni bir E kodu `ok:false` olursa değişiklik geri alınır ve "reddedildi" yazılır (araç yoksa "doğrulanmadı").
 Değerlendirme raporunun sonuna "Uygulanan düzeltmeler" tablosu eklenir; rapor yeniden yazılmaz.
 
 ## Sınırlar

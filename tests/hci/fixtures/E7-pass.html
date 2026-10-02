@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E7 PASS — natural focus order</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: none; border-radius: 8px; font: inherit; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Invoice</h1>
+  <p>Focus order follows the DOM and visual order; no positive tabindex.</p>
+  <button id="step1" class="btn" type="button">First step</button>
+  <button id="step2" class="btn" type="button">Middle step</button>
+  <button id="step3" class="btn" type="button">Last step</button>
+</main>
+</body>
+</html>

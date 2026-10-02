@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E13 PASS — no clipping at 200 percent text</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  .card { border: 1px solid #79808C; border-radius: 8px; padding: 8px; max-width: 320px; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Contract</h1>
+  <div class="card">
+    <p>This description flows in a container with no fixed height, so enlarging text to 200 percent never clips it.</p>
+  </div>
+</main>
+</body>
+</html>

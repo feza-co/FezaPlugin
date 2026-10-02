@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E12 FAIL — reduce altında transform animasyonu sürüyor</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  /* transform tabanlı animasyon; prefers-reduced-motion yok sayılıyor. */
+  @keyframes slide { from { transform: translateX(-40px); } to { transform: translateX(40px); } }
+  .slider { width: 60px; height: 60px; background: #1D5FD1; border-radius: 8px; animation: slide 1s linear infinite alternate; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Kampanya</h1>
+  <p>Bu kutu, hareket azaltma tercihi açıkken de sürekli kayar.</p>
+  <div class="slider"></div>
+</main>
+</body>
+</html>

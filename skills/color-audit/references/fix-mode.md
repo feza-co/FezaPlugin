@@ -74,25 +74,52 @@ Yeni bağımlılık eklenmez; dosya silinmez; dosya taşınmaz.
 - **Renk tutarlılığı (color-audit).** Renkler tek tek kullanım yerlerinde değil **TOKEN seviyesinde** düzeltilir: değer tek yerde değişir, kullanım yerleri token'a bağlanır. Token katmanı yoksa önce bir katman oluşturmayı öner (`styles/tokens.css` ya da mevcut tema dosyası) ve `AskUserQuestion` ile onay al; onay yoksa rengi yalnız raporla.
 - **Değer tahmin edilmez.** Yeni renk değeri `scripts/contrast.py` ile hesaplanır; elle tutulan bir oran kullanılmaz.
 
-## 6. Doğrulama
+## 6. Doğrulama (doğrulama kapısı)
 
-1. Düzeltmelerden sonra render doğrulamasını çalıştır. Script bu skill'in kendi klasöründedir (`scripts/verify-ui.mjs`); kullanıcının proje kökünde çalıştırılırken skill klasöründeki dosyanın **mutlak yolu** verilir: `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL>`. Script kullanıcı projesine kopyalanmaz.
-2. Eşikleri `references/thresholds.md` dosyasındaki E1-E13 kontrollerine göre oku. Statik kriterler (E9 birincil eylem, E10 görev derinliği, E11 durum kapsaması) script'te ölçülmez; düzeltilen ekranlarda elle kontrol edilir.
-3. Çıkış kodu yorumu:
-   - `0` → doğrulandı.
-   - `1` → kalan ihlalleri düzelt ve yeniden çalıştır; **en fazla 2 tur**.
-   - `2` → araç yok. Statik kontrol yap (HTML/CSS okuma, sınıf-stil eşlemesi) ve rapora `Otomatik render doğrulaması yapılamadı` yaz.
-4. Çıktı klasörü (varsayılan `.feza/`) oluştuysa, kullanıcının `.gitignore` dosyasına eklemesini öner.
+Düzeltmeler körü körüne uygulanmaz; her düzeltme (ya da ilişkili düzeltme grubu) bir **doğrulama
+kapısından** geçer. Kapı, düzeltmenin ihlali gerçekten azalttığını kanıtlar ve gerilemeyi (regresyonu)
+engeller.
+
+1. **Önce taban (baseline) ölçümü al.** Düzeltmeye başlamadan önce ilgili sayfayı doğrula ve
+   `ok:false` kriterlerdeki **toplam ihlal sayısını** ve `ok:false` **E kodu kümesini** kaydet. Script
+   bu skill'in kendi klasöründedir (`scripts/verify-ui.mjs`); kullanıcının proje kökünde çalıştırılırken
+   skill klasöründeki dosyanın **mutlak yolu** verilir:
+   `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL> --json --out <geçici dizin>`.
+   Script kullanıcı projesine kopyalanmaz. `report.json` içindeki `results.<E>` alanlarından
+   `ok:false` olanları ve `violations` uzunluklarını toplayarak ihlal sayısını hesapla.
+2. **Düzeltmeyi uygula**, sonra aynı ölçümü **yeniden** çalıştır.
+3. **Kapı kararı.** Aşağıdaki koşullardan biri sağlanıyorsa düzeltme **reddedilir**:
+   - Toplam ihlal sayısı **kesin olarak azalmadıysa** (aynı kaldı ya da arttı), ya da
+   - Önce olmayan **yeni bir ihlal türü** ortaya çıktıysa (yeni bir E kodu `ok:false` oldu).
+   Reddedilen düzeltme geri alınır: ilgili dosya(lar) `git checkout -- <dosya>` ile eski hâline
+   döndürülür ya da uygulanan yama geri alınır. Karar raporda `reddedildi` olarak listelenir.
+   Aksi hâlde karar `kabul` olur.
+4. **Eşikler.** `references/thresholds.md` dosyasındaki E1-E29 kontrollerine göre oku. Statik kriterler
+   (E9 birincil eylem, E10 görev derinliği, E11 durum kapsaması, E19, E20) script'te ölçülmez;
+   düzeltilen ekranlarda elle kontrol edilir ve doğrulama sütununa `statik` yazılır.
+5. **Çıkış kodu yorumu:**
+   - `0` → tüm ihlaller kapandı; doğrulandı.
+   - `1` → kalan ihlaller var. Kapı kararına göre ilerle; **en fazla 2 tur**.
+   - `2` → araç yok. **Doğrulama kapısı uygulanamaz**: düzeltmeler `doğrulanmadı` olarak işaretlenir
+     (kabul/reddedildi kararı verilemez), statik kontrol yapılır (HTML/CSS okuma, sınıf-stil eşlemesi)
+     ve rapora `Otomatik render doğrulaması yapılamadı` yazılır.
+6. Çıktı klasörü (varsayılan `.feza/`) oluştuysa, kullanıcının `.gitignore` dosyasına eklemesini öner.
 
 ## 7. Rapor
 
 Mevcut değerlendirme rapor dosyası **korunur**: silinmez, sıfırdan yeniden yazılmaz. Raporun sonuna `## Uygulanan düzeltmeler` bölümü eklenir:
 
-| Bulgu ID | Dosya | Önce | Sonra | Doğrulama |
-|----------|-------|------|-------|-----------|
-| H1 | `pages/profile.tsx` | Yükleme geri bildirimi yok | Spinner + "Kaydediliyor..." | `verify-ui OK` |
+| Bulgu ID | Dosya | Önce | Sonra | Önce ihlal | Sonra ihlal | Karar | Doğrulama |
+|----------|-------|------|-------|------------|-------------|-------|-----------|
+| H1 | `pages/profile.tsx` | Yükleme geri bildirimi yok | Spinner + "Kaydediliyor..." | 3 | 1 | kabul | `verify-ui OK` |
+| H2 | `pages/checkout.tsx` | Kontrast 3.1:1 | Token güncellendi | 1 | 1 | reddedildi | `git checkout --` |
 
-Doğrulama sütunu şu değerlerden birini alır: `verify-ui OK`, `verify-ui FAIL (<kod>)`, `statik`, `Elle düzeltilmeli — <neden>`.
+- **Önce ihlal / Sonra ihlal** — §6'daki tanıma göre `ok:false` kriterlerdeki toplam ihlal sayısı.
+- **Karar** — `kabul` ya da `reddedildi` (§6.3 kapı kuralı: azalma yoksa ya da yeni ihlal türü
+  doğduysa reddedilir ve değişiklik geri alınır). Araç yoksa kapı uygulanamaz; bu satırlar
+  `doğrulanmadı` olarak işaretlenir ve Karar sütununa `doğrulanmadı` yazılır.
+- **Doğrulama** sütunu şu değerlerden birini alır: `verify-ui OK`, `verify-ui FAIL (<kod>)`, `statik`,
+  `Elle düzeltilmeli — <neden>`.
 
 Tablonun ardından düzeltilmeyen bulgular kısa bir liste olarak yazılır (severity < eşik ya da konumlandırılamayan), her biri gerekçesiyle. Değerlendirme raporu kullanıcıya görünürdür; yalnızca gizli kalite kapısı puanı gizli kalır ve rapora yazılmaz.
 
@@ -100,7 +127,7 @@ Tablonun ardından düzeltilmeyen bulgular kısa bir liste olarak yazılır (sev
 
 En fazla 4 satır:
 
-1. Kaç bulgu düzeltildi / kaçı elle bırakıldı.
+1. Kaç bulgu düzeltildi (kabul) / kaçı reddedildi / kaçı elle bırakıldı.
 2. Değişen dosya sayısı.
 3. Doğrulama sonucu (`verify-ui OK` / `FAIL` / `Otomatik render doğrulaması yapılamadı`).
 4. Rapor yolu.

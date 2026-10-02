@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>good — no violations</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  p { color: #1B2430; max-width: 60ch; }
+  label { display: block; margin-top: 12px; }
+  input { font: inherit; width: 100%; max-width: 320px; height: 44px; padding: 8px; border: 1px solid #79808C; border-radius: 8px; background: #FFFFFF; }
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: none; border-radius: 8px; font: inherit; }
+  .card { border: 1px solid #79808C; border-radius: 8px; padding: 8px; max-width: 320px; }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Profile</h1>
+  <p>This page has no automated violations: sufficient contrast, accessible names, adequate target sizes and no horizontal scroll.</p>
+  <form>
+    <label for="email">Email</label>
+    <input id="email" type="email" autocomplete="email">
+    <button class="btn" type="submit">Save</button>
+  </form>
+  <div class="card">
+    <p>A fluid card with a visible border and no fixed height.</p>
+  </div>
+</main>
+</body>
+</html>

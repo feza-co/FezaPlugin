@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E12 PASS — motion disabled under reduce</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  main { max-width: 100%; padding: 16px; }
+  h1 { font-size: 24px; }
+  @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+  .fader { width: 60px; height: 60px; background: #1D5FD1; border-radius: 8px; animation: fade 0.2s ease; }
+  /* Yalnız opaklık; reduce altında animasyon hemen sonlanır. */
+  @media (prefers-reduced-motion: reduce) {
+    .fader { animation: none; }
+    * { transition: none !important; }
+  }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Campaign</h1>
+  <p>Only opacity is animated, and motion is disabled when the user prefers reduced motion.</p>
+  <div class="fader"></div>
+</main>
+</body>
+</html>
