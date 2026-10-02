@@ -1,7 +1,7 @@
 {
   "name": "feza-hci",
   "displayName": "FezaPlugin HCI and UX",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Human-computer interaction skills: holistic UX review, heuristic evaluation, usability test planning, cognitive load, color and contrast audit, design thinking, prototyping, personas, and HCI-compliant UI design and implementation.",
   "author": {
     "name": "Feza"

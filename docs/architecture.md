@@ -55,10 +55,9 @@ FezaPlugin/
 |---------|-----------|-------:|
 | `feza-requirements` | `/feza-requirements:<skill>` | 6 |
 | `feza-pm` | `/feza-pm:<skill>` | 12 |
-| `feza-iso` | `/feza-iso:<skill>` | 6 |
 | `feza-hci` | `/feza-hci:<skill>` | 9 |
 | `feza-sqa` | `/feza-sqa:<skill>` | 7 |
-| `feza-toolkit` | `/feza-toolkit:<skill>` | 5 |
+| `feza-toolkit` | `/feza-toolkit:<skill>` | 6 |
 
 Skill names are unique across packages, which allows the flat root `skills/` mirror and
 name-based invocation in clients without namespaces.
@@ -110,7 +109,7 @@ shared/*.md ──────────────┐
                           ├──> plugins/<pkg>/skills/<skill>/references/   (generated copies)
 other skill's references ─┘                    │
                                                └──> skills/<skill>/       (generated mirror)
-VERSION ──> plugin.json x 18, gemini-extension.json, README badges
+VERSION ──> plugin.json x 15, gemini-extension.json, README badges
 ```
 
 ## Validation
@@ -143,7 +142,7 @@ Every document-producing skill follows the same pipeline, defined by the shared 
    questions about critical gaps; detect the output language.
 2. **Generation**: draft the document in memory using the skill's own references.
 3. **Quality gate** (`references/quality-gate.md`): score the draft against the criteria set of
-   the package that produced it (feza-requirements, feza-pm, feza-iso, feza-hci, feza-sqa, or integrated
+   the package that produced it (feza-requirements, feza-pm, feza-hci, feza-sqa, or integrated
    package report), fix blocking issues, and revise up to two times when the draft is below the
    threshold. The gate is internal: scores, criteria tables and revision notes are never shown to
    the user or written to files.

@@ -1,6 +1,6 @@
 {
   "name": "feza-requirements",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Requirements engineering skills: ISO/IEC/IEEE 29148 aligned SRS generation and review, elicitation kits, requirement classification, conflict analysis and user stories.",
   "author": {
     "name": "Feza"

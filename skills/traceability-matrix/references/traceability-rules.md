@@ -23,7 +23,7 @@ Gereksinimler mimari elemanlara, tasarim kararlarina, dogrulama yontemlerine ve 
 ```
 Stakeholder Need (N-XXX)
     ↓ traces-to
-Business Requirement (BR-XXX)         — `/feza-iso:iso29148-req` katmani
+Business Requirement (BR-XXX)         — 29148 Business Requirements Specification katmani
     ↓ refines-as
 Stakeholder Requirement (StR-XXX)     — `/feza-pm:stakeholder-map` + `/feza-hci:persona`
     ↓ allocated-to

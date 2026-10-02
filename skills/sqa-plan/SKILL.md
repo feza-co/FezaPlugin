@@ -22,12 +22,10 @@ IEEE 730-2014 uyumlu SQA Plan iskeleti.
 
 ## Adim 0 — Bagilami Topla
 1. **`SCOPE_*.md`** — proje boyutu, triple constraint
-2. **`SRS_*.md`** — quality dimensions input
+2. **`SRS_*.md`** — quality dimensions ve kalite hedefleri input
 3. **`STAKEHOLDERS_*.md`** — QA roles
 4. **`RACI_*.md`** (varsa) — sorumluluk
-5. **`ISO25010_QUALITY_*.md`** (varsa) — kalite hedefleri
-6. **`MEASUREMENT_PLAN_*.md`** (varsa) — metrik
-7. Yoksa **TEK** soru: "SQA plani hangi proje icin? (kisa brief)"
+5. Yoksa **TEK** soru: "SQA plani hangi proje icin? (kisa brief)"
 
 ## Adim 1 — Gri Nokta (max 3)
 

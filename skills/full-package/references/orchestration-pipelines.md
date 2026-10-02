@@ -26,7 +26,7 @@ Mini'nin tum ciktilari +
 15. comm-plan          → COMM_PLAN_*.md          (depends-on: STAKEHOLDERS)
 ```
 
-## Full Paket (28+ skill — kurumsal hazırlık)
+## Full Paket (24+ dosya — kurumsal hazırlık)
 
 ```
 Standard'in tum ciktilari +
@@ -35,17 +35,13 @@ feza-hci paketi (8 doküman skill'i; arayüz üreten hci-execute pakete dahil ed
   prototype-plan, persona (zaten standard'da), cognitive-load,
   usability-eval-plan
 
-feza-iso paketi (6 skill):
-- iso25010-quality, iso15939-measure, iso29148-req,
-  iso12207-audit, iso29110-vse, complaints-to-compliance
-
 feza-sqa paketi (7 skill):
 - sqa-plan, traceability-matrix, inspection,
   metrics-plan, defect-report (template), change-control,
   test-plan (zaten standard'da)
 ```
 
-Total Full ≈ 35 skill (bazilari ortak).
+Total Full ≈ 24+ dosya (persona ve test-plan Standard'da da oldugu icin bazi ciktilar ortaktir).
 
 ## Bagimlilik Grafigi
 
@@ -93,7 +89,7 @@ Total Full ≈ 35 skill (bazilari ortak).
 14. comm-plan (stakeholder)
 15. test-plan (srs)
 
-(Full paket icin Standard sonrasi: hci-review, heuristic-eval, color-audit, design-thinking, prototype-plan, cognitive-load, usability-eval-plan, iso25010-quality, iso15939-measure, iso29148-req, iso12207-audit, iso29110-vse, sqa-plan, traceability-matrix, inspection, metrics-plan, defect-report, change-control)
+(Full paket icin Standard sonrasi: hci-review, heuristic-eval, color-audit, design-thinking, prototype-plan, cognitive-load, usability-eval-plan, sqa-plan, traceability-matrix, inspection, metrics-plan, defect-report, change-control)
 
 ## Dil Tutarliligi
 
@@ -120,7 +116,7 @@ Tum paket dosyalari ayni dilde. Brief'in dilinden veya `--lang=` argumanindan se
 | TEST_PLAN | ~6 KB |
 | **TOPLAM** | **~70 KB / 15 dosya** |
 
-Full paket: ~150 KB, 28 dosya.
+Full paket: ~130 KB, 24 dosya.
 
 ## Manifest (PACKAGE_*.md) Sablonu
 
@@ -175,7 +171,7 @@ Her doküman kalite kapisindan (`references/quality-gate.md`) gecer ve kurumsal 
 
 ## Paket Gereksinimi
 
-Pipeline farkli paketlerin skill'lerini cagirir; ilgili paketlerin (`feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa`, `feza-iso`, `feza-toolkit`) kurulu olmasi gerekir.
+Pipeline farkli paketlerin skill'lerini cagirir; ilgili paketlerin (`feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa`, `feza-toolkit`) kurulu olmasi gerekir.
 
 ## Anti-Pattern'ler
 

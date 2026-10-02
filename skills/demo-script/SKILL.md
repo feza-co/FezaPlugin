@@ -83,14 +83,12 @@ Paydaş / yatırımcı / müşteri / yönetim kurulu sunum akışı + Q&A.
 - ESTIMATES_*.md → toplam efor
 - ACTIVITIES_*.md → kritik yol
 - RISK_REGISTER_*.md → risk dagilim
-- ISO25010_QUALITY_*.md → kalite skoru
 - METRICS_PLAN_*.md → DRE hedef
 
 ## 6. Standart Uyumu (60 saniye)
 **Soyle:** "Endustri standartlarina uyumlu ilerledik: ISO/IEC/IEEE 29148 SRS, ISO/IEC 25010 9 karakteristik, ISO/IEC/IEEE 12207 process audit, IEEE 1028 inspection."
 
 **Sayfa 6:** Standart listesi + uyum yuzdesi
-**Kanit:** ISO12207_AUDIT_*.md olgunluk yuzdesi
 
 ## 7. Validation / Test (60 saniye)
 **Soyle:** "X test case, %78 unit coverage, %89 DRE, 12 kritik bulgu inspection ile yakalandi."

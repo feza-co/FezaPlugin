@@ -40,7 +40,7 @@ Varsayılan teslim formatında üst bilgi alanları **kapak sayfasındaki tabloy
 > Standart/Kaynak: <ilgili standart, ör. ISO/IEC/IEEE 29148:2018>
 ```
 
-`<paket>` ad alanları: `feza-requirements`, `feza-pm`, `feza-iso`, `feza-hci`, `feza-sqa`, `feza-toolkit` (ör. `/feza-requirements:srs-generate`, `/feza-pm:wbs`).
+`<paket>` ad alanları: `feza-requirements`, `feza-pm`, `feza-hci`, `feza-sqa`, `feza-toolkit` (ör. `/feza-requirements:srs-generate`, `/feza-pm:wbs`).
 
 ## Teslim Formatı
 

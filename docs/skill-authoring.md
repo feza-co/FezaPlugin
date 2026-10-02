@@ -82,7 +82,7 @@ Every skill that writes a document must include this flow before its write step:
 ```
 
 Existing skills contain the Turkish wording of this section; copy it from a skill in the same
-package and name the criteria set after the package (feza-requirements, feza-pm, feza-iso, feza-hci, feza-sqa,
+package and name the criteria set after the package (feza-requirements, feza-pm, feza-hci, feza-sqa,
 or "Bütünleşik paket raporu" for integrated package reports). Conversational skills that do not write files, such as `help` and
 `conflict-resolve`, do not need it.
 

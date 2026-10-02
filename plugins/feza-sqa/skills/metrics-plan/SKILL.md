@@ -22,10 +22,9 @@ Inspection ve test surecini 3 asamada (oncesi / sirasi / sonrasi) olcen SQA metr
 
 ## Adim 0 — Bagilami Topla
 1. **`SQA_PLAN_*.md`** (varsa) — quality goal'a metrik baglar
-2. **`MEASUREMENT_PLAN_*.md`** (varsa — 15939) — 25010 metric setiyle entegre
-3. **`SRS_*.md`** — KLOC tahmini icin
-4. **`ESTIMATES_*.md`** (varsa) — effort tahmini icin
-5. Yoksa **TEK** soru: "Proje boyutu kabaca? (KLOC veya feature sayisi)"
+2. **`SRS_*.md`** — KLOC tahmini icin
+3. **`ESTIMATES_*.md`** (varsa) — effort tahmini icin
+4. Yoksa **TEK** soru: "Proje boyutu kabaca? (KLOC veya feature sayisi)"
 
 ## Adim 1 — Gri Nokta (max 2)
 
@@ -176,12 +175,12 @@ Onerilen gorsel:
 - Severity dagilimi (pie)
 - Phase bazli defect cost
 
-### Bolum 8 — 15939 Entegrasyon
+### Bolum 8 — 15939 Uyumu
 
-Bu metric set'i `MEASUREMENT_PLAN_*.md` (ISO/IEC/IEEE 15939 measurement construct yapisi) ile entegre olabilir:
-- 15939 plani: bilgi ihtiyaci → measurement construct (urun, surec ve proje kavramlari)
-- Bu plan: SQA process odakli
-- Ikisi farkli kaplar — birlikte calistirilir
+Bu metrik set'i ISO/IEC/IEEE 15939 measurement construct yapisiyla hizalanir:
+- Bilgi ihtiyaci → measurement construct (urun, surec ve proje kavramlari)
+- Bu plan: SQA process odakli bir uygulama
+- Her metrige sayisal hedef ve toplama yontemi baglanir
 
 ## Adim 4 — Self-Check
 - [ ] 3 grup metrik (Pre/In/End) tam mi?
@@ -190,7 +189,7 @@ Bu metric set'i `MEASUREMENT_PLAN_*.md` (ISO/IEC/IEEE 15939 measurement construc
 - [ ] Historical data ornegi var mi?
 - [ ] Bu proje icin sayisal hedefler var mi?
 - [ ] Toplama plani (kim/ne sıklıkta) var mi?
-- [ ] 15939 ile farkı belirtildi mi?
+- [ ] 15939 uyumu belirtildi mi?
 
 ## Kalite Kapısı ve Teslim Formatı (yazmadan önce)
 

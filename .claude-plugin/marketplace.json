@@ -5,7 +5,7 @@
     "url": "https://github.com/feza-co"
   },
   "metadata": {
-    "description": "FezaPlugin: 45 documentation and design skills for software teams across requirements, project management, ISO compliance, HCI/UX, software quality assurance and a cross-package toolkit."
+    "description": "FezaPlugin: 40 documentation and design skills for software teams across requirements, project management, HCI/UX, software quality assurance and a cross-package toolkit."
   },
   "plugins": [
     {
@@ -39,23 +39,6 @@
         "pmbok"
       ],
       "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-pm",
-      "license": "MIT"
-    },
-    {
-      "name": "feza-iso",
-      "source": "./plugins/feza-iso",
-      "description": "ISO/IEC standards skills: 12207 process audit, 29110 VSE profile, 25010 product quality, 15939 measurement plan, 29148 layered requirements and complaint-to-process mapping.",
-      "category": "productivity",
-      "keywords": [
-        "iso",
-        "iso-12207",
-        "iso-25010",
-        "iso-29110",
-        "iso-15939",
-        "iso-29148",
-        "compliance"
-      ],
-      "homepage": "https://github.com/feza-co/FezaPlugin/tree/main/plugins/feza-iso",
       "license": "MIT"
     },
     {
@@ -95,7 +78,7 @@
     {
       "name": "feza-toolkit",
       "source": "./plugins/feza-toolkit",
-      "description": "Cross-package utilities: skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
+      "description": "Cross-package utilities: brief clarification interview, skill menu, lifecycle model selection, full documentation package orchestration, demo script and bilingual glossary. full-package requires all FezaPlugin packages.",
       "category": "productivity",
       "keywords": [
         "toolkit",
