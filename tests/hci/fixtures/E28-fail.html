@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>E28 FAIL — bozuk başlık/bölge yapısı</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1.5; color: #1B2430; background: #FFFFFF; }
+  .wrap { max-width: 100%; padding: 16px; }
+  h1, h2, h4 { margin: 8px 0; }
+  .btn { min-width: 44px; min-height: 44px; padding: 8px 16px; margin: 4px; background: #1D5FD1; color: #FFFFFF; border: 1px solid transparent; border-radius: 8px; font: inherit; }
+  :focus-visible { outline: 3px solid #1D5FD1; outline-offset: 2px; }
+</style>
+</head>
+<body>
+<!-- main landmark yok; iki h1 var; h2'den h4'e seviye atlaması; adsız düğme. -->
+<div class="wrap">
+  <h1>Ürünler</h1>
+  <h1>Fiyatlar</h1>
+  <h2>Kategoriler</h2>
+  <h4>Alt kategori</h4>
+  <p>Sayfada main bölgesi yok ve başlık hiyerarşisi bozuk; aşağıdaki düğmenin erişilebilir adı da yok.</p>
+  <button class="btn" type="button"></button>
+</div>
+</body>
+</html>

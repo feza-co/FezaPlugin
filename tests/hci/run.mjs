@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * run.mjs — Faz 2/4 fixture koşucusu.
+ * run.mjs — fixture koşucusu.
  *
  * Her fixture'ı `verify-ui.mjs` ile çalıştırır, beklenen çıkış kodunu,
  * `ok:false` olan E kodlarını ve (beklenti verilmişse) `ok:null` kodlarını
@@ -75,7 +75,9 @@ function parseArgs(argv) {
   return args;
 }
 
-// expected.json: { "static": [...], "<dosya>.html" | "static/<ad>": { "exit", "fail", "null"?, "mode"?, "note"? } }
+// expected.json: { "static": [...], "<dosya>.html" | "static/<ad>": { "exit", "fail", "null"?, "mode"?, "note"?, "args"? } }
+// İsteğe bağlı "fixture" alanı olan girdiler, aynı dosyayı farklı bayraklarla
+// çalıştıran "takma ad" koşullarıdır (1:1 dosya tutarlılık kontrolüne girmez).
 function isFixtureEntry(value) {
   return value && typeof value === 'object' && !Array.isArray(value) && 'exit' in value;
 }
@@ -83,6 +85,11 @@ function isFixtureEntry(value) {
 // Girdi anahtarı "static/<ad>" biçimindeyse ya da mode:"static" ise statik koşulur.
 function isStaticEntry(key, value) {
   return value.mode === 'static' || key.startsWith('static/');
+}
+
+// Takma ad girdisi: dosya adını `fixture` alanından alır; anahtar etiket olur.
+function entryFile(key, value) {
+  return value.fixture || key;
 }
 
 function loadExpected(file) {
@@ -106,12 +113,12 @@ function matchesOnly(file, only) {
   }
 }
 
-function runVerify(target, isStatic) {
+function runVerify(target, isStatic, extraArgs) {
   return new Promise((resolve) => {
     const outDir = fs.mkdtempSync(path.join(os.tmpdir(), 'feza-hci-fixture-'));
     const args = isStatic
-      ? [VERIFY_UI, '--static', target, '--json', '--out', outDir]
-      : [VERIFY_UI, target, '--json', '--out', outDir];
+      ? [VERIFY_UI, '--static', target, '--json', '--out', outDir, ...(extraArgs || [])]
+      : [VERIFY_UI, target, '--json', '--out', outDir, ...(extraArgs || [])];
     const child = execFile(
       process.execPath,
       args,
@@ -211,8 +218,11 @@ async function main() {
   const expectedFiles = new Set();
   const expectedStatic = new Set();
   for (const e of entries) {
-    if (isStaticEntry(e.file, e.expect)) expectedStatic.add(e.file);
-    else expectedFiles.add(e.file);
+    // Takma ad girdilerinin dosyası `fixture` alanından gelir; dosya kümesini
+    // gerçek dosya adıyla besler.
+    const target = entryFile(e.file, e.expect);
+    if (isStaticEntry(target, e.expect)) expectedStatic.add(target);
+    else expectedFiles.add(target);
   }
   for (const f of expectedFiles) {
     if (!presentFiles.has(f)) errors.push('Beklentide var, dosyası yok: ' + f);
@@ -246,11 +256,12 @@ async function main() {
       const i = cursor++;
       if (i >= selected.length) return;
       const entry = selected[i];
-      const isStatic = isStaticEntry(entry.file, entry.expect);
+      const file = entryFile(entry.file, entry.expect);
+      const isStatic = isStaticEntry(file, entry.expect);
       const target = isStatic
-        ? path.join(FIXTURES_DIR, 'static', entry.file.slice('static/'.length))
-        : path.join(FIXTURES_DIR, entry.file);
-      const outcome = await runVerify(target, isStatic);
+        ? path.join(FIXTURES_DIR, 'static', file.slice('static/'.length))
+        : path.join(FIXTURES_DIR, file);
+      const outcome = await runVerify(target, isStatic, entry.expect.args);
       if (outcome.exit === 2) sawToolMissing = true;
       const fails = actualFails(outcome.report);
       const nulls = actualNulls(outcome.report);

@@ -1,4 +1,4 @@
-# DTCG token kabul testi (Faz 7)
+# DTCG token kabul testi
 
 `plugins/feza-hci/skills/hci-execute/scripts/contrast.py` betiğinin DTCG
 (Design Tokens Community Group, Format Module 2025.10) token dosyası desteğini

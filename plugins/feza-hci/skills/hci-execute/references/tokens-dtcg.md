@@ -1,7 +1,7 @@
 # DTCG Tasarım Token'ları — Ayrıntılı Notlar
 
-Bu dosya `references/design-system-rules.md` §9'un ayrıntı ekidir. §1 token mimarisi
-ve §9'daki biçim kuralları esastır; burada yalnız dönüştürme akışı, araç sürümleri ve
+Bu dosya `references/design-system-rules.md` §12'nin ayrıntı ekidir. §1 token mimarisi
+ve §12'deki biçim kuralları esastır; burada yalnız dönüştürme akışı, araç sürümleri ve
 sık yapılan hatalar yer alır.
 
 Standart: **Design Tokens Community Group Format Module 2025.10** "first stable

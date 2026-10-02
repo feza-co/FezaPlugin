@@ -258,13 +258,13 @@ parallax üreten scroll dinleyicileri de tercih kontrolüyle kapatılmalıdır (
 | Bilişsel test yasağı (E17) | Kullanıcıdan parolayı ezberleyip yazmasını gerektiren bilişsel test yok (ör. hesaplama); kimlik bilgisi girişi ya da yapıştırma serbest |
 | Sürükleme alternatifi (E18, SC 2.5.7) | Sürükle-bırak ile yapılan her işlem (sıralama, taşıma, kaydırıcı) için tek işaretçi alternatifi sunulur: ok tuşlarıyla taşıma ya da "yukarı/aşağı taşı" düğmeleri. `draggable` öğelerine klavye erişimi de sağlanır |
 
-## 9. Tasarım Token'ları (DTCG)
+## 12. Tasarım Token'ları (DTCG)
 
 Bu bölüm §1'deki token mimarisinin makine okunabilir karşılığını tanımlar; §1'deki katman/rol kuralları geçerlidir.
 
 Kanıtlanmış standart: **Design Tokens Community Group Format Module 2025.10** "first stable version" (designtokens.org, 2025-10). Dönüştürme aracı olarak Style Dictionary **5.3+** DTCG 2025.10'u destekler (doğrulanmış sürüm bilgisi; daha eski sürümlerde bu biçim desteklenmez).
 
-### 9.1 İsteğe bağlı `tokens.tokens.json` çıktısı
+### 12.1 İsteğe bağlı `tokens.tokens.json` çıktısı
 
 Varsayılan teslimde token kaynağı `styles/tokens.css`'tir (§1). İstenirse **aynı değerleri taşıyan** bir DTCG dosyası da üretilir:
 
@@ -272,7 +272,7 @@ Varsayılan teslimde token kaynağı `styles/tokens.css`'tir (§1). İstenirse *
 - `tokens.css` ile değerler **birebir aynı** olmalı; biri değişirse ikisi birlikte güncellenir.
 - Zorunlu değil; üretildiyse `DESIGN_RATIONALE_<proje>.md` §4 token tablosunda belirtilir.
 
-### 9.2 Biçim kuralları
+### 12.2 Biçim kuralları
 
 | Öğe | Kural |
 |-----|-------|
@@ -295,7 +295,7 @@ Varsayılan teslimde token kaynağı `styles/tokens.css`'tir (§1). İstenirse *
 }
 ```
 
-### 9.3 Desteklenen alt küme
+### 12.3 Desteklenen alt küme
 
 | Tür | Durum |
 |-----|-------|
@@ -305,7 +305,7 @@ Varsayılan teslimde token kaynağı `styles/tokens.css`'tir (§1). İstenirse *
 
 `color` dışı türler kontrast hesabına girmez; `contrast.py --tokens` yalnız renk token'larını çiftlere çözer.
 
-### 9.4 Kontrast doğrulaması
+### 12.4 Kontrast doğrulaması
 
 ```bash
 # DTCG dosyasından çözerek (tek tema)
@@ -317,15 +317,15 @@ python scripts/contrast.py --tokens light.tokens.json --tokens-dark dark.tokens.
 
 `pairs.json` içinde `fg`/`bg` için `{color.text}`, `color.text` ya da `--color-text` biçimleri kabul edilir. Alias zinciri döngüsüz çözülür; döngü ya da derinlik aşımında betik çıkış kodu 2 ile anlaşılır hata verir. Renk değerleri `contrast.py --css` ile aynı oranları vermelidir (bkz. `tests/hci/tokens/`).
 
-### 9.5 Style Dictionary ile dönüştürme (doğrulanmış sürümler)
+### 12.5 Style Dictionary ile dönüştürme (doğrulanmış sürümler)
 
 Style Dictionary **5.3+** DTCG 2025.10 biçimini okuyup platform çıktısına (CSS değişkenleri, JS/TS nesnesi) dönüştürebilir. Bu, `tokens.css` ile DTCG dosyasının tek kaynaktan üretilmesini sağlar. Ayrıntı ve alternatif akış: `references/tokens-dtcg.md`.
 
-## 10. Tasarım Dili: Hareket, Köşe, Container Queries
+## 13. Tasarım Dili: Hareket, Köşe, Container Queries
 
 Bu bölüm §5 (biçim) ve §6 (hareket) kurallarını genişletir; çelişki olursa §5-§6 esastır.
 
-### 10.1 Hareket token'ları
+### 13.1 Hareket token'ları
 
 | Kategori | Süre | Kullanım |
 |----------|------|----------|
@@ -336,7 +336,7 @@ Bu bölüm §5 (biçim) ve §6 (hareket) kurallarını genişletir; çelişki ol
 - Hareket amacı yalnız durum değişimini ve uzamsal ilişkiyi anlatmaktır; dekoratif/parallax hareket yasaktır (E12, SC 2.3.3).
 - Örnek token'lar: `duration.functional-fast: 150ms`, `duration.functional: 250ms`, `duration.expressive: 400ms`; eğri `cubicBezier.ease-out: [0, 0, 0.2, 1]`.
 
-### 10.2 Köşe yarıçapı ölçeği (5 kademe)
+### 13.2 Köşe yarıçapı ölçeği (5 kademe)
 
 | Token | Değer | Tipik kullanım |
 |-------|-------|----------------|
@@ -346,9 +346,9 @@ Bu bölüm §5 (biçim) ve §6 (hareket) kurallarını genişletir; çelişki ol
 | `--radius-4` | 16 px | Diyalog, alt sayfa, büyük yüzey |
 | `--radius-5` | 24 px | Kahraman bölüm, tam yuvarlak kapsayıcı |
 
-Kademe **amaca göre** seçilir; tüm yüzeyler aynı yarıçapı almaz (bkz. §10.4 "şablon izleri"). §5'teki `--radius-sm/md/lg` bu ölçeğe karşılık gelir (sm=1, md=2, lg=4).
+Kademe **amaca göre** seçilir; tüm yüzeyler aynı yarıçapı almaz (bkz. §13.4 "şablon izleri"). §5'teki `--radius-sm/md/lg` bu ölçeğe karşılık gelir (sm=1, md=2, lg=4).
 
-### 10.3 Container queries (kart ve tablo)
+### 13.3 Container queries (kart ve tablo)
 
 Bileşen, görünümünü **kendi kapsayıcısının** genişliğine göre uyarlar; pencere genişliğine göre değil. Bu, aynı kart/tablo bileşeninin dar sütunda ve geniş alanda doğru davranmasını sağlar.
 
@@ -372,13 +372,13 @@ Bileşen, görünümünü **kendi kapsayıcısının** genişliğine göre uyarl
 - Container query desteklenmiyorsa makul bir tek sütun/akış yedeği bırak (progressive enhancement).
 - Kırılımlar (§4) sayfa düzeyi; container query bileşen düzeyidir — ikisi birlikte kullanılır.
 
-### 10.4 "Şablon izleri" öz-denetimi
+### 13.4 "Şablon izleri" öz-denetimi
 
 Aşağıdakilerden biri varsa tasarım **kalıplaşmış** demektir; gerekçesiz tekrar düzeltilir (Self-Check maddesi):
 
 - [ ] Her bölümde **aynı gölge** ve aynı yüzey kullanılmış mı? (Yükseklik hiyerarşisi yoksa düzleştirilmiş demektir.)
 - [ ] Her başlığın üstünde **büyük harfli küçük etiket** (eyebrow/overline) var mı? (Her yerde tekrarı şablon izidir.)
-- [ ] Tüm köşeler **tekdüze yarıçap** mı? (§10.2 kademeleri amaca göre kullanılmalı.)
+- [ ] Tüm köşeler **tekdüze yarıçap** mı? (§13.2 kademeleri amaca göre kullanılmalı.)
 - [ ] Her bölüm **ortalanmış** mı? (Hizalama bilgi hiyerarşisi taşımalı.)
 - [ ] Aynı **ikon-başlık-metin kart üçlüsü** tekrar tekrar mı? (İçerik türü farklıysa sunum da farklılaşmalı.)
 - [ ] Aynı **dekoratif vurgu** (aynı renk bloğu/çizgi/parıltı) her bölümde mi?
@@ -387,14 +387,14 @@ Aşağıdakilerden biri varsa tasarım **kalıplaşmış** demektir; gerekçesiz
 
 Bir öğe birden çok bölümde tekrarlanıyorsa gerekçesi `DESIGN_RATIONALE_<proje>.md` §5 tasarım kararları tablosuna yazılır.
 
-## 11. ARIA 1.3 Notları
+## 14. ARIA 1.3 Notları
 
 Bölüm ARIA 1.3 Working Draft'a (W3C WD, 04 June 2026 — https://www.w3.org/TR/wai-aria-1.3/)
 dayanır. Bu maddeler **ek/tavsiye** niteliğindedir; WCAG 2.2 A/AA gereksinimlerinin yerine
 geçmez. ARIA 1.3 henüz Working Draft olduğundan tarayıcı/AT desteği değişkendir: kritik
 işlevselliği ARIA 1.3'e tek başına bağlama, işlevsiz bir yedek bırak.
 
-### 11.1 Belge kökünde `aria-hidden` yasağı
+### 14.1 Belge kökünde `aria-hidden` yasağı
 
 ARIA 1.3, `aria-hidden="true"`ın **belge kök öğelerinde** (ör. `html`, `body`) kullanılmasını
 engeller (değişiklik kaydı: "prevent use of aria-hidden=true on document root elements").
@@ -411,7 +411,7 @@ Kök öğeyi gizlemek tüm erişilebilirlik ağacını bozar. Bunun yerine gizle
 - Modal/dialog açıkken arka planı gizlemek için kökü değil, uygulama kapsayıcısını hedefle.
 - `aria-hidden="true"` taşıyan öğe odaklanabilir içermemelidir (aksi hâlde `inert` kullan).
 
-### 11.2 `role="tooltip"` adlandırılamaz
+### 14.2 `role="tooltip"` adlandırılamaz
 
 ARIA 1.3'te `tooltip`, **"Name prohibited"** roller listesine eklendi (değişiklik kaydı:
 "Change tooltip to name prohibited"; §5.2.8.3). Yani `tooltip` rolü `aria-label` /
@@ -429,7 +429,7 @@ ARIA 1.3'te `tooltip`, **"Name prohibited"** roller listesine eklendi (değişik
 - Tooltip'i tetikleyiciyle `aria-describedby` ile bağla; erişilebilir adı tetikleyici taşır.
 - Tooltip gecikmesi ARIA 1.3'e göre 1–5 saniyedir; kalıcı gecikme ekleme.
 
-### 11.3 `ariaNotify()`
+### 14.3 `ariaNotify()`
 
 ARIA 1.3, canlı bölge (`aria-live`) yönetimine alternatif programatik duyuru API'si ekler:
 `ARIANotifyMixin` (`ariaNotify(announcement, options)`), `Element` ve `Document` üzerinde

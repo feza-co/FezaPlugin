@@ -62,8 +62,8 @@
   },
   "E8-fail.html": {
     "exit": 1,
-    "fail": ["E1", "E8"],
-    "note": "Etiketsiz alan axe 'label' (serious) tetiklediği için E1 de düşer (bilinçli çakışma)."
+    "fail": ["E1", "E8", "E28"],
+    "note": "Etiketsiz alan axe 'label' (serious) tetiklediği için E1 de düşer; erişilebilir adı olmadığından E28 (adı boş etkileşimli öğe) de düşer (bilinçli çakışma)."
   },
   "E8-pass.html": {
     "exit": 0,
@@ -127,13 +127,13 @@
   "E18-fail.html": {
     "exit": 0,
     "fail": [],
-    "null": ["E9", "E10", "E11", "E17", "E18", "E19", "E20", "E22", "E23", "E26", "E27", "E28", "E29"],
+    "null": ["E9", "E10", "E11", "E17", "E18", "E19", "E20", "E22", "E23", "E26", "E27", "E29"],
     "note": "Sürükleme adayı bulunduğu için E18 ok:null (karma; tek-işaretçi alternatifi elle doğrulanır) ve çıkış kodunu bozmaz. null beklentisi tam kümedir (her zaman ok:null dönen statik/ölçülemeyen kodlar dahil)."
   },
   "E18-pass.html": {
     "exit": 0,
     "fail": [],
-    "null": ["E9", "E10", "E11", "E17", "E19", "E20", "E22", "E23", "E26", "E27", "E28", "E29"]
+    "null": ["E9", "E10", "E11", "E17", "E19", "E20", "E22", "E23", "E26", "E27", "E29"]
   },
   "E21-custom-checkbox-fail.html": {
     "exit": 1,
@@ -244,11 +244,32 @@
   },
   "bad.html": {
     "exit": 1,
-    "fail": ["E1", "E2", "E3", "E4", "E15", "E5", "E8"],
-    "note": "Kasıtlı çoklu ihlal sayfası (E2/E3/E4/E5/E8 ve bunlardan doğan E1/E15)."
+    "fail": ["E1", "E2", "E3", "E4", "E15", "E5", "E8", "E28"],
+    "note": "Kasıtlı çoklu ihlal sayfası (E2/E3/E4/E5/E8 ve bunlardan doğan E1/E15); adı boş etkileşimli öğe nedeniyle E28 de düşer."
+  },
+  "E28-fail.html": {
+    "exit": 1,
+    "fail": ["E1", "E28"],
+    "note": "İki h1 + h2→h4 atlaması + main yok + adsız düğme; adsız düğme axe 'button-name' (serious) tetiklediği için E1 de düşer."
+  },
+  "E28-dialog-pass.html": {
+    "exit": 0,
+    "fail": [],
+    "note": "Sayfa h1 + main; açık <dialog open> kendi h1/h3 hiyerarşisine sahip. Dialog alt ağacı sayfa h1 sayımına ve seviye-atlama kontrolüne katılmamalı."
+  },
+  "E28-pass.html": {
+    "exit": 0,
+    "fail": []
   },
   "good.html": {
     "exit": 0,
     "fail": []
+  },
+  "good.html --profile en301549": {
+    "fixture": "good.html",
+    "args": ["--profile", "en301549"],
+    "exit": 0,
+    "fail": [],
+    "note": "Uyum profili: axe EN-301-549 etiketiyle de sıfır ihlal. Kurulu axe sürümünde etiket yoksa profil wcag22aa'ya düşer; bu durumda da ihlal sayısı değişmez."
   }
 }

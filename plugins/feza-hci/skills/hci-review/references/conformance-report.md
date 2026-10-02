@@ -30,10 +30,12 @@ kriter tabloları) uyumlu bölümler kullanır; VPAT belgesinin kendisi kopyalan
 | Erişilebilirlik ağacı | `ariaSnapshot()` | E28 (tek `h1`, `main`, başlık atlaması, ad) | Ad kalitesini değil varlığını ölçer |
 | Manuel testler | — | Kriter tablosunda "manuel" işaretli satırlar | Değerlendiren kişinin deneyimine bağlı |
 
-`--profile en301549`: axe `runOnly` etiketlerine `EN-301-549` eklenir. Kurulu axe sürümünde bu
-etiket yoksa (4.8.0 öncesi) profil `wcag22aa`ya düşer ve bu durum raporlanır. `report.json`
-`profile` alanı kullanılan profili taşır. `--aria-baseline <dosya>` verilirse E28 snapshot'ının
-önceki tabana göre farkı raporlanır.
+`--profile en301549`: axe `runOnly` etiketleri `EN-301-549` ile sınırlanır (best-practice kuralları
+dahil edilmez). Kurulu axe sürümünde bu etiket yoksa (4.8.0 öncesi) profil `wcag22aa`ya düşer ve
+bu durum raporlanır. `report.json` `profile: {requested, applied, fallbackReason}` alanı istenen
+profili, uygulanan profili ve varsa düşme gerekçesini; `axeVersion` alanı kurulu axe-core sürümünü
+taşır. `--aria-baseline <dosya>` verilirse E28 snapshot'ının önceki tabana göre satır farkı
+(`report.json.ariaDiff`; bilgi amaçlı, çıkış kodunu bozmaz) raporlanır.
 
 Kanıt yolları: her satırın "Kanıt" sütunu ya bir `E<kod>` sonucuna (ör. `report.json → results.E2`),
 ya `report.json` dosya yoluna, ya da "manuel" etiketli gözleme işaret eder. Bir SC ancak **o SC'ye

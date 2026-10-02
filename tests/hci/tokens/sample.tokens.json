@@ -1,5 +1,5 @@
 {
-  "$description": "Faz 7 kabul testi için örnek DTCG token dosyası (2025.10).",
+  "$description": "Örnek DTCG token dosyası (2025.10) — sample.css ile aynı değerler.",
   "color": {
     "$type": "color",
     "$description": "Anlamsal renk rolleri; bileşenler yalnız bunları kullanır.",

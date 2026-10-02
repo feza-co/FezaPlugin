@@ -69,7 +69,10 @@ const THRESHOLDS = {
 };
 // THRESHOLDS-END
 
+// Uyum profilleri: axe `runOnly` etiketleri. wcag22aa varsayılandır.
 const AXE_TAGS = ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'wcag22aa'];
+const AXE_TAGS_EN301549 = ['EN-301-549'];
+const PROFILES = ['wcag22aa', 'en301549'];
 const VIEWPORTS = [320, 390, 768, 1280];
 const INTERACTIVE_SELECTOR =
   'a[href], button, input:not([type=hidden]), select, textarea, summary, ' +
@@ -137,6 +140,36 @@ function npmBin() {
   return process.platform === 'win32' ? 'npm.cmd' : 'npm';
 }
 
+// Önbelleğe tüm temel + istenen ek paketleri kurar. npm tek seferde kurulan
+// paket listesini `--no-save` ile budadığı için ekler her zaman temel paketlerle
+// birlikte kurulur.
+const BASE_DEPS = ['playwright', '@axe-core/playwright'];
+const OPTIONAL_DEPS = {
+  ibm: ['accessibility-checker-engine'],
+  visual: ['pixelmatch', 'pngjs'],
+};
+
+function installDeps(optionalKeys, dir) {
+  const packages = [...BASE_DEPS];
+  for (const key of optionalKeys) {
+    for (const p of OPTIONAL_DEPS[key] || []) {
+      if (!packages.includes(p)) packages.push(p);
+    }
+  }
+  const pkgJson = path.join(dir, 'package.json');
+  if (!fs.existsSync(pkgJson)) {
+    fs.writeFileSync(
+      pkgJson,
+      JSON.stringify({ name: 'feza-ui-check-deps', private: true }, null, 2)
+    );
+  }
+  runBin(npmBin(), ['install', '--prefix', dir, '--no-save', '--silent', ...packages], {
+    cwd: dir,
+    stdio: 'inherit',
+    timeout: 590000,
+  });
+}
+
 function npxBin() {
   return process.platform === 'win32' ? 'npx.cmd' : 'npx';
 }
@@ -166,18 +199,59 @@ function tryResolveFromCache() {
     const require = createRequire(pkgJson);
     const pwEntry = require.resolve('playwright');
     const axeEntry = require.resolve('@axe-core/playwright');
-    return { pwEntry, axeEntry, pkgJson, dir };
+    let axeCoreEntry = null;
+    try {
+      axeCoreEntry = require.resolve('axe-core');
+    } catch {
+      /* axe-core doğrudan yoksa sürüm bilgisi atlanır */
+    }
+    return { pwEntry, axeEntry, axeCoreEntry, pkgJson, dir };
   } catch {
     return null;
   }
 }
 
-async function loadDeps() {
+function loadAxeCore(entry) {
+  if (!entry) return null;
+  try {
+    const mod = createRequire(entry)(entry);
+    return mod && mod.default ? mod.default : mod;
+  } catch {
+    return null;
+  }
+}
+
+async function loadOptionalDep(name) {
+  // Önbellekten piksel karşılaştırma bağımlılıklarını çözmeyi dener; yoksa kurmaz.
+  const dir = cacheDir();
+  const pkgJson = path.join(dir, 'package.json');
+  if (fs.existsSync(pkgJson)) {
+    try {
+      const require = createRequire(pkgJson);
+      return await import(pathToFileURL(require.resolve(name)).href);
+    } catch {
+      /* doğrudan çözmeyi dene */
+    }
+  }
+  try {
+    return await import(name);
+  } catch {
+    return null;
+  }
+}
+
+async function loadDeps(optionalKeys = []) {
   // 1) Doğrudan çözülmeyi dene.
   try {
     const pw = await import('playwright');
     const axeMod = await import('@axe-core/playwright');
-    return { playwright: pw, AxeBuilder: pickAxe(axeMod) };
+    let axeCore = null;
+    try {
+      axeCore = (await import('axe-core')).default;
+    } catch {
+      /* sürüm bilgisi atlanır */
+    }
+    return { playwright: pw, AxeBuilder: pickAxe(axeMod), axeCore };
   } catch {
     /* önbellek yoluna geç */
   }
@@ -189,7 +263,8 @@ async function loadDeps() {
   if (cached) {
     const pw = await import(pathToFileURL(cached.pwEntry).href);
     const axeMod = await import(pathToFileURL(cached.axeEntry).href);
-    return { playwright: pw, AxeBuilder: pickAxe(axeMod) };
+    const axeCore = loadAxeCore(cached.axeCoreEntry);
+    return { playwright: pw, AxeBuilder: pickAxe(axeMod), axeCore };
   }
 
   if (noInstall) {
@@ -200,44 +275,85 @@ async function loadDeps() {
 
   const dir = cacheDir();
   fs.mkdirSync(dir, { recursive: true });
-  const pkgJson = path.join(dir, 'package.json');
-  if (!fs.existsSync(pkgJson)) {
-    fs.writeFileSync(
-      pkgJson,
-      JSON.stringify({ name: 'feza-ui-check-deps', private: true }, null, 2)
-    );
-  }
 
   try {
-    runBin(
-      npmBin(),
-      [
-        'install',
-        '--prefix',
-        dir,
-        '--no-save',
-        '--silent',
-        'playwright',
-        '@axe-core/playwright',
-      ],
-      { cwd: dir, stdio: 'inherit', timeout: 590000 }
-    );
+    installDeps(optionalKeys, dir);
   } catch (err) {
     throw new ToolMissingError('npm install başarısız: ' + (err.message || err));
   }
 
+  const pkgJson = path.join(dir, 'package.json');
   const require = createRequire(pkgJson);
   let pw;
   let axeMod;
+  let axeCore = null;
   try {
     const pwEntry = require.resolve('playwright');
     const axeEntry = require.resolve('@axe-core/playwright');
     pw = await import(pathToFileURL(pwEntry).href);
     axeMod = await import(pathToFileURL(axeEntry).href);
+    try {
+      axeCore = loadAxeCore(require.resolve('axe-core'));
+    } catch {
+      /* sürüm bilgisi atlanır */
+    }
   } catch (err) {
     throw new ToolMissingError('paketler çözülemedi: ' + (err.message || err));
   }
-  return { playwright: pw, AxeBuilder: pickAxe(axeMod) };
+  return { playwright: pw, AxeBuilder: pickAxe(axeMod), axeCore };
+}
+
+// Profil çözümleme: axe sürümünde EN-301-549 etiketi var mı diye bakılır;
+// yoksa wcag22aa'ya düşülür ve gerekçe rapora yazılır.
+function resolveProfile(requested, axeCore) {
+  const axeVersion = axeCore && axeCore.version ? axeCore.version : null;
+  const hasEnTag = (() => {
+    if (!axeCore || typeof axeCore.getRules !== 'function') return false;
+    try {
+      return axeCore.getRules(AXE_TAGS_EN301549).length > 0;
+    } catch {
+      return false;
+    }
+  })();
+  const enRuleCount = (() => {
+    if (!hasEnTag) return 0;
+    try {
+      return axeCore.getRules(AXE_TAGS_EN301549).length;
+    } catch {
+      return 0;
+    }
+  })();
+
+  if (requested === 'en301549') {
+    if (hasEnTag) {
+      return {
+        requested,
+        applied: 'en301549',
+        tags: AXE_TAGS_EN301549,
+        fallbackReason: null,
+        axeVersion,
+        enRuleCount,
+      };
+    }
+    return {
+      requested,
+      applied: 'wcag22aa',
+      tags: AXE_TAGS,
+      fallbackReason: axeVersion
+        ? 'kurulu axe-core ' + axeVersion + " sürümünde EN-301-549 etiketi yok"
+        : 'axe-core sürümü/etiketi doğrulanamadı',
+      axeVersion,
+      enRuleCount: 0,
+    };
+  }
+  return {
+    requested: 'wcag22aa',
+    applied: 'wcag22aa',
+    tags: AXE_TAGS,
+    fallbackReason: null,
+    axeVersion,
+    enRuleCount,
+  };
 }
 
 async function launchChromium(playwrightMod) {
@@ -345,7 +461,17 @@ function makeOutDir(argOut) {
 }
 
 function parseArgs(argv) {
-  const args = { target: null, out: null, json: false, static: false };
+  const args = {
+    target: null,
+    out: null,
+    json: false,
+    static: false,
+    profile: 'wcag22aa',
+    ariaBaseline: null,
+    engines: ['axe'],
+    visual: null,
+    visualMaxDiff: 100,
+  };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === '--static') {
@@ -356,17 +482,56 @@ function parseArgs(argv) {
       args.out = a.slice('--out='.length);
     } else if (a === '--json') {
       args.json = true;
+    } else if (a === '--profile') {
+      args.profile = argv[++i];
+    } else if (a.startsWith('--profile=')) {
+      args.profile = a.slice('--profile='.length);
+    } else if (a === '--aria-baseline') {
+      args.ariaBaseline = argv[++i];
+    } else if (a.startsWith('--aria-baseline=')) {
+      args.ariaBaseline = a.slice('--aria-baseline='.length);
+    } else if (a === '--engines') {
+      args.engines = String(argv[++i] || '')
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    } else if (a.startsWith('--engines=')) {
+      args.engines = a
+        .slice('--engines='.length)
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
+    } else if (a === '--visual') {
+      args.visual = argv[++i];
+    } else if (a.startsWith('--visual=')) {
+      args.visual = a.slice('--visual='.length);
+    } else if (a === '--visual-max-diff') {
+      args.visualMaxDiff = Number(argv[++i]);
+    } else if (a.startsWith('--visual-max-diff=')) {
+      args.visualMaxDiff = Number(a.slice('--visual-max-diff='.length));
     } else if (a === '--help' || a === '-h') {
       process.stdout.write(
         'Kullanım: node scripts/verify-ui.mjs <URL | yerel.html> [--out DIR] [--json]\n' +
         '        node scripts/verify-ui.mjs --static <dizin> [--out DIR] [--json]\n' +
         '\n' +
-        'E1–E27 kriterlerini otomatik/karma olarak ölçer (E9–E11, E19–E29 statik/\n' +
-        'gelecek faz). --static ile tarayıcı açmadan kaynak taraması yapılır (E23, E24\n' +
-        'fiziksel yön, E26, E27). Sonuçlar report.json -> results.E<kod> altında\n' +
-        '{ ok, value, threshold, method } taşır; method = otomatik | karma | statik.\n' +
-        'ok: null ise ilgili kriter elle doğrulanmalıdır (na gerekçesiyle). Çıkış:\n' +
-        '0 geçti, 1 ihlal, 2 araç yok ya da girdi hatası.\n'
+        'Bayraklar:\n' +
+        '  --profile wcag22aa|en301549  axe etiket profili (varsayılan wcag22aa).\n' +
+        '                               en301549: EN-301-549 etiketi kurulu axe\n' +
+        "                               sürümünde yoksa wcag22aa'ya düşer ve raporlanır.\n" +
+        '  --aria-baseline <dosya>      E28 erişilebilirlik ağacı snapshot tabanı;\n' +
+        '                               yoksa oluşturulur, varsa farkı raporlanır (bilgi).\n' +
+        '  --engines axe,ibm            İkinci motor (IBM Equal Access) yalnız uyarı\n' +
+        '                               katmanı; E1 ve çıkış kodunu etkilemez.\n' +
+        '  --visual <baseline-dizin>    Viewport ekran görüntülerini piksel\n' +
+        '                               karşılaştırmasıyla baseline ile kıyaslar (bilgi).\n' +
+        '  --visual-max-diff N          Piksel fark toleransı (varsayılan 100).\n' +
+        '\n' +
+        'E1–E29 kriterlerini otomatik/karma olarak ölçer. --static ile tarayıcı\n' +
+        'açmadan kaynak taraması yapılır (E23, E24 fiziksel yön, E26, E27). Sonuçlar\n' +
+        'report.json -> results.E<kod> altında { ok, value, threshold, method }\n' +
+        'taşır; method = otomatik | karma | statik. ok: null ise ilgili kriter elle\n' +
+        'doğrulanmalıdır (na gerekçesiyle). Çıkış: 0 geçti, 1 ihlal, 2 araç yok ya da\n' +
+        'girdi hatası.\n'
       );
       process.exit(0);
     } else if (!args.target) {
@@ -380,6 +545,25 @@ function parseArgs(argv) {
       'Hedef gerekli: node scripts/verify-ui.mjs <URL | yerel.html> [--out DIR]'
     );
   }
+  if (!PROFILES.includes(args.profile)) {
+    throw new InputError(
+      'Geçersiz profil: ' + args.profile + ' (geçerli: ' + PROFILES.join('|') + ')'
+    );
+  }
+  if (args.visual !== null && !args.visual) {
+    throw new InputError('--visual için baseline dizini gerekli');
+  }
+  if (!Number.isFinite(args.visualMaxDiff) || args.visualMaxDiff < 0) {
+    throw new InputError('--visual-max-diff negatif olmayan bir sayı olmalı');
+  }
+  const knownEngines = ['axe', 'ibm'];
+  const unknown = args.engines.filter((e) => !knownEngines.includes(e));
+  if (unknown.length > 0) {
+    throw new InputError(
+      'Bilinmeyen motor: ' + unknown.join(',') + ' (geçerli: axe,ibm)'
+    );
+  }
+  if (!args.engines.includes('axe')) args.engines.unshift('axe');
   return args;
 }
 
@@ -1000,8 +1184,10 @@ function summarizeAxeResult(result) {
   return { violations, seriousCritical };
 }
 
-async function runAxe(page, AxeBuilder) {
-  const result = await new AxeBuilder({ page }).withTags(AXE_TAGS).analyze();
+async function runAxe(page, AxeBuilder, tags) {
+  const result = await new AxeBuilder({ page })
+    .withTags(tags || AXE_TAGS)
+    .analyze();
   return summarizeAxeResult(result);
 }
 
@@ -1012,6 +1198,7 @@ async function runAxe(page, AxeBuilder) {
 async function capturePass(context, url, outDir, AxeBuilder, label, opts = {}) {
   const colorScheme = opts.colorScheme || 'light';
   const reducedMotion = opts.reducedMotion || 'no-preference';
+  const axeTags = opts.axeTags || AXE_TAGS;
   const page = await context.newPage();
   const passes = [];
   try {
@@ -1029,7 +1216,7 @@ async function capturePass(context, url, outDir, AxeBuilder, label, opts = {}) {
 
       let axe = { violations: [], seriousCritical: [] };
       try {
-        axe = await runAxe(page, AxeBuilder);
+        axe = await runAxe(page, AxeBuilder, axeTags);
       } catch (err) {
         axe = {
           violations: [],
@@ -1475,7 +1662,14 @@ function forcedColorsBoundaryInPage(selector) {
 
 async function forcedColorsTest(context, url) {
   const page = await context.newPage();
-  const out = { total: 0, boundary: [], focus: [], skipped: [] };
+  const out = {
+    total: 0,
+    boundary: [],
+    focus: [],
+    skipped: [],
+    focusables: 0,
+    focusChecked: [],
+  };
   try {
     await page.goto(url, { waitUntil: 'load', timeout: 60000 });
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -1491,9 +1685,12 @@ async function forcedColorsTest(context, url) {
       .filter((i) => !i.boundary)
       .map((i) => ({ selector: i.selector, reason: 'görünür sınır yok' }));
 
-    // Odak göstergesi: Tab ile gezinirken her odaklanan öğede outline görünür olmalı
-    // (forced-colors box-shadow'u siler).
+    // Odak göstergesi: Tab ile gezinirken HER odaklanan öğede outline görünür
+    // olmalı (forced-colors box-shadow'u siler). Bu döngü, sınır kontrolünden
+    // muaf tutulan yerel checkbox/radio öğelerini de kapsar; yani onlar için
+    // odak göstergesi kontrolü sürer.
     const info = await page.evaluate(tagFocusablesInPage, INTERACTIVE_SELECTOR);
+    out.focusables = info.total;
     await page.evaluate(() => {
       if (document.body) document.body.focus();
     });
@@ -1502,6 +1699,7 @@ async function forcedColorsTest(context, url) {
       await page.keyboard.press('Tab');
       const snap = await page.evaluate(focusSnapshotInPage);
       if (!snap || !snap.focused) break;
+      out.focusChecked.push(snap.descriptor);
       const outlineVisible =
         snap.outlineStyle !== 'none' && parseFloat(snap.outlineWidth || '0') > 0;
       if (!outlineVisible) {
@@ -1877,6 +2075,440 @@ async function motionAuditTest(context, url) {
   } finally {
     await page.close();
   }
+}
+
+// --------------------------------------------------------------------------- #
+// E28 — başlık/bölge yapısı (erişilebilirlik ağacı)
+// --------------------------------------------------------------------------- #
+
+// ariaSnapshot() çıktısını satır bazında yorumlar. Satır biçimi:
+//   - main:
+//     - heading "Başlık" [level=1]
+//     - button "Kaydet"
+//     - link:
+const ARIA_INTERACTIVE_ROLES = [
+  'button', 'link', 'textbox', 'searchbox', 'checkbox', 'radio', 'combobox',
+  'listbox', 'menuitem', 'menuitemcheckbox', 'menuitemradio', 'option',
+  'slider', 'spinbutton', 'switch', 'tab', 'treeitem',
+];
+
+// Diyalog kabukları kendi başlık hiyerarşisine sahiptir; alt ağaçlarındaki
+// başlıklar sayfa h1 sayımına ve seviye-atlama kontrolüne katılmaz.
+const DIALOG_ROLES = ['dialog', 'alertdialog'];
+
+function parseAriaSnapshot(text) {
+  const headings = [];
+  const interactive = [];
+  let mainCount = 0;
+  const lines = String(text || '').split('\n');
+  // Erişilebilirlik ağacı girinti ile iç içe geçer; diyalog alt ağacını
+  // ayırt edebilmek için aktif rol yığınını girintiyle birlikte tutarız.
+  const stack = [];
+  for (const raw of lines) {
+    const indent = (/^(\s*)/.exec(raw)[1] || '').length;
+    const line = raw.replace(/^\s*-\s*/, '');
+    const m = /^([a-zA-Z]+)\b(.*)$/.exec(line);
+    if (!m) continue;
+    const role = m[1].toLowerCase();
+    const rest = m[2] || '';
+    while (stack.length && stack[stack.length - 1].indent >= indent) stack.pop();
+    const inDialog = stack.some((s) => DIALOG_ROLES.includes(s.role));
+    if (role === 'heading') {
+      if (!inDialog) {
+        const lm = /\[level=(\d+)\]/.exec(rest);
+        headings.push({
+          name: /"([^"]*)"/.exec(rest) ? /"([^"]*)"/.exec(rest)[1] : '',
+          level: lm ? Number(lm[1]) : 0,
+        });
+      }
+    } else if (role === 'main') {
+      mainCount++;
+    } else if (ARIA_INTERACTIVE_ROLES.includes(role)) {
+      const named = /"[^"]*"/.test(rest);
+      if (!named) {
+        interactive.push({ role, line: raw.trim() });
+      }
+    }
+    stack.push({ indent, role });
+  }
+  return { headings, interactive, mainCount };
+}
+
+function analyzeAriaStructure(text) {
+  const parsed = parseAriaSnapshot(text);
+  const violations = [];
+  const h1s = parsed.headings.filter((h) => h.level === 1);
+  if (h1s.length !== 1) {
+    violations.push({
+      kind: 'h1-count',
+      detail: 'tam olarak bir h1 beklenirken ' + h1s.length + ' bulundu',
+    });
+  }
+  let prev = 0;
+  for (const h of parsed.headings) {
+    if (h.level > prev + 1 && h.level > 0) {
+      violations.push({
+        kind: 'heading-skip',
+        detail:
+          'başlık seviyesi atlaması: h' + prev + " → h" + h.level +
+          (h.name ? ' ("' + h.name + '")' : ''),
+      });
+    }
+    prev = h.level;
+  }
+  if (parsed.mainCount < 1) {
+    violations.push({ kind: 'main-missing', detail: 'main landmark bulunamadı' });
+  } else if (parsed.mainCount > 1) {
+    violations.push({
+      kind: 'main-duplicate',
+      detail: parsed.mainCount + ' main landmark bulundu (bir beklenir)',
+    });
+  }
+  for (const item of parsed.interactive) {
+    violations.push({
+      kind: 'unnamed-interactive',
+      detail: 'adı boş etkileşimli öğe: ' + item.role + ' (' + item.line + ')',
+    });
+  }
+  return { violations, parsed };
+}
+
+async function ariaSnapshotTest(context, url) {
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+    let text = null;
+    let method = null;
+    try {
+      if (
+        page.locator &&
+        typeof page.locator === 'function' &&
+        typeof page.locator('body').ariaSnapshot === 'function'
+      ) {
+        text = await page.locator('body').ariaSnapshot();
+        method = 'ariaSnapshot';
+      }
+    } catch {
+      text = null;
+    }
+    // Yedek yol yok: page.accessibility.snapshot() çıktısı ayrıştırılamadığı
+    // için E28 sessizce geçmemeli; ariaSnapshot API yoksa ok:null döneriz.
+    return { available: text !== null, snapshot: text, method };
+  } finally {
+    await page.close();
+  }
+}
+
+// --aria-baseline: dosya yoksa oluştur, varsa satır farkı çıkar.
+function computeAriaBaseline(snapshotText, baselinePath) {
+  const result = { path: baselinePath, status: 'none', added: [], removed: [] };
+  try {
+    if (!fs.existsSync(baselinePath)) {
+      fs.mkdirSync(path.dirname(path.resolve(baselinePath)), { recursive: true });
+      fs.writeFileSync(baselinePath, snapshotText);
+      result.status = 'baseline-created';
+      return result;
+    }
+    const prev = fs.readFileSync(baselinePath, 'utf8');
+    if (prev === snapshotText) {
+      result.status = 'no-change';
+      return result;
+    }
+    const prevLines = prev.split('\n');
+    const nextLines = snapshotText.split('\n');
+    const prevSet = new Set(prevLines);
+    const nextSet = new Set(nextLines);
+    result.added = nextLines.filter((l) => !prevSet.has(l));
+    result.removed = prevLines.filter((l) => !nextSet.has(l));
+    result.status = 'changed';
+  } catch (err) {
+    result.status = 'error';
+    result.error = String(err && err.message ? err.message : err);
+  }
+  return result;
+}
+
+async function ariaBaselineTest(context, url, baselinePath) {
+  const page = await context.newPage();
+  const out = { available: false, method: null, path: baselinePath };
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+    let text = null;
+    try {
+      if (
+        page.locator &&
+        typeof page.locator('body').ariaSnapshot === 'function'
+      ) {
+        text = await page.locator('body').ariaSnapshot();
+        out.method = 'ariaSnapshot';
+      }
+    } catch {
+      text = null;
+    }
+    if (text === null && page.accessibility && page.accessibility.snapshot) {
+      text = JSON.stringify(await page.accessibility.snapshot(), null, 2);
+      out.method = 'accessibility.snapshot';
+    }
+    if (text === null) return out;
+    out.available = true;
+    Object.assign(out, computeAriaBaseline(text, baselinePath));
+  } finally {
+    await page.close();
+  }
+  return out;
+}
+
+// --------------------------------------------------------------------------- #
+// İsteğe bağlı ikinci motor: IBM Equal Access (yalnız uyarı katmanı)
+// --------------------------------------------------------------------------- #
+
+// Paket: accessibility-checker-engine (npm). Tarayıcıda `ace.js` enjekte edilir
+// ve `new ace.Checker().check(document, ['IBM_Accessibility'])` çağrılır.
+function resolveIbmEngine() {
+  const dir = cacheDir();
+  const entry = path.join(dir, 'node_modules', 'accessibility-checker-engine', 'ace.js');
+  return fs.existsSync(entry) ? entry : null;
+}
+
+function installIbmEngine() {
+  const dir = cacheDir();
+  fs.mkdirSync(dir, { recursive: true });
+  installDeps(['ibm'], dir);
+}
+
+async function ibmEngineTest(context, url) {
+  const entry = resolveIbmEngine();
+  if (!entry) {
+    if (process.env.FEZA_UI_CHECK_NO_INSTALL === '1') {
+      return {
+        status: 'n/a',
+        reason:
+          'accessibility-checker-engine kurulu değil ve FEZA_UI_CHECK_NO_INSTALL=1',
+      };
+    }
+    try {
+      installIbmEngine();
+    } catch (err) {
+      return {
+        status: 'n/a',
+        reason:
+          'accessibility-checker-engine kurulamadı: ' +
+          String(err && err.message ? err.message : err),
+      };
+    }
+  }
+  const src = resolveIbmEngine();
+  if (!src) {
+    return { status: 'n/a', reason: 'accessibility-checker-engine ace.js bulunamadı' };
+  }
+  let aceSrc;
+  try {
+    aceSrc = fs.readFileSync(src, 'utf8');
+  } catch (err) {
+    return {
+      status: 'n/a',
+      reason: 'ace.js okunamadı: ' + String(err && err.message ? err.message : err),
+    };
+  }
+  const page = await context.newPage();
+  try {
+    await page.goto(url, { waitUntil: 'load', timeout: 60000 });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.waitForTimeout(200);
+    await page.addScriptTag({ content: aceSrc });
+    const { results, summary } = await page.evaluate(async () => {
+      /* global ace */
+      const checker = new ace.Checker();
+      const r = await checker.check(document, ['IBM_Accessibility']);
+      return {
+        results: r.results || [],
+        summary:
+          (r.report && r.report.summary && r.report.summary.counts) || null,
+      };
+    });
+    // value = [level, status]; yalnız level=VIOLATION ve status=FAIL gerçek ihlaldir.
+    const violations = results
+      .filter(
+        (x) =>
+          Array.isArray(x.value) && x.value[0] === 'VIOLATION' && x.value[1] === 'FAIL'
+      )
+      .map((x) => ({
+        ruleId: x.ruleId,
+        path: x.path ? x.path.dom : null,
+        message: x.message,
+        snippet: x.snippet,
+      }));
+    const recommendations = results.filter(
+      (x) =>
+        Array.isArray(x.value) &&
+        (x.value[0] === 'RECOMMENDATION' ||
+          x.value[0] === 'WARNING' ||
+          x.value[1] === 'POTENTIAL')
+    ).length;
+    return {
+      status: 'ok',
+      version: 'accessibility-checker-engine@' + ibmEngineVersion(),
+      violations,
+      violationCount: summary ? summary.violation : violations.length,
+      counts: summary,
+      otherFindings: recommendations,
+      rulesChecked: results.length,
+    };
+  } catch (err) {
+    return {
+      status: 'n/a',
+      reason: 'IBM motoru çalıştırılamadı: ' + String(err && err.message ? err.message : err),
+    };
+  } finally {
+    await page.close();
+  }
+}
+
+function ibmEngineVersion() {
+  const pkg = path.join(
+    cacheDir(),
+    'node_modules',
+    'accessibility-checker-engine',
+    'package.json'
+  );
+  try {
+    return JSON.parse(fs.readFileSync(pkg, 'utf8')).version || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
+// --------------------------------------------------------------------------- #
+// İsteğe bağlı görsel karşılaştırma (pixelmatch + pngjs)
+// --------------------------------------------------------------------------- #
+
+function installVisualDeps() {
+  const dir = cacheDir();
+  fs.mkdirSync(dir, { recursive: true });
+  installDeps(['visual'], dir);
+}
+
+async function loadVisualDeps() {
+  let pixelmatchMod = await loadOptionalDep('pixelmatch');
+  let pngjsMod = await loadOptionalDep('pngjs');
+  if (!pixelmatchMod || !pngjsMod) {
+    if (process.env.FEZA_UI_CHECK_NO_INSTALL === '1') {
+      return { status: 'n/a', reason: 'pixelmatch/pngjs yok ve FEZA_UI_CHECK_NO_INSTALL=1' };
+    }
+    try {
+      installVisualDeps();
+    } catch (err) {
+      return {
+        status: 'n/a',
+        reason:
+          'pixelmatch/pngjs kurulamadı: ' +
+          String(err && err.message ? err.message : err),
+      };
+    }
+    pixelmatchMod = await loadOptionalDep('pixelmatch');
+    pngjsMod = await loadOptionalDep('pngjs');
+  }
+  if (!pixelmatchMod || !pngjsMod) {
+    return { status: 'n/a', reason: 'pixelmatch/pngjs yüklenemedi' };
+  }
+  const pixelmatch =
+    pixelmatchMod.default || pixelmatchMod.pixelmatch || pixelmatchMod;
+  const PNG = pngjsMod.PNG || (pngjsMod.default && pngjsMod.default.PNG);
+  if (typeof pixelmatch !== 'function' || !PNG) {
+    return { status: 'n/a', reason: 'pixelmatch/PNG API bulunamadı' };
+  }
+  return { status: 'ok', pixelmatch, PNG };
+}
+
+// Tek ekran görüntüsünü baseline ile karşılaştırır; baseline yoksa oluşturur.
+function compareVisualPair({ pixelmatch, PNG, shotPath, baselinePath, diffPath, maxDiffPixels }) {
+  if (!fs.existsSync(baselinePath)) {
+    fs.mkdirSync(path.dirname(baselinePath), { recursive: true });
+    fs.copyFileSync(shotPath, baselinePath);
+    return { status: 'baseline-created', diffPixels: 0 };
+  }
+  const img1 = PNG.sync.read(fs.readFileSync(baselinePath));
+  const img2 = PNG.sync.read(fs.readFileSync(shotPath));
+  if (img1.width !== img2.width || img1.height !== img2.height) {
+    return {
+      status: 'size-mismatch',
+      baseline: { w: img1.width, h: img1.height },
+      current: { w: img2.width, h: img2.height },
+      diffPixels: null,
+      ok: false,
+    };
+  }
+  const diff = new PNG({ width: img1.width, height: img1.height });
+  const diffPixels = pixelmatch(
+    img1.data,
+    img2.data,
+    diff.data,
+    img1.width,
+    img1.height,
+    { threshold: 0.1 }
+  );
+  if (diffPixels > 0) {
+    fs.mkdirSync(path.dirname(diffPath), { recursive: true });
+    fs.writeFileSync(diffPath, PNG.sync.write(diff));
+  }
+  return {
+    status: diffPixels === 0 ? 'identical' : 'different',
+    diffPixels,
+    ok: diffPixels <= maxDiffPixels,
+  };
+}
+
+async function runVisualComparison(report, outDir, baselineDir, maxDiffPixels) {
+  const deps = await loadVisualDeps();
+  if (deps.status !== 'ok') {
+    return { status: 'n/a', reason: deps.reason };
+  }
+  const results = [];
+  let anyFail = false;
+  const passes = report.passes || [];
+  for (const pass of passes) {
+    if (!pass.screenshot) continue;
+    const shotPath = path.join(outDir, pass.screenshot);
+    const baselinePath = path.join(baselineDir, pass.screenshot);
+    const diffName = 'diff-' + pass.name + '-' + pass.viewport + '.png';
+    const diffPath = path.join(outDir, diffName);
+    let cmp;
+    try {
+      cmp = compareVisualPair({
+        pixelmatch: deps.pixelmatch,
+        PNG: deps.PNG,
+        shotPath,
+        baselinePath,
+        diffPath,
+        maxDiffPixels,
+      });
+    } catch (err) {
+      cmp = {
+        status: 'error',
+        error: String(err && err.message ? err.message : err),
+      };
+    }
+    if (cmp.ok === false) anyFail = true;
+    results.push({
+      pass: pass.name,
+      viewport: pass.viewport,
+      baseline: path.relative(outDir, baselinePath).split(path.sep).join('/'),
+      diff: cmp.diffPixels ? diffName : null,
+      ...cmp,
+    });
+  }
+  return {
+    status: 'ok',
+    baselineDir,
+    maxDiffPixels,
+    results,
+    // Bilgi amaçlı; çıkış kodunu bozmaz.
+    anyFail,
+  };
 }
 
 // --------------------------------------------------------------------------- #
@@ -2655,8 +3287,27 @@ function evaluateResults(report) {
     };
   }
 
-  // E28: başlık/bölge yapısı (bu sürümde kapsam dışı).
-  results.E28 = { ok: null, value: null, threshold: null, method: 'otomatik', na: 'başlık/bölge yapısı denetimi bu sürümde kapsam dışı' };
+  // E28 — başlık/bölge yapısı (erişilebilirlik ağacı).
+  const aria = report.ariaStructure || {};
+  if (!aria.available) {
+    results.E28 = {
+      ok: null,
+      value: null,
+      threshold: null,
+      method: 'otomatik',
+      na: 'ariaSnapshot API yok',
+    };
+  } else {
+    const violations = aria.violations || [];
+    results.E28 = {
+      ok: violations.length === 0,
+      value: violations.length,
+      threshold: 0,
+      method: 'otomatik',
+      violations,
+      method_detail: aria.method || null,
+    };
+  }
 
   return results;
 }
@@ -2683,6 +3334,21 @@ function printSummary(report) {
       '  ' + status + ' ' + code.padEnd(4) + ' ihlal: ' + value.padEnd(4) +
         ' eşik: ' + (r.threshold === null ? '-' : r.threshold) + ' [' + r.method + ']'
     );
+  }
+  if (report.profile) {
+    lines.push(
+      'Profil: ' + report.profile.applied + ' (istenen: ' + report.profile.requested + ')' +
+        (report.profile.fallbackReason ? ' — ' + report.profile.fallbackReason : '')
+    );
+    if (report.profile.axeVersion) {
+      lines.push('axe-core: ' + report.profile.axeVersion);
+    }
+  }
+  if (report.visual && report.visual.status === 'ok') {
+    const diffs = (report.visual.results || []).filter(
+      (r) => r.diffPixels && r.diffPixels > report.visual.maxDiffPixels
+    ).length;
+    lines.push('Görsel karşılaştırma: ' + diffs + ' geçiş eşiği aştı (bilgi).');
   }
   lines.push('Genel: ' + (report.ok ? 'OK' : 'FAIL'));
   if (report.__outDir) {
@@ -2749,9 +3415,13 @@ async function main() {
 
     const outDir = makeOutDir(args.out);
 
+    const optionalDeps = [];
+    if (args.engines.includes('ibm')) optionalDeps.push('ibm');
+    if (args.visual) optionalDeps.push('visual');
+
     let deps;
     try {
-      deps = await loadDeps();
+      deps = await loadDeps(optionalDeps);
     } catch (err) {
       if (err instanceof ToolMissingError) {
         fatal(2, missingToolMessage(err.message));
@@ -2767,6 +3437,9 @@ async function main() {
 
     const startedAt = new Date().toISOString();
 
+    // Profil çözümleme: axe etiketleri ve EN-301-549 desteği.
+    const profile = resolveProfile(args.profile, deps.axeCore);
+
     // 1. geçiş: açık tema, hareketsizlik tercihi yok.
     const lightCtx = await browser.newContext({
       viewport: { width: 1280, height: 800 },
@@ -2778,7 +3451,7 @@ async function main() {
       outDir,
       deps.AxeBuilder,
       'light',
-      { colorScheme: 'light', reducedMotion: 'no-preference' }
+      { colorScheme: 'light', reducedMotion: 'no-preference', axeTags: profile.tags }
     );
     await lightCtx.close();
 
@@ -2794,7 +3467,7 @@ async function main() {
       outDir,
       deps.AxeBuilder,
       'dark-reduced',
-      { colorScheme: 'dark', reducedMotion: 'reduce' }
+      { colorScheme: 'dark', reducedMotion: 'reduce', axeTags: profile.tags }
     );
 
     // Klavye testi (1280, açık tema).
@@ -2953,6 +3626,55 @@ async function main() {
       motionAudit = { transformAnimations: [], parallax: [], error: String(err.message || err) };
     }
 
+    // E28 — erişilebilirlik ağacı (başlık/bölge yapısı).
+    let ariaStructure;
+    try {
+      const aCtx = await browser.newContext({
+        viewport: { width: 1280, height: 800 },
+        colorScheme: 'light',
+      });
+      try {
+        ariaStructure = await ariaSnapshotTest(aCtx, url);
+        if (ariaStructure.available) {
+          const analysis = analyzeAriaStructure(ariaStructure.snapshot);
+          ariaStructure.violations = analysis.violations;
+        } else {
+          ariaStructure.violations = [];
+        }
+      } finally {
+        await aCtx.close();
+      }
+    } catch (err) {
+      ariaStructure = {
+        available: false,
+        violations: [],
+        error: String(err.message || err),
+      };
+    }
+
+    // --aria-baseline: E28 snapshot tabanı (bilgi amaçlı).
+    let ariaDiff = null;
+    if (args.ariaBaseline) {
+      try {
+        const bCtx = await browser.newContext({
+          viewport: { width: 1280, height: 800 },
+          colorScheme: 'light',
+        });
+        try {
+          ariaDiff = await ariaBaselineTest(bCtx, url, args.ariaBaseline);
+        } finally {
+          await bCtx.close();
+        }
+      } catch (err) {
+        ariaDiff = {
+          available: false,
+          status: 'error',
+          error: String(err.message || err),
+          path: args.ariaBaseline,
+        };
+      }
+    }
+
     report = {
       target: target,
       url,
@@ -2970,12 +3692,71 @@ async function main() {
       contrastMore,
       rtl,
       expansion,
+      ariaStructure,
+      profile,
+      axeVersion: profile.axeVersion,
+      engines: null,
+      warnings: {},
+      ariaDiff,
+      visual: null,
       results: null,
       ok: false,
       __outDir: outDir,
     };
+
+    // İsteğe bağlı ikinci motor: IBM Equal Access (yalnız uyarı katmanı).
+    const engineStatuses = {
+      axe: { status: 'ok', version: profile.axeVersion },
+    };
+    if (args.engines.includes('ibm')) {
+      let ibm;
+      try {
+        const ibmCtx = await browser.newContext({
+          viewport: { width: 1280, height: 800 },
+          colorScheme: 'light',
+        });
+        try {
+          ibm = await ibmEngineTest(ibmCtx, url);
+        } finally {
+          await ibmCtx.close();
+        }
+      } catch (err) {
+        ibm = {
+          status: 'n/a',
+          reason: 'IBM motoru çalıştırılamadı: ' + String(err.message || err),
+        };
+      }
+      engineStatuses.ibm = ibm;
+      if (ibm.status === 'ok') {
+        report.warnings.ibm = {
+          violations: ibm.violations,
+          violationCount: ibm.violationCount,
+          otherFindings: ibm.otherFindings,
+          version: ibm.version,
+        };
+      }
+    }
+    report.engines = engineStatuses;
+
     report.results = evaluateResults(report);
     report.ok = !Object.values(report.results).some((r) => r.ok === false);
+
+    // İsteğe bağlı görsel karşılaştırma (bilgi amaçlı; çıkış kodunu bozmaz).
+    if (args.visual) {
+      try {
+        report.visual = await runVisualComparison(
+          report,
+          outDir,
+          args.visual,
+          args.visualMaxDiff
+        );
+      } catch (err) {
+        report.visual = {
+          status: 'n/a',
+          reason: String(err && err.message ? err.message : err),
+        };
+      }
+    }
 
     const reportForDisk = { ...report };
     delete reportForDisk.__outDir;

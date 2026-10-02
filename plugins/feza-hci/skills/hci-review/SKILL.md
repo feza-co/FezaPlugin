@@ -160,9 +160,12 @@ Tetikleyici: `--acr`, "uyum raporu", "ACR", "erişilebilirlik uyum beyanı". Tet
 1. **Ölçümü çalıştır:** verify-ui'yi uyum profiliyle çalıştır —
    `node <skill-klasörü>/scripts/verify-ui.mjs <sayfa.html | URL> --profile wcag22aa|en301549 --out <dir>`
    (mutlak yol; script kullanıcı projesine kopyalanmaz). `en301549` profilinde axe sürümü `EN-301-549`
-   etiketini desteklemiyorsa profil `wcag22aa`ya düşer; bunu rapora yaz. `report.json` alanı `profile`
-   kullanılan profili taşır. E28 başlık/bölge yapısı `ariaSnapshot()` ile ölçülür; `--aria-baseline <dosya>`
-   verilirse farkı rapora ekle.
+   etiketini desteklemiyorsa profil `wcag22aa`ya düşer; bunu rapora yaz. `report.json` alanı
+   `profile: {requested, applied, fallbackReason}` (istenen/uygulanan profil ve düşme gerekçesi) ile
+   `axeVersion` taşır; raporun "Değerlendirme Yöntemi" tablosuna uygulanan profili ve axe sürümünü yaz.
+   E28 başlık/bölge yapısı `ariaSnapshot()` ile ölçülür; snapshot API yoksa E28 `ok: null` döner ve
+   kriter "Değerlendirilmedi" + manuel listeye alınır. `--aria-baseline <dosya>` verilirse farkı
+   (`report.json.ariaDiff`; bilgi amaçlı, çıkış kodunu bozmaz) rapora ekle.
 2. **Otomatik satırları doldur:** `references/conformance-report.md` §5–§6 tablolarındaki her SC için,
    ilgili `report.json → results.E<kod>` sonucunu "Kanıt" sütununa yaz. Bir SC ancak **o SC'ye özgü**
    bir E kodu `ok: true` ise (ya da E1 içinde SC'ye özgü axe kuralı — ör. `image-alt` → 1.1.1 —

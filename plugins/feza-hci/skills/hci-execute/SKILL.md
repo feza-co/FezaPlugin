@@ -145,7 +145,7 @@ Ekranları gerçek dosyalar olarak yaz. Mevcut stack varsa onun klasör yapısı
 ├── <ekran>.html            diğer ekranlar (ya da tek sayfa + hash yönlendirme)
 ├── styles/
 │   ├── tokens.css          tek token kaynağı (açık + koyu tema)
-│   ├── tokens.tokens.json  isteğe bağlı DTCG karşılığı (aynı değerler; bkz. §9)
+│   ├── tokens.tokens.json  isteğe bağlı DTCG karşılığı (aynı değerler; bkz. §12)
 │   ├── base.css            reset, tipografi, odak stili, reduced-motion
 │   └── components.css      bileşenler ve durumları
 ├── scripts/
@@ -196,7 +196,9 @@ Uygulama v1 → verify-ui.mjs + görsel inceleme + statik kontroller
                 └─ kapanmayanlar → DESIGN_RATIONALE "Bilinen Boşluklar"
 ```
 
-1. **Render doğrulaması (önce):** `node scripts/verify-ui.mjs <giriş sayfası ya da yerel sunucu URL'si>` — script bu skill klasöründedir; kullanıcı projesinin kökünde çalıştırılırken skill klasöründeki dosyanın mutlak yolu verilir. 320/390/768/1280 px'de ekran görüntüsü, axe-core (WCAG 2.1 A/AA + 2.2), yatay kaydırma, dokunma hedefi, klavye/odak testi, odak örtülmesi (E14), hedef aralığı (E15), metin aralığı (E16), erişilebilir kimlik doğrulama (E17), sürükleme tespiti (E18), forced-colors (E21), prefers-contrast (E22), RTL (E24), sahte yerelleştirme/metin genişlemesi (E25), reduced-motion + koyu tema ikinci geçişi ve %200 metin büyütme yapar. **Statik tarama:** `node scripts/verify-ui.mjs --static <dizin>` tarayıcı açmadan kaynakta E23 (saydam yüzey), E24 statik (fiziksel yön), E26 (Türkçe harf dönüşümü), E27 (yerel biçim) bulgularını raporlar. Çıktı `.feza/ui-check/<zaman>/` altında (ekran görüntüleri + `report.json`); bu klasör teslimin parçası değildir, kullanıcıya `.feza/` dizinini `.gitignore`'a eklemesi önerilir. Çıkış kodu 0 = eşikler sağlandı, 1 = ihlal, 2 = araç yok. Projeye bağımlılık eklenmez; script gerekirse paketleri geçici kullanıcı önbelleğine kurar.
+1. **Render doğrulaması (önce):** `node scripts/verify-ui.mjs <giriş sayfası ya da yerel sunucu URL'si>` — script bu skill klasöründedir; kullanıcı projesinin kökünde çalıştırılırken skill klasöründeki dosyanın mutlak yolu verilir. 320/390/768/1280 px'de ekran görüntüsü, axe-core (WCAG 2.1 A/AA + 2.2), yatay kaydırma, dokunma hedefi, klavye/odak testi, odak örtülmesi (E14), hedef aralığı (E15), metin aralığı (E16), erişilebilir kimlik doğrulama (E17), sürükleme tespiti (E18), forced-colors (E21), prefers-contrast (E22), RTL (E24), sahte yerelleştirme/metin genişlemesi (E25), başlık/bölge yapısı (E28, erişilebilirlik ağacı), reduced-motion + koyu tema ikinci geçişi ve %200 metin büyütme yapar. **Statik tarama:** `node scripts/verify-ui.mjs --static <dizin>` tarayıcı açmadan kaynakta E23 (saydam yüzey), E24 statik (fiziksel yön), E26 (Türkçe harf dönüşümü), E27 (yerel biçim) bulgularını raporlar. **Uyum profili:** `--profile wcag22aa|en301549` axe etiketlerini belirler (varsayılan `wcag22aa`); `en301549` etiketi kurulu axe sürümünde yoksa profil `wcag22aa`ya düşer, `report.json.profile` `{requested, applied, fallbackReason}` ve `axeVersion` taşır. **Erişilebilirlik ağacı tabanı (bilgi):** `--aria-baseline <dosya>` E28 snapshot'ını yoksa oluşturur, varsa satır farkını `report.json.ariaDiff` altında raporlar; çıkış kodunu bozmaz. Çıktı `.feza/ui-check/<zaman>/` altında (ekran görüntüleri + `report.json`); bu klasör teslimin parçası değildir, kullanıcıya `.feza/` dizinini `.gitignore`'a eklemesi önerilir. Çıkış kodu 0 = eşikler sağlandı, 1 = ihlal, 2 = araç yok. Projeye bağımlılık eklenmez; script gerekirse paketleri geçici kullanıcı önbelleğine kurar.
+
+   İsteğe bağlı (varsayılan kapalı, araç yoksa `n/a`; kalite kapısını/çıkış kodunu bozmaz): `--engines axe,ibm` ikinci motor IBM Equal Access'i uyarı katmanı olarak çalıştırır (`report.json.warnings.ibm`; E1 birincil motorda kalır); `--visual <baseline-dizin>` her viewport ekran görüntüsünü `pixelmatch` ile baseline'a göre karşılaştırır (`--visual-max-diff N`, varsayılan 100; sonuç `report.json.visual`, bilgi amaçlı).
 2. **Görsel inceleme:** ekran görüntülerini Read aracıyla aç; hizalama, taşma, görsel hiyerarşi, boşluk tutarlılığı ve koyu temada okunurluk sorunlarını bulgu olarak ekle.
 3. **Sayısal eşikler:** `references/thresholds.md` E1-E29; sonuçlar `report.json` → `results` alanında `{ ok, value, threshold, method }`. `method` = `otomatik | karma | statik`. `ok: null` gelen sonuç (`na` gerekçeli) otomatik ölçülemedi demektir; **elle doğrulanır** ve çıkış kodunu bozmaz. Otomatik/karma kriterler E1-E18, E21-E25, E28; statik olanlar E9-E11, E19, E20, E26, E27, E29. E1-E18'den biri `ok: false` ise severity'den bağımsız düzeltilir.
 4. **E14-E18 ve tercih modları doğrulaması:** E14 (odak tamamen örtülmüş), E15/E16, E21 (forced-colors sınır/odak), E22 (prefers-contrast), E24 (RTL), E25 (metin genişlemesi) ihlalleri doğrudan düzeltilir. E17/E18 `karma`dır — script tespit eder (yapıştırma engeli, `autocomplete`, "göster" düğmesi, sürükleme işleyicileri), onay kod okuma ile verilir; E18'de `ok: null` dönen `candidates` elle incelenip tek işaretçi alternatifi eklenir. E22 tercih kuralı tanımlı değilse `ok:null` bilgidir.
@@ -275,6 +277,7 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] **E25:** Metin %30 uzatılınca kırpılmıyor/taşmıyor; kaplar içeriğe göre büyüyor?
 - [ ] **E26:** Kullanıcıya görünen metinde yerel ayarsız `uppercase`/`.toUpperCase()` yok?
 - [ ] **E27:** Sayı/tarih/para `Intl.*` ile biçimleniyor; elle `toFixed+" TL"` / sabit tarih deseni yok?
+- [ ] **E28:** Tek `h1`, başlık seviyesi atlaması yok, `main` landmark var, adı boş etkileşimli öğe yok?
 - [ ] 320 px'de yatay kaydırma yok; dokunma hedefleri ≥ 44 px?
 - [ ] `prefers-reduced-motion`, `prefers-color-scheme`, `forced-colors`, `prefers-contrast` ve `prefers-reduced-transparency` destekleniyor?
 - [ ] Severity ≥ 2 bulgu kalmadı ya da Bilinen Boşluklar'a gerekçeli yazıldı?
@@ -283,10 +286,10 @@ Konum: proje kökü. Teslim formatı: kapak, özet (TR + EN), numaralı içindek
 - [ ] Her ekran bir tarife bağlandı; tarif yoksa varsayım kaydedildi?
 - [ ] Mikro-metinler `references/ux-writing.md` §6 kontrol listesinden geçti?
 - [ ] Logo ve marka varlıkları placeholder olarak işaretli?
-- [ ] **Şablon izleri:** aynı gölge, her başlık üstünde büyük harfli küçük etiket, tekdüze köşe yarıçapı, her bölüm ortalanmış, tekrar eden ikon-başlık-metin kart üçlüsü gibi kalıplaşmalar gerekçelendirildi ya da giderildi (`references/design-system-rules.md` §10.4)?
-- [ ] **Hareket:** işlevsel 100-300 ms / ifade edici 300-500 ms; `prefers-reduced-motion: reduce` altında ifade edici hareket kapalı, dekoratif/parallax yok (§10.1, E12)?
-- [ ] **Container query:** kart ve tablo pencere değil kapsayıcı genişliğine göre uyarlanıyor; desteklenmiyorsa akış yedeği var (§10.3)?
-- [ ] İsteğe bağlı `tokens.tokens.json` üretildiyse `tokens.css` ile değerleri birebir aynı ve `contrast.py --tokens` ile doğrulandı (§9)?
+- [ ] **Şablon izleri:** aynı gölge, her başlık üstünde büyük harfli küçük etiket, tekdüze köşe yarıçapı, her bölüm ortalanmış, tekrar eden ikon-başlık-metin kart üçlüsü gibi kalıplaşmalar gerekçelendirildi ya da giderildi (`references/design-system-rules.md` §13.4)?
+- [ ] **Hareket:** işlevsel 100-300 ms / ifade edici 300-500 ms; `prefers-reduced-motion: reduce` altında ifade edici hareket kapalı, dekoratif/parallax yok (§13.1, E12)?
+- [ ] **Container query:** kart ve tablo pencere değil kapsayıcı genişliğine göre uyarlanıyor; desteklenmiyorsa akış yedeği var (§13.3)?
+- [ ] İsteğe bağlı `tokens.tokens.json` üretildiyse `tokens.css` ile değerleri birebir aynı ve `contrast.py --tokens` ile doğrulandı (§12)?
 
 ## Sınırlar
 - En fazla 3 soru (Adım 0'daki brief sorusu dahil değil).

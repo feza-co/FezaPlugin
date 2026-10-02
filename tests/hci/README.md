@@ -1,4 +1,4 @@
-# HCI fixture test seti (Faz 2 + Faz 4)
+# HCI fixture test seti
 
 `plugins/feza-hci/skills/hci-execute/scripts/verify-ui.mjs` tarafından ölçülen E kodlarının
 her biri için bir **fail** ve bir **pass** örnek sayfası; ayrıca çoklu ihlal (`bad.html`) ve
@@ -43,9 +43,16 @@ dizininden çözer: Linux/macOS'ta `~/.cache/feza-ui-check`, Windows'ta
 - `mode: "static"` — fixture bir dizindir ve `verify-ui.mjs --static <dizin>` ile çalıştırılır; çıkış kodu
   ve `ok:false`/`ok:null` davranışı aynıdır. Anahtar `static/` ile başlıyorsa `mode` yazılmasa da statik sayılır.
 - `note` — kaçınılmaz çakışmanın (ör. E2 axonun serious `color-contrast` kuralından E1 de düşer)
-  gerekçesi. Faz 4'teki örnekler: E16↔E25, E6↔E21.
+  gerekçesi. Örnekler: E16↔E25, E6↔E21, E8↔E28.
+- `args` — aynı fixture'ı ek bayraklarla çalıştıran **takma ad** girdisi. Anahtar serbest bir etikettir,
+  dosya adı `fixture` alanından gelir (ör. `"good.html --profile en301549": { "fixture": "good.html",
+  "args": ["--profile", "en301549"], ... }`). Takma ad girdileri 1:1 dosya↔beklenti tutarlılık kontrolüne girmez.
 - `static` — verify-ui'nin render modunda ölçmediği statik kodların listesi (E9, E10, E11, E19, E20);
   fixture yazılmaz. E26/E27/E23/E24 statik taramada `--static` dizinleriyle temsil edilir.
+
+Uyum profilinin (`--profile en301549`) desteklendiğini kanıtlayan takma ad girdisi `expected.json` içinde
+`good.html --profile en301549` anahtarıyla yer alır; kurulu axe sürümünde `EN-301-549` etiketi yoksa
+profil `wcag22aa`ya düşse de sıfır ihlal beklentisi geçerlidir.
 
 Koşucu, beklentide olup dosyası/dizini olmayan ya da tersine, dosyası/dizini olup beklentisi olmayan
 fixture'ı hata sayar.

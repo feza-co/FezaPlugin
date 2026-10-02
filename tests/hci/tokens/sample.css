@@ -1,4 +1,4 @@
-/* Faz 7 kabul testi: sample.tokens.json ile AYNI değerleri taşıyan CSS token
+/* sample.tokens.json ile AYNI değerleri taşıyan CSS token
    dosyası. contrast.py --css ve --tokens aynı oranları vermelidir. */
 :root {
   --color-bg: #FFFFFF;
