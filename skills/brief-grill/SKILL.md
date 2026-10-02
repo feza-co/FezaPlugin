@@ -32,7 +32,11 @@ fikrin sınırlarını çizmektir. Belirsizlik kaldıysa iş bitmemiştir.
 
 Önce brief'i ara; **dosya/kod okunarak cevaplanabilecek hiçbir şey kullanıcıya sorulmaz** (Kural 5).
 
-1. Mevcut brief keşfi: `references/input-discovery.md` prosedürünü uygula.
+1. Mevcut brief keşfi: `references/input-discovery.md` prosedürünü **yalnızca dosya bulma** (Adım A/B) için
+   uygula — brief/fikir dosyasını ve önceki FezaPlugin çıktılarını arar.
+   > **Muafiyet:** `input-discovery.md`'deki "gri nokta toplu sorma" ve "MAX 3 / MAX 4 soru" sınırı
+   > bu skill için **geçersizdir**; brief-grill'de her soru TEK TEK ve toplam sınır olmadan sorulur
+   > (Kural 2, Kural 6).
    - Kök: `IDEA.md`, `BRIEF.md`, `FIKIR.md`, `PROJE.md`, `PROJECT.md`, `OVERVIEW.md`, `VIZYON.md`, `VISION.md`
    - `docs/`: `docs/idea.md`, `docs/brief.md`, `docs/overview.md`, `docs/vision.md`
    - `README.md` içinde "## Proje Fikri / ## Fikir / ## Açıklama / ## About / ## Overview" vb. bölümler
@@ -167,7 +171,7 @@ Brief'in mevcut metnini silme, taşıma veya yeniden yazma — yalnızca sonuna 
 
 | # | Ek kural | Nerede |
 |---|----------|--------|
-| E1 | Brief bulma: `input-discovery` mantığıyla ara; yoksa tek serbest metinle al ve `BRIEF.md` oluştur | Adım 0 |
+| E1 | Brief bulma: `input-discovery` mantığıyla YALNIZ dosya bul (Adım A/B); yoksa tek serbest metinle al ve `BRIEF.md` oluştur. Gri nokta toplu sorma ve MAX 3/4 soru sınırı burada geçersizdir (Kural 2, 6) | Adım 0 |
 | E2 | Kök dallar listesi | Adım 1 |
 | E3 | "Çözüldü" tanımı; "bilmiyorum" → varsayım; çelişki tek soruda | Adım 2 alt başlıkları |
 | E4 | Çıktı: sohbet özeti + `BRIEF.md` sonuna karar tablosu + "Açık Varsayımlar" | Adım 4, Adım 5 |
@@ -210,5 +214,4 @@ geçerlidir; tek fark sunum biçimidir:
 - Brief'in mevcut metnini silme/yeniden yazma; yalnızca sonuna ekle.
 - Belirsiz ifadeyi ("hızlı", "kolay") çözülmüş sayma; sayı/eşik/seçim iste.
 - Kaynaksız kesin istatistik yazma; her satır Kullanıcı / Varsayım / Dosya etiketli olmalı.
-- Kaynak: grill yaklaşımı **grill-me-skill (Rob Mitt)** yaklaşımından uyarlanmıştır —
-  https://github.com/robmitt/grill-me-skill
+- Kaynak: grill yaklaşımı **[grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill)** yaklaşımından uyarlanmıştır.

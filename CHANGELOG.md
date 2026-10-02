@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   or asks for the idea once, records each decision, treats "I don't know" as a labelled assumption
   and surfaces contradictions as a single question. Decisions and open assumptions are appended to
   the brief as a "Netleştirilmiş Kararlar" table and an "Açık Varsayımlar" list without rewriting
-  the existing text. Adapted from the grill-me-skill (Rob Mitt) approach.
+  the existing text. Adapted from the [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) approach.
   `feza-toolkit` now ships 6 skills (40 in total).
 
 ### Removed

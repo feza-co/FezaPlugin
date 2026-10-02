@@ -188,6 +188,8 @@ Related tools and references:
 | `/feza-toolkit:demo-script` | Prepares a 10-15 minute presentation for stakeholders, investors, customers or a board: a timed flow (opening hook, problem, solution, live demo, architecture, numeric evidence such as PERT estimates, DRE and risk scores, standards compliance, closing) and a Q&A bank with prepared answers on ROI, schedule, risk, security, scalability, competition and adoption. Pulls its figures from existing FezaPlugin outputs. | `DEMO_SCRIPT_<project>.md` |
 | `/feza-toolkit:glossary` | Generates a bilingual Turkish-English glossary of requirements, project management, ISO/IEC standards, HCI and SQA terms, sorted alphabetically and by category. Each entry gives the translation, a definition, the source standard reference, the related FezaPlugin skill and a usage example. Needs no input, but can be filtered by area or term. | `GLOSSARY_<lang>.md` |
 
+> `brief-grill` is adapted from the [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) approach.
+
 ## Quick Start
 
 Full instructions for every platform are in [docs/installation.md](docs/installation.md).

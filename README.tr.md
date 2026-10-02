@@ -190,6 +190,8 @@ Bu sürümde eklenen **E14-E29** kriterleri:
 | `/feza-toolkit:demo-script` | Paydaşlar, yatırımcılar, müşteriler ya da yönetim kurulu için 10-15 dakikalık bir sunum hazırlar: zamanlanmış akış (açılış, problem, çözüm, canlı demo, mimari, PERT tahminleri, DRE ve risk skorları gibi sayısal kanıtlar, standart uyumu, kapanış) ve ROI, takvim, risk, güvenlik, ölçeklenebilirlik, rekabet ve benimseme konularında hazır cevaplı soru-cevap bankası. Rakamları mevcut FezaPlugin çıktılarından alır. | `DEMO_SCRIPT_<proje>.md` |
 | `/feza-toolkit:glossary` | Gereksinim, proje yönetimi, ISO/IEC standartları, HCI ve SQA terimlerinden oluşan, alfabetik ve kategorize edilmiş iki dilli Türkçe-İngilizce sözlük üretir. Her madde karşılığı, tanımı, kaynak standart referansını, ilgili FezaPlugin skill'ini ve bir kullanım örneğini verir. Girdi gerektirmez; alana ya da terime göre filtrelenebilir. | `GLOSSARY_<lang>.md` |
 
+> `brief-grill`, [grill-me-skill (Rob Mitt)](https://github.com/robmitt/grill-me-skill) yaklaşımından uyarlanmıştır.
+
 ## Hızlı Başlangıç
 
 Tüm platformlar için ayrıntılı talimatlar [docs/installation.md](docs/installation.md) dosyasındadır.
